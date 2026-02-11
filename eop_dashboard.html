@@ -250,7 +250,14 @@
                                     <option value="ALL">全部合并</option>
                                 </select>
                             </div>
-                            <div class="col-md-3 config-item">
+                            <div class="col-md-2 config-item">
+                                <label>统计维度</label>
+                                <select class="form-select" id="metricSelector" onchange="updateDashboard()">
+                                    <option value="amount">呆滞金额</option>
+                                    <option value="quantity">呆滞数量</option>
+                                </select>
+                            </div>
+                            <div class="col-md-2 config-item">
                                 <label>阶梯筛选（可多选）</label>
                                 <div class="tier-filter-group">
                                     <label class="tier-checkbox-label">
@@ -268,15 +275,26 @@
                                 </div>
                             </div>
                             <div class="col-md-2 config-item">
+                                <label>类型筛选（可多选）</label>
+                                <div class="tier-filter-group">
+                                    <label class="tier-checkbox-label">
+                                        <input type="checkbox" class="type-checkbox" value="总成" onchange="updateDashboard()"> 总成
+                                    </label>
+                                    <label class="tier-checkbox-label">
+                                        <input type="checkbox" class="type-checkbox" value="物料" onchange="updateDashboard()"> 物料
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-1 config-item">
                                 <label>Top N</label>
                                 <select class="form-select" id="topN" onchange="updateDashboard()">
-                                    <option value="10">Top 10</option>
-                                    <option value="15">Top 15</option>
-                                    <option value="20">Top 20</option>
-                                    <option value="30">Top 30</option>
+                                    <option value="10">10</option>
+                                    <option value="15">15</option>
+                                    <option value="20">20</option>
+                                    <option value="30">30</option>
                                 </select>
                             </div>
-                            <div class="col-md-5 config-item">
+                            <div class="col-md-3 config-item">
                                 <label>操作</label>
                                 <div>
                                     <button class="btn btn-primary btn-sm" onclick="updateDashboard()">
@@ -508,6 +526,182 @@
                 </div>
             </div>
 
+            <!-- 专用零件交互查询 -->
+            <div class="row">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <i class="fas fa-search"></i> 专用零件交互查询
+                        </div>
+                        <div class="card-body">
+                            <div class="row mb-3">
+                                <div class="col-md-3">
+                                    <label>选择PSM专业组</label>
+                                    <select class="form-select" id="exclusiveQueryPSM" onchange="updateExclusiveQueryParts()">
+                                        <option value="">--请选择--</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-3">
+                                    <label>选择零件</label>
+                                    <select class="form-select" id="exclusiveQueryPart" onchange="updateExclusivePartDetail()">
+                                        <option value="">--全部零件--</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label>专用件统计</label>
+                                    <div class="alert alert-info mb-0" id="exclusiveQueryStats">
+                                        请选择PSM专业组
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div id="exclusiveQueryChart" class="chart-container" style="height: 300px;"></div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div style="max-height: 300px; overflow-y: auto;">
+                                        <table class="table table-sm table-striped" id="exclusivePartsTable">
+                                            <thead>
+                                                <tr>
+                                                    <th>零部件名称</th>
+                                                    <th>物料编码</th>
+                                                    <th>供应商</th>
+                                                    <th>呆滞金额</th>
+                                                    <th>是否专用</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody></tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- LT和CW交互查询 -->
+            <div class="row">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <i class="fas fa-search"></i> LT & CW 交互查询
+                        </div>
+                        <div class="card-body">
+                            <div class="row mb-3">
+                                <div class="col-md-3">
+                                    <label>选择PSM专业组</label>
+                                    <select class="form-select" id="ltcwQueryPSM" onchange="updateLTCWQueryParts()">
+                                        <option value="">--请选择--</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-3">
+                                    <label>选择零件</label>
+                                    <select class="form-select" id="ltcwQueryPart" onchange="updateLTCWPartDetail()">
+                                        <option value="">--全部零件--</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label>LT & CW 统计</label>
+                                    <div class="alert alert-info mb-0" id="ltcwQueryStats">
+                                        请选择PSM专业组
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <h6 class="text-center">LT分布</h6>
+                                    <div id="ltcwQueryChartLT" class="chart-container" style="height: 300px;"></div>
+                                </div>
+                                <div class="col-md-6">
+                                    <h6 class="text-center">CW分布</h6>
+                                    <div id="ltcwQueryChartCW" class="chart-container" style="height: 300px;"></div>
+                                </div>
+                            </div>
+                            <div class="row mt-3">
+                                <div class="col-12">
+                                    <div style="max-height: 300px; overflow-y: auto;">
+                                        <table class="table table-sm table-striped" id="ltcwPartsTable">
+                                            <thead>
+                                                <tr>
+                                                    <th>零部件名称</th>
+                                                    <th>物料编码</th>
+                                                    <th>供应商</th>
+                                                    <th>LT</th>
+                                                    <th>CW</th>
+                                                    <th>呆滞金额</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody></tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- LT和CW统计分析 -->
+            <div class="row">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <i class="fas fa-chart-bar"></i> LT & CW 统计分析
+                        </div>
+                        <div class="card-body">
+                            <div class="row mb-3">
+                                <div class="col-md-3">
+                                    <label>统计维度</label>
+                                    <select class="form-select" id="ltcwStatsDimension" onchange="updateDashboard()">
+                                        <option value="category">按零件品类</option>
+                                        <option value="psm">按PSM专业组</option>
+                                        <option value="type">按零件类型</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <h6 class="text-center">LT (Lead Time) 统计</h6>
+                                    <div id="ltStatsChart" class="chart-container" style="height: 350px;"></div>
+                                </div>
+                                <div class="col-md-6">
+                                    <h6 class="text-center">CW (Component Weight) 统计</h6>
+                                    <div id="cwStatsChart" class="chart-container" style="height: 350px;"></div>
+                                </div>
+                            </div>
+                            <div class="row mt-3">
+                                <div class="col-12">
+                                    <table class="table table-striped table-sm" id="ltCwStatsTable">
+                                        <thead>
+                                            <tr>
+                                                <th>分类</th>
+                                                <th>样本数</th>
+                                                <th colspan="4" class="text-center bg-light">LT统计</th>
+                                                <th colspan="4" class="text-center bg-light">CW统计</th>
+                                            </tr>
+                                            <tr>
+                                                <th></th>
+                                                <th></th>
+                                                <th>平均值</th>
+                                                <th>最大值</th>
+                                                <th>最小值</th>
+                                                <th>中位数</th>
+                                                <th>平均值</th>
+                                                <th>最大值</th>
+                                                <th>最小值</th>
+                                                <th>中位数</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody></tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- 数据表格 -->
             <div class="row">
                 <div class="col-12">
@@ -665,12 +859,17 @@
                             T1供应商名称: row[9],
                             Tn零部件品类: row[17],
                             是否EOP: row[18],
+                            LT: parseFloat(row[26]) || 0,
+                            CW: parseFloat(row[27]) || 0,
                             是否认可为行业内理想专用: row[35] || '',
                             单价是否合理: row[36] || '',
                             CW_LT是否合理: row[37] || '',
+                            理想端呆滞数量: row[47] || 0,
+                            T1端呆滞数量: row[48] || 0,
                             理想端呆滞金额: row[52] || 0,
                             T1端呆滞金额: row[53] || 0,
                             呆滞总金额: row[54] || 0,
+                            呆滞总数量: (row[47] || 0) + (row[48] || 0),
                             下一步措施: row[58] || '',
                             内部review: row[60] || ''
                         };
@@ -683,6 +882,46 @@
         function changeSheet() {
             currentSheet = document.getElementById('sheetSelector').value;
             updateDashboard();
+        }
+
+        // 获取当前指标值（金额或数量）
+        function getMetricValue(item, type = 'total') {
+            const metricType = document.getElementById('metricSelector').value;
+            if (metricType === 'amount') {
+                switch(type) {
+                    case 'total': return parseFloat(item.呆滞总金额) || 0;
+                    case 't1': return parseFloat(item.T1端呆滞金额) || 0;
+                    case 'ideal': return parseFloat(item.理想端呆滞金额) || 0;
+                    default: return parseFloat(item.呆滞总金额) || 0;
+                }
+            } else {
+                switch(type) {
+                    case 'total': return parseFloat(item.呆滞总数量) || 0;
+                    case 't1': return parseFloat(item.T1端呆滞数量) || 0;
+                    case 'ideal': return parseFloat(item.理想端呆滞数量) || 0;
+                    default: return parseFloat(item.呆滞总数量) || 0;
+                }
+            }
+        }
+
+        // 获取当前单位和格式化函数
+        function getMetricConfig() {
+            const metricType = document.getElementById('metricSelector').value;
+            if (metricType === 'amount') {
+                return {
+                    unit: '万元',
+                    label: '金额',
+                    formatter: (val) => (val / 10000).toFixed(2),
+                    displayFormatter: (val) => '¥' + (val / 10000).toFixed(2) + '万'
+                };
+            } else {
+                return {
+                    unit: '件',
+                    label: '数量',
+                    formatter: (val) => Math.round(val),
+                    displayFormatter: (val) => Math.round(val) + '件'
+                };
+            }
         }
 
         // 更新仪表板
@@ -701,6 +940,17 @@
                 data = data.filter(item => selectedTiers.includes(item.分类));
             }
 
+            // 应用类型筛选（总成/物料）
+            const selectedTypes = Array.from(document.querySelectorAll('.type-checkbox:checked')).map(cb => cb.value);
+            if (selectedTypes.length > 0) {
+                data = data.filter(item => {
+                    const partType = item.零件类型 || '';
+                    if (selectedTypes.includes('总成') && partType.includes('总成')) return true;
+                    if (selectedTypes.includes('物料') && !partType.includes('总成')) return true;
+                    return false;
+                });
+            }
+
             updateStatCards(data);
             updateTierChart(data);
             updateGroupChart(data);
@@ -717,24 +967,30 @@
             updateExclusiveByGroupChart(data);
             updateExclusiveAmountChart(data);
             updateExclusiveComparisonChart(data);
+            updateExclusiveQueryPSMOptions(data);
+            updateLTCWQueryPSMOptions(data);
+            updateLTCWStats(data);
             updateDataTable(data);
         }
 
         // 更新统计卡片
         function updateStatCards(data) {
             const totalRecords = data.length;
-            const totalAmount = data.reduce((sum, item) => sum + (parseFloat(item.呆滞总金额) || 0), 0);
-            const t1Amount = data.reduce((sum, item) => sum + (parseFloat(item.T1端呆滞金额) || 0), 0);
-            const idealAmount = data.reduce((sum, item) => sum + (parseFloat(item.理想端呆滞金额) || 0), 0);
+            const config = getMetricConfig();
+
+            const totalValue = data.reduce((sum, item) => sum + getMetricValue(item, 'total'), 0);
+            const t1Value = data.reduce((sum, item) => sum + getMetricValue(item, 't1'), 0);
+            const idealValue = data.reduce((sum, item) => sum + getMetricValue(item, 'ideal'), 0);
 
             document.getElementById('totalRecords').textContent = totalRecords.toLocaleString();
-            document.getElementById('totalAmount').textContent = '¥' + (totalAmount / 10000).toFixed(2) + '万';
-            document.getElementById('t1Amount').textContent = '¥' + (t1Amount / 10000).toFixed(2) + '万';
-            document.getElementById('idealAmount').textContent = '¥' + (idealAmount / 10000).toFixed(2) + '万';
+            document.getElementById('totalAmount').textContent = config.displayFormatter(totalValue);
+            document.getElementById('t1Amount').textContent = config.displayFormatter(t1Value);
+            document.getElementById('idealAmount').textContent = config.displayFormatter(idealValue);
         }
 
         // 更新阶梯分布图
         function updateTierChart(data) {
+            const config = getMetricConfig();
             const tierData = {
                 '50万以内': 0,
                 '50-100万': 0,
@@ -745,7 +1001,7 @@
             data.forEach(item => {
                 const category = item.分类;
                 if (tierData.hasOwnProperty(category)) {
-                    tierData[category] += parseFloat(item.呆滞总金额) || 0;
+                    tierData[category] += getMetricValue(item, 'total') || 0;
                 }
             });
 
@@ -802,6 +1058,7 @@
 
         // 更新专业组图表
         function updateGroupChart(data) {
+            const config = getMetricConfig();
             const groupData = {};
             data.forEach(item => {
                 const group = item.PSM专业组;
@@ -809,7 +1066,7 @@
                     if (!groupData[group]) {
                         groupData[group] = 0;
                     }
-                    groupData[group] += parseFloat(item.呆滞总金额) || 0;
+                    groupData[group] += getMetricValue(item, 'total') || 0;
                 }
             });
 
@@ -860,6 +1117,7 @@
 
         // 更新品类图表
         function updateCategoryChart(data) {
+            const config = getMetricConfig();
             const categoryData = {};
             data.forEach(item => {
                 const category = item.Tn零部件品类;
@@ -867,7 +1125,7 @@
                     if (!categoryData[category]) {
                         categoryData[category] = 0;
                     }
-                    categoryData[category] += parseFloat(item.呆滞总金额) || 0;
+                    categoryData[category] += getMetricValue(item, 'total') || 0;
                 }
             });
 
@@ -925,6 +1183,7 @@
 
         // 更新零件类型图表
         function updateTypeChart(data) {
+            const config = getMetricConfig();
             const typeData = {};
             data.forEach(item => {
                 const type = item.零件类型;
@@ -932,7 +1191,7 @@
                     if (!typeData[type]) {
                         typeData[type] = 0;
                     }
-                    typeData[type] += parseFloat(item.呆滞总金额) || 0;
+                    typeData[type] += getMetricValue(item, 'total') || 0;
                 }
             });
 
@@ -975,8 +1234,9 @@
 
         // 更新对比图表
         function updateComparisonChart(data) {
-            const t1Total = data.reduce((sum, item) => sum + (parseFloat(item.T1端呆滞金额) || 0), 0);
-            const idealTotal = data.reduce((sum, item) => sum + (parseFloat(item.理想端呆滞金额) || 0), 0);
+            const config = getMetricConfig();
+            const t1Total = data.reduce((sum, item) => sum + (getMetricValue(item, 't1') || 0), 0);
+            const idealTotal = data.reduce((sum, item) => sum + (getMetricValue(item, 'ideal') || 0), 0);
 
             const chartDom = document.getElementById('comparisonChart');
             if (!charts.comparisonChart) {
@@ -1040,6 +1300,7 @@
 
         // 更新供应商排名图表
         function updateSupplierChart(data) {
+            const config = getMetricConfig();
             const supplierData = {};
             data.forEach(item => {
                 const supplier = item.T1供应商名称;
@@ -1048,7 +1309,7 @@
                         supplierData[supplier] = { count: 0, amount: 0 };
                     }
                     supplierData[supplier].count += 1;
-                    supplierData[supplier].amount += parseFloat(item.呆滞总金额) || 0;
+                    supplierData[supplier].amount += getMetricValue(item, 'total') || 0;
                 }
             });
 
@@ -1070,7 +1331,7 @@
                         const supplier = params[0].name;
                         const data = supplierData[supplier];
                         return supplier + '<br/>' +
-                               '呆滞金额: ¥' + (data.amount / 10000).toFixed(2) + '万元<br/>' +
+                               '呆滞金额: ¥' + (parseFloat(config.formatter(data.amount))).toFixed(2) + '万元<br/>' +
                                '记录数: ' + data.count + '条';
                     }
                 },
@@ -1118,6 +1379,7 @@
 
         // 更新Review状态图表
         function updateReviewChart(data) {
+            const config = getMetricConfig();
             const reviewData = {};
             data.forEach(item => {
                 let review = item.内部review;
@@ -1128,7 +1390,7 @@
                     reviewData[review] = { count: 0, amount: 0 };
                 }
                 reviewData[review].count += 1;
-                reviewData[review].amount += parseFloat(item.呆滞总金额) || 0;
+                reviewData[review].amount += getMetricValue(item, 'total') || 0;
             });
 
             const sortedReview = Object.entries(reviewData)
@@ -1146,7 +1408,7 @@
                         const review = params.name;
                         const data = reviewData[review];
                         return review + '<br/>' +
-                               '呆滞金额: ¥' + (data.amount / 10000).toFixed(2) + '万元<br/>' +
+                               '呆滞金额: ¥' + (parseFloat(config.formatter(data.amount))).toFixed(2) + '万元<br/>' +
                                '记录数: ' + data.count + '条<br/>' +
                                '占比: ' + params.percent + '%';
                     }
@@ -1189,6 +1451,7 @@
 
         // 更新下一步措施图表（支持多选项整合）
         function updateNextStepChart(data) {
+            const config = getMetricConfig();
             const nextStepData = {};
 
             // 常见的措施选项（根据多选框）
@@ -1230,7 +1493,7 @@
                         nextStepData[matchedStep] = { count: 0, amount: 0 };
                     }
                     nextStepData[matchedStep].count += 1;
-                    nextStepData[matchedStep].amount += parseFloat(item.呆滞总金额) || 0;
+                    nextStepData[matchedStep].amount += getMetricValue(item, 'total') || 0;
                 });
             });
 
@@ -1297,6 +1560,7 @@
 
         // 更新是否认可为理想专用图表
         function updateIdealExclusiveChart(data) {
+            const config = getMetricConfig();
             const exclusiveData = {};
             data.forEach(item => {
                 let status = item.是否认可为行业内理想专用;
@@ -1307,7 +1571,7 @@
                     exclusiveData[status] = { count: 0, amount: 0 };
                 }
                 exclusiveData[status].count += 1;
-                exclusiveData[status].amount += parseFloat(item.呆滞总金额) || 0;
+                exclusiveData[status].amount += getMetricValue(item, 'total') || 0;
             });
 
             const sortedData = Object.entries(exclusiveData)
@@ -1325,7 +1589,7 @@
                         const status = params.name;
                         const data = exclusiveData[status];
                         return status + '<br/>' +
-                               '呆滞金额: ¥' + (data.amount / 10000).toFixed(2) + '万元<br/>' +
+                               '呆滞金额: ¥' + (parseFloat(config.formatter(data.amount))).toFixed(2) + '万元<br/>' +
                                '记录数: ' + data.count + '条<br/>' +
                                '占比: ' + params.percent + '%';
                     }
@@ -1354,6 +1618,7 @@
 
         // 更新单价合理性图表
         function updatePriceReasonableChart(data) {
+            const config = getMetricConfig();
             const priceData = {};
             data.forEach(item => {
                 let status = item.单价是否合理;
@@ -1364,7 +1629,7 @@
                     priceData[status] = { count: 0, amount: 0 };
                 }
                 priceData[status].count += 1;
-                priceData[status].amount += parseFloat(item.呆滞总金额) || 0;
+                priceData[status].amount += getMetricValue(item, 'total') || 0;
             });
 
             const sortedData = Object.entries(priceData)
@@ -1397,7 +1662,7 @@
                         const status = params.name;
                         const data = priceData[status];
                         return status + '<br/>' +
-                               '呆滞金额: ¥' + (data.amount / 10000).toFixed(2) + '万元<br/>' +
+                               '呆滞金额: ¥' + (parseFloat(config.formatter(data.amount))).toFixed(2) + '万元<br/>' +
                                '记录数: ' + data.count + '条<br/>' +
                                '占比: ' + params.percent + '%';
                     }
@@ -1426,6 +1691,7 @@
 
         // 更新CW/LT合理性图表
         function updateCWReasonableChart(data) {
+            const config = getMetricConfig();
             const cwData = {};
             data.forEach(item => {
                 let status = item.CW_LT是否合理;
@@ -1436,7 +1702,7 @@
                     cwData[status] = { count: 0, amount: 0 };
                 }
                 cwData[status].count += 1;
-                cwData[status].amount += parseFloat(item.呆滞总金额) || 0;
+                cwData[status].amount += getMetricValue(item, 'total') || 0;
             });
 
             const sortedData = Object.entries(cwData)
@@ -1469,7 +1735,7 @@
                         const status = params.name;
                         const data = cwData[status];
                         return status + '<br/>' +
-                               '呆滞金额: ¥' + (data.amount / 10000).toFixed(2) + '万元<br/>' +
+                               '呆滞金额: ¥' + (parseFloat(config.formatter(data.amount))).toFixed(2) + '万元<br/>' +
                                '记录数: ' + data.count + '条<br/>' +
                                '占比: ' + params.percent + '%';
                     }
@@ -1504,6 +1770,7 @@
 
         // 更新按零件类型的专用件占比图表
         function updateExclusiveByTypeChart(data) {
+            const config = getMetricConfig();
             const typeData = {};
 
             data.forEach(item => {
@@ -1515,7 +1782,7 @@
                     };
                 }
 
-                const amount = parseFloat(item.呆滞总金额) || 0;
+                const amount = getMetricValue(item, 'total') || 0;
                 if (isExclusive(item)) {
                     typeData[type].exclusive.count += 1;
                     typeData[type].exclusive.amount += amount;
@@ -1548,8 +1815,8 @@
                         const total = data.exclusive.count + data.nonExclusive.count;
                         const percentage = total > 0 ? ((data.exclusive.count / total) * 100).toFixed(1) : 0;
                         return type + '<br/>' +
-                               '专用件: ' + data.exclusive.count + '条 (¥' + (data.exclusive.amount / 10000).toFixed(2) + '万)<br/>' +
-                               '非专用件: ' + data.nonExclusive.count + '条 (¥' + (data.nonExclusive.amount / 10000).toFixed(2) + '万)<br/>' +
+                               '专用件: ' + data.exclusive.count + '条 (¥' + (parseFloat(config.formatter(data.exclusive.amount))).toFixed(2) + '万)<br/>' +
+                               '非专用件: ' + data.nonExclusive.count + '条 (¥' + (data.parseFloat(config.formatter(nonExclusive.amount))).toFixed(2) + '万)<br/>' +
                                '专用件占比: ' + percentage + '%';
                     }
                 },
@@ -1620,6 +1887,7 @@
 
         // 更新按PSM专业组的专用件占比图表
         function updateExclusiveByGroupChart(data) {
+            const config = getMetricConfig();
             const groupData = {};
 
             data.forEach(item => {
@@ -1631,7 +1899,7 @@
                     };
                 }
 
-                const amount = parseFloat(item.呆滞总金额) || 0;
+                const amount = getMetricValue(item, 'total') || 0;
                 if (isExclusive(item)) {
                     groupData[group].exclusive.count += 1;
                     groupData[group].exclusive.amount += amount;
@@ -1667,8 +1935,8 @@
                         const total = data.exclusive.count + data.nonExclusive.count;
                         const percentage = total > 0 ? ((data.exclusive.count / total) * 100).toFixed(1) : 0;
                         return group + '<br/>' +
-                               '专用件: ' + data.exclusive.count + '条 (¥' + (data.exclusive.amount / 10000).toFixed(2) + '万)<br/>' +
-                               '非专用件: ' + data.nonExclusive.count + '条 (¥' + (data.nonExclusive.amount / 10000).toFixed(2) + '万)<br/>' +
+                               '专用件: ' + data.exclusive.count + '条 (¥' + (parseFloat(config.formatter(data.exclusive.amount))).toFixed(2) + '万)<br/>' +
+                               '非专用件: ' + data.nonExclusive.count + '条 (¥' + (data.parseFloat(config.formatter(nonExclusive.amount))).toFixed(2) + '万)<br/>' +
                                '专用件占比: ' + percentage + '%';
                     }
                 },
@@ -1739,11 +2007,12 @@
 
         // 更新专用件金额占比总览
         function updateExclusiveAmountChart(data) {
+            const config = getMetricConfig();
             let exclusiveAmount = 0;
             let nonExclusiveAmount = 0;
 
             data.forEach(item => {
-                const amount = parseFloat(item.呆滞总金额) || 0;
+                const amount = getMetricValue(item, 'total') || 0;
                 if (isExclusive(item)) {
                     exclusiveAmount += amount;
                 } else {
@@ -1817,11 +2086,12 @@
 
         // 更新专用vs非专用对比图表
         function updateExclusiveComparisonChart(data) {
+            const config = getMetricConfig();
             let exclusiveData = { count: 0, amount: 0 };
             let nonExclusiveData = { count: 0, amount: 0 };
 
             data.forEach(item => {
-                const amount = parseFloat(item.呆滞总金额) || 0;
+                const amount = getMetricValue(item, 'total') || 0;
                 if (isExclusive(item)) {
                     exclusiveData.count += 1;
                     exclusiveData.amount += amount;
@@ -1857,7 +2127,7 @@
                     },
                     {
                         type: 'value',
-                        name: '金额(万元)',
+                        name: config.unit,
                         position: 'right'
                     }
                 ],
@@ -1879,10 +2149,10 @@
                         }
                     },
                     {
-                        name: '金额(万元)',
+                        name: config.unit,
                         type: 'bar',
                         yAxisIndex: 1,
-                        data: [exclusiveData.amount / 10000, nonExclusiveData.amount / 10000],
+                        data: [parseFloat(config.formatter(exclusiveData.amount)), parseFloat(config.formatter(nonExclusiveData.amount))],
                         itemStyle: {
                             color: new echarts.graphic.LinearGradient(0, 1, 0, 0, [
                                 { offset: 0, color: '#f093fb' },
@@ -1927,7 +2197,7 @@
                     eopCell.innerHTML = '<span class="badge bg-secondary badge-custom">-</span>';
                 }
 
-                row.insertCell(7).textContent = (parseFloat(item.呆滞总金额) || 0).toLocaleString();
+                row.insertCell(7).textContent = (getMetricValue(item, 'total') || 0).toLocaleString();
             });
 
             if (data.length > 100) {
@@ -1994,9 +2264,9 @@
 
                 // 添加统计数据
                 const totalRecords = data.length;
-                const totalAmount = data.reduce((sum, item) => sum + (parseFloat(item.呆滞总金额) || 0), 0);
-                const t1Amount = data.reduce((sum, item) => sum + (parseFloat(item.T1端呆滞金额) || 0), 0);
-                const idealAmount = data.reduce((sum, item) => sum + (parseFloat(item.理想端呆滞金额) || 0), 0);
+                const totalAmount = data.reduce((sum, item) => sum + (getMetricValue(item, 'total') || 0), 0);
+                const t1Amount = data.reduce((sum, item) => sum + (getMetricValue(item, 't1') || 0), 0);
+                const idealAmount = data.reduce((sum, item) => sum + (getMetricValue(item, 'ideal') || 0), 0);
 
                 let yPos = 40;
                 pdf.setFontSize(12);
@@ -2092,10 +2362,16 @@
         function resetFilters() {
             document.getElementById('sheetSelector').value = 'L987';
             document.getElementById('topN').value = '10';
+            document.getElementById('metricSelector').value = 'amount';
 
             // 取消所有阶梯复选框
             document.querySelectorAll('.tier-checkbox').forEach(cb => {
                 cb.checked = false;
+            });
+
+            // 选中所有类型复选框
+            document.querySelectorAll('.type-checkbox').forEach(cb => {
+                cb.checked = true;
             });
 
             currentSheet = 'L987';
@@ -2108,6 +2384,695 @@
                 if (chart) chart.resize();
             });
         });
+
+        // ========== 专用零件交互查询功能 ==========
+
+        // 更新PSM专业组选项
+        function updateExclusiveQueryPSMOptions(data) {
+            const psmSelect = document.getElementById('exclusiveQueryPSM');
+            const psmSet = new Set();
+
+            data.forEach(item => {
+                if (item.PSM专业组) psmSet.add(item.PSM专业组);
+            });
+
+            psmSelect.innerHTML = '<option value="">--请选择--</option>';
+            Array.from(psmSet).sort().forEach(psm => {
+                const option = document.createElement('option');
+                option.value = psm;
+                option.textContent = psm;
+                psmSelect.appendChild(option);
+            });
+        }
+
+        // 当选择PSM专业组后，更新零件选项
+        function updateExclusiveQueryParts() {
+            let data = [];
+            if (currentSheet === 'ALL') {
+                data = [...allData.L987, ...allData.L6];
+            } else {
+                data = allData[currentSheet] || [];
+            }
+
+            // 应用筛选
+            const selectedTiers = Array.from(document.querySelectorAll('.tier-checkbox:checked')).map(cb => cb.value);
+            if (selectedTiers.length > 0) {
+                data = data.filter(item => selectedTiers.includes(item.分类));
+            }
+            const selectedTypes = Array.from(document.querySelectorAll('.type-checkbox:checked')).map(cb => cb.value);
+            if (selectedTypes.length > 0) {
+                data = data.filter(item => {
+                    const partType = item.零件类型 || '';
+                    if (selectedTypes.includes('总成') && partType.includes('总成')) return true;
+                    if (selectedTypes.includes('物料') && !partType.includes('总成')) return true;
+                    return false;
+                });
+            }
+
+            const selectedPSM = document.getElementById('exclusiveQueryPSM').value;
+            if (!selectedPSM) {
+                document.getElementById('exclusiveQueryStats').innerHTML = '请选择PSM专业组';
+                document.getElementById('exclusiveQueryPart').innerHTML = '<option value="">--全部零件--</option>';
+                if (charts.exclusiveQueryChart) charts.exclusiveQueryChart.clear();
+                document.getElementById('exclusivePartsTable').querySelector('tbody').innerHTML = '';
+                return;
+            }
+
+            // 筛选该PSM专业组的数据
+            const psmData = data.filter(item => item.PSM专业组 === selectedPSM);
+
+            // 收集该PSM下的所有零部件名称（去重）
+            const partNames = new Set();
+            psmData.forEach(item => {
+                if (item.T1零部件名称 && item.T1零部件名称.trim() !== '') {
+                    partNames.add(item.T1零部件名称);
+                }
+            });
+
+            const partSelect = document.getElementById('exclusiveQueryPart');
+            partSelect.innerHTML = '<option value="">--全部零件--</option>';
+            Array.from(partNames).sort().forEach(partName => {
+                const option = document.createElement('option');
+                option.value = partName;
+                option.textContent = partName;
+                partSelect.appendChild(option);
+            });
+
+            // 显示该PSM专业组的统计
+            updateExclusivePartDetail();
+        }
+
+        // 更新专用件详情
+        function updateExclusivePartDetail() {
+            let data = [];
+            if (currentSheet === 'ALL') {
+                data = [...allData.L987, ...allData.L6];
+            } else {
+                data = allData[currentSheet] || [];
+            }
+
+            // 应用筛选
+            const selectedTiers = Array.from(document.querySelectorAll('.tier-checkbox:checked')).map(cb => cb.value);
+            if (selectedTiers.length > 0) {
+                data = data.filter(item => selectedTiers.includes(item.分类));
+            }
+            const selectedTypes = Array.from(document.querySelectorAll('.type-checkbox:checked')).map(cb => cb.value);
+            if (selectedTypes.length > 0) {
+                data = data.filter(item => {
+                    const partType = item.零件类型 || '';
+                    if (selectedTypes.includes('总成') && partType.includes('总成')) return true;
+                    if (selectedTypes.includes('物料') && !partType.includes('总成')) return true;
+                    return false;
+                });
+            }
+
+            const selectedPSM = document.getElementById('exclusiveQueryPSM').value;
+            const selectedPartName = document.getElementById('exclusiveQueryPart').value;
+
+            if (!selectedPSM) return;
+
+            // 筛选数据：先按PSM专业组，再按零部件名称
+            let filteredData = data.filter(item => item.PSM专业组 === selectedPSM);
+            if (selectedPartName) {
+                filteredData = filteredData.filter(item => item.T1零部件名称 === selectedPartName);
+            }
+
+            // 统计专用件和非专用件
+            let exclusiveCount = 0, nonExclusiveCount = 0;
+            let exclusiveAmount = 0, nonExclusiveAmount = 0;
+            const allParts = [];
+
+            filteredData.forEach(item => {
+                const isExcl = isExclusive(item);
+                allParts.push({ ...item, isExclusive: isExcl });
+
+                if (isExcl) {
+                    exclusiveCount++;
+                    exclusiveAmount += getMetricValue(item, 'total');
+                } else {
+                    nonExclusiveCount++;
+                    nonExclusiveAmount += getMetricValue(item, 'total');
+                }
+            });
+
+            const totalCount = exclusiveCount + nonExclusiveCount;
+            const percentage = totalCount > 0 ? ((exclusiveCount / totalCount) * 100).toFixed(1) : 0;
+            const config = getMetricConfig();
+
+            // 更新统计信息
+            const displayName = selectedPartName ? `${selectedPSM} - ${selectedPartName}` : selectedPSM;
+            document.getElementById('exclusiveQueryStats').innerHTML = `
+                <strong>${displayName}</strong><br/>
+                总计：${totalCount}条 | 专用件：${exclusiveCount}条 (${percentage}%) | 非专用件：${nonExclusiveCount}条<br/>
+                专用件${config.label}：${config.displayFormatter(exclusiveAmount)}
+            `;
+
+            // 更新图表
+            const chartDom = document.getElementById('exclusiveQueryChart');
+            if (!charts.exclusiveQueryChart) {
+                charts.exclusiveQueryChart = echarts.init(chartDom);
+            }
+
+            const option = {
+                tooltip: {
+                    trigger: 'item',
+                    formatter: '{b}: {c}条 ({d}%)'
+                },
+                series: [{
+                    type: 'pie',
+                    radius: ['40%', '70%'],
+                    data: [
+                        { value: exclusiveCount, name: '专用件', itemStyle: { color: '#5470c6' } },
+                        { value: nonExclusiveCount, name: '非专用件', itemStyle: { color: '#91cc75' } }
+                    ],
+                    label: {
+                        formatter: '{b}\n{c}条 ({d}%)'
+                    }
+                }]
+            };
+
+            charts.exclusiveQueryChart.setOption(option);
+
+            // 更新零件列表
+            const tbody = document.getElementById('exclusivePartsTable').querySelector('tbody');
+            tbody.innerHTML = '';
+            allParts.sort((a, b) => getMetricValue(b, 'total') - getMetricValue(a, 'total'));
+            allParts.slice(0, 100).forEach(item => {
+                const row = tbody.insertRow();
+                row.insertCell(0).textContent = item.T1零部件名称 || '-';
+                row.insertCell(1).textContent = item.T1物料编码 || '-';
+                row.insertCell(2).textContent = item.T1供应商名称 || '-';
+                row.insertCell(3).textContent = config.displayFormatter(getMetricValue(item, 'total'));
+                const exclusiveCell = row.insertCell(4);
+                if (item.isExclusive) {
+                    exclusiveCell.innerHTML = '<span class="badge bg-success">是</span>';
+                } else {
+                    exclusiveCell.innerHTML = '<span class="badge bg-secondary">否</span>';
+                }
+            });
+
+            if (allParts.length > 100) {
+                const row = tbody.insertRow();
+                const cell = row.insertCell(0);
+                cell.colSpan = 5;
+                cell.className = 'text-center text-muted';
+                cell.textContent = `显示前100条，共${allParts.length}条记录`;
+            }
+        }
+
+        // ========== LT和CW交互查询功能 ==========
+
+        // 更新LTCW查询的PSM专业组选项
+        function updateLTCWQueryPSMOptions(data) {
+            const psmSelect = document.getElementById('ltcwQueryPSM');
+            const psmSet = new Set();
+
+            data.forEach(item => {
+                if (item.PSM专业组) psmSet.add(item.PSM专业组);
+            });
+
+            psmSelect.innerHTML = '<option value="">--请选择--</option>';
+            Array.from(psmSet).sort().forEach(psm => {
+                const option = document.createElement('option');
+                option.value = psm;
+                option.textContent = psm;
+                psmSelect.appendChild(option);
+            });
+        }
+
+        // 当选择PSM专业组后，更新零件选项
+        function updateLTCWQueryParts() {
+            let data = [];
+            if (currentSheet === 'ALL') {
+                data = [...allData.L987, ...allData.L6];
+            } else {
+                data = allData[currentSheet] || [];
+            }
+
+            // 应用筛选
+            const selectedTiers = Array.from(document.querySelectorAll('.tier-checkbox:checked')).map(cb => cb.value);
+            if (selectedTiers.length > 0) {
+                data = data.filter(item => selectedTiers.includes(item.分类));
+            }
+            const selectedTypes = Array.from(document.querySelectorAll('.type-checkbox:checked')).map(cb => cb.value);
+            if (selectedTypes.length > 0) {
+                data = data.filter(item => {
+                    const partType = item.零件类型 || '';
+                    if (selectedTypes.includes('总成') && partType.includes('总成')) return true;
+                    if (selectedTypes.includes('物料') && !partType.includes('总成')) return true;
+                    return false;
+                });
+            }
+
+            const selectedPSM = document.getElementById('ltcwQueryPSM').value;
+            if (!selectedPSM) {
+                document.getElementById('ltcwQueryStats').innerHTML = '请选择PSM专业组';
+                document.getElementById('ltcwQueryPart').innerHTML = '<option value="">--全部零件--</option>';
+                if (charts.ltcwQueryChartLT) charts.ltcwQueryChartLT.clear();
+                if (charts.ltcwQueryChartCW) charts.ltcwQueryChartCW.clear();
+                document.getElementById('ltcwPartsTable').querySelector('tbody').innerHTML = '';
+                return;
+            }
+
+            // 筛选该PSM专业组的数据
+            const psmData = data.filter(item => item.PSM专业组 === selectedPSM);
+
+            // 收集该PSM下的所有零部件名称（去重）
+            const partNames = new Set();
+            psmData.forEach(item => {
+                if (item.T1零部件名称 && item.T1零部件名称.trim() !== '') {
+                    partNames.add(item.T1零部件名称);
+                }
+            });
+
+            const partSelect = document.getElementById('ltcwQueryPart');
+            partSelect.innerHTML = '<option value="">--全部零件--</option>';
+            Array.from(partNames).sort().forEach(partName => {
+                const option = document.createElement('option');
+                option.value = partName;
+                option.textContent = partName;
+                partSelect.appendChild(option);
+            });
+
+            // 显示该PSM专业组的统计
+            updateLTCWPartDetail();
+        }
+
+        // 更新LT&CW零件详情
+        function updateLTCWPartDetail() {
+            let data = [];
+            if (currentSheet === 'ALL') {
+                data = [...allData.L987, ...allData.L6];
+            } else {
+                data = allData[currentSheet] || [];
+            }
+
+            // 应用筛选
+            const selectedTiers = Array.from(document.querySelectorAll('.tier-checkbox:checked')).map(cb => cb.value);
+            if (selectedTiers.length > 0) {
+                data = data.filter(item => selectedTiers.includes(item.分类));
+            }
+            const selectedTypes = Array.from(document.querySelectorAll('.type-checkbox:checked')).map(cb => cb.value);
+            if (selectedTypes.length > 0) {
+                data = data.filter(item => {
+                    const partType = item.零件类型 || '';
+                    if (selectedTypes.includes('总成') && partType.includes('总成')) return true;
+                    if (selectedTypes.includes('物料') && !partType.includes('总成')) return true;
+                    return false;
+                });
+            }
+
+            const selectedPSM = document.getElementById('ltcwQueryPSM').value;
+            const selectedPartName = document.getElementById('ltcwQueryPart').value;
+
+            if (!selectedPSM) return;
+
+            // 筛选数据：先按PSM专业组，再按零部件名称
+            let filteredData = data.filter(item => item.PSM专业组 === selectedPSM);
+            if (selectedPartName) {
+                filteredData = filteredData.filter(item => item.T1零部件名称 === selectedPartName);
+            }
+
+            // 收集LT和CW数据
+            const ltValues = [];
+            const cwValues = [];
+            filteredData.forEach(item => {
+                if (item.LT > 0) ltValues.push(item.LT);
+                if (item.CW > 0) cwValues.push(item.CW);
+            });
+
+            // 计算统计值
+            const calculateStats = (values) => {
+                if (values.length === 0) return { avg: 0, max: 0, min: 0, median: 0 };
+                values.sort((a, b) => a - b);
+                const avg = values.reduce((a, b) => a + b, 0) / values.length;
+                const max = values[values.length - 1];
+                const min = values[0];
+                const median = values.length % 2 === 0
+                    ? (values[values.length / 2 - 1] + values[values.length / 2]) / 2
+                    : values[Math.floor(values.length / 2)];
+                return { avg, max, min, median };
+            };
+
+            const ltStats = calculateStats(ltValues);
+            const cwStats = calculateStats(cwValues);
+            const config = getMetricConfig();
+
+            // 更新统计信息
+            const displayName = selectedPartName ? `${selectedPSM} - ${selectedPartName}` : selectedPSM;
+            document.getElementById('ltcwQueryStats').innerHTML = `
+                <strong>${displayName}</strong><br/>
+                样本数：${filteredData.length}条<br/>
+                LT - 平均:${ltStats.avg.toFixed(2)} 最大:${ltStats.max.toFixed(2)} 最小:${ltStats.min.toFixed(2)}<br/>
+                CW - 平均:${cwStats.avg.toFixed(2)} 最大:${cwStats.max.toFixed(2)} 最小:${cwStats.min.toFixed(2)}
+            `;
+
+            // 更新LT图表
+            const ltChartDom = document.getElementById('ltcwQueryChartLT');
+            if (!charts.ltcwQueryChartLT) {
+                charts.ltcwQueryChartLT = echarts.init(ltChartDom);
+            }
+
+            const ltOption = {
+                tooltip: {
+                    trigger: 'item',
+                    formatter: 'LT: {c}'
+                },
+                xAxis: {
+                    type: 'category',
+                    data: filteredData.map((_, i) => i + 1)
+                },
+                yAxis: {
+                    type: 'value',
+                    name: 'LT'
+                },
+                series: [{
+                    data: filteredData.map(item => item.LT),
+                    type: 'bar',
+                    itemStyle: {
+                        color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                            { offset: 0, color: '#83bff6' },
+                            { offset: 1, color: '#188df0' }
+                        ])
+                    }
+                }]
+            };
+
+            charts.ltcwQueryChartLT.setOption(ltOption);
+
+            // 更新CW图表
+            const cwChartDom = document.getElementById('ltcwQueryChartCW');
+            if (!charts.ltcwQueryChartCW) {
+                charts.ltcwQueryChartCW = echarts.init(cwChartDom);
+            }
+
+            const cwOption = {
+                tooltip: {
+                    trigger: 'item',
+                    formatter: 'CW: {c}'
+                },
+                xAxis: {
+                    type: 'category',
+                    data: filteredData.map((_, i) => i + 1)
+                },
+                yAxis: {
+                    type: 'value',
+                    name: 'CW'
+                },
+                series: [{
+                    data: filteredData.map(item => item.CW),
+                    type: 'bar',
+                    itemStyle: {
+                        color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                            { offset: 0, color: '#fccb05' },
+                            { offset: 1, color: '#f77062' }
+                        ])
+                    }
+                }]
+            };
+
+            charts.ltcwQueryChartCW.setOption(cwOption);
+
+            // 更新零件列表
+            const tbody = document.getElementById('ltcwPartsTable').querySelector('tbody');
+            tbody.innerHTML = '';
+            filteredData.sort((a, b) => getMetricValue(b, 'total') - getMetricValue(a, 'total'));
+            filteredData.slice(0, 100).forEach(item => {
+                const row = tbody.insertRow();
+                row.insertCell(0).textContent = item.T1零部件名称 || '-';
+                row.insertCell(1).textContent = item.T1物料编码 || '-';
+                row.insertCell(2).textContent = item.T1供应商名称 || '-';
+                row.insertCell(3).textContent = item.LT ? item.LT.toFixed(2) : '-';
+                row.insertCell(4).textContent = item.CW ? item.CW.toFixed(2) : '-';
+                row.insertCell(5).textContent = config.displayFormatter(getMetricValue(item, 'total'));
+            });
+
+            if (filteredData.length > 100) {
+                const row = tbody.insertRow();
+                const cell = row.insertCell(0);
+                cell.colSpan = 6;
+                cell.className = 'text-center text-muted';
+                cell.textContent = `显示前100条，共${filteredData.length}条记录`;
+            }
+        }
+
+        // ========== LT和CW统计分析功能 ==========
+
+        function updateLTCWStats(data) {
+            // 获取统计维度
+            const dimension = document.getElementById('ltcwStatsDimension').value;
+
+            // 按选择的维度分组统计
+            const groupStats = {};
+
+            data.forEach(item => {
+                let groupKey;
+                switch(dimension) {
+                    case 'category':
+                        groupKey = item.Tn零部件品类 || '未分类';
+                        break;
+                    case 'psm':
+                        groupKey = item.PSM专业组 || '未分类';
+                        break;
+                    case 'type':
+                        groupKey = item.零件类型 || '未分类';
+                        break;
+                    default:
+                        groupKey = '未分类';
+                }
+
+                if (!groupStats[groupKey]) {
+                    groupStats[groupKey] = { ltValues: [], cwValues: [] };
+                }
+                if (item.LT > 0) groupStats[groupKey].ltValues.push(item.LT);
+                if (item.CW > 0) groupStats[groupKey].cwValues.push(item.CW);
+            });
+
+            // 计算统计值
+            const calculateStats = (values) => {
+                if (values.length === 0) return { avg: 0, max: 0, min: 0, median: 0 };
+
+                values.sort((a, b) => a - b);
+                const sum = values.reduce((a, b) => a + b, 0);
+                const avg = sum / values.length;
+                const max = values[values.length - 1];
+                const min = values[0];
+                const median = values.length % 2 === 0
+                    ? (values[values.length / 2 - 1] + values[values.length / 2]) / 2
+                    : values[Math.floor(values.length / 2)];
+
+                return { avg, max, min, median };
+            };
+
+            // 更新表格
+            const tbody = document.getElementById('ltCwStatsTable').querySelector('tbody');
+            tbody.innerHTML = '';
+
+            // 按分类名称排序
+            const sortedGroups = Object.entries(groupStats).sort((a, b) => a[0].localeCompare(b[0]));
+
+            sortedGroups.forEach(([groupName, data]) => {
+                const ltStats = calculateStats(data.ltValues);
+                const cwStats = calculateStats(data.cwValues);
+                const count = Math.max(data.ltValues.length, data.cwValues.length);
+
+                const row = tbody.insertRow();
+                row.insertCell(0).textContent = groupName;
+                row.insertCell(1).textContent = count;
+                row.insertCell(2).textContent = ltStats.avg.toFixed(2);
+                row.insertCell(3).textContent = ltStats.max.toFixed(2);
+                row.insertCell(4).textContent = ltStats.min.toFixed(2);
+                row.insertCell(5).textContent = ltStats.median.toFixed(2);
+                row.insertCell(6).textContent = cwStats.avg.toFixed(2);
+                row.insertCell(7).textContent = cwStats.max.toFixed(2);
+                row.insertCell(8).textContent = cwStats.min.toFixed(2);
+                row.insertCell(9).textContent = cwStats.median.toFixed(2);
+            });
+
+            // 更新LT图表
+            updateLTChart(groupStats);
+
+            // 更新CW图表
+            updateCWChart(groupStats);
+        }
+
+        function updateLTChart(groupStats) {
+            const chartDom = document.getElementById('ltStatsChart');
+            if (!charts.ltStatsChart) {
+                charts.ltStatsChart = echarts.init(chartDom);
+            }
+
+            const groups = Object.keys(groupStats).sort();
+            const avgData = groups.map(g => {
+                const values = groupStats[g].ltValues;
+                return values.length > 0 ? (values.reduce((a,b) => a+b, 0) / values.length).toFixed(2) : 0;
+            });
+            const maxData = groups.map(g => {
+                const values = groupStats[g].ltValues;
+                return values.length > 0 ? Math.max(...values).toFixed(2) : 0;
+            });
+            const minData = groups.map(g => {
+                const values = groupStats[g].ltValues;
+                return values.length > 0 ? Math.min(...values).toFixed(2) : 0;
+            });
+            const medianData = groups.map(g => {
+                const values = groupStats[g].ltValues;
+                if (values.length === 0) return 0;
+                values.sort((a, b) => a - b);
+                const median = values.length % 2 === 0
+                    ? (values[values.length / 2 - 1] + values[values.length / 2]) / 2
+                    : values[Math.floor(values.length / 2)];
+                return median.toFixed(2);
+            });
+
+            const option = {
+                tooltip: {
+                    trigger: 'axis',
+                    axisPointer: { type: 'shadow' }
+                },
+                legend: {
+                    data: ['平均值', '最大值', '最小值', '中位数'],
+                    top: 0
+                },
+                grid: {
+                    left: '3%',
+                    right: '4%',
+                    bottom: '15%',
+                    containLabel: true
+                },
+                xAxis: {
+                    type: 'category',
+                    data: groups,
+                    axisLabel: {
+                        rotate: 45,
+                        interval: 0,
+                        fontSize: 10
+                    }
+                },
+                yAxis: {
+                    type: 'value',
+                    name: 'LT'
+                },
+                series: [
+                    {
+                        name: '平均值',
+                        type: 'bar',
+                        data: avgData,
+                        itemStyle: { color: '#5470c6' }
+                    },
+                    {
+                        name: '最大值',
+                        type: 'line',
+                        data: maxData,
+                        itemStyle: { color: '#ee6666' }
+                    },
+                    {
+                        name: '最小值',
+                        type: 'line',
+                        data: minData,
+                        itemStyle: { color: '#91cc75' }
+                    },
+                    {
+                        name: '中位数',
+                        type: 'line',
+                        data: medianData,
+                        itemStyle: { color: '#fac858' },
+                        lineStyle: { type: 'dashed' }
+                    }
+                ]
+            };
+
+            charts.ltStatsChart.setOption(option);
+        }
+
+        function updateCWChart(groupStats) {
+            const chartDom = document.getElementById('cwStatsChart');
+            if (!charts.cwStatsChart) {
+                charts.cwStatsChart = echarts.init(chartDom);
+            }
+
+            const groups = Object.keys(groupStats).sort();
+            const avgData = groups.map(g => {
+                const values = groupStats[g].cwValues;
+                return values.length > 0 ? (values.reduce((a,b) => a+b, 0) / values.length).toFixed(2) : 0;
+            });
+            const maxData = groups.map(g => {
+                const values = groupStats[g].cwValues;
+                return values.length > 0 ? Math.max(...values).toFixed(2) : 0;
+            });
+            const minData = groups.map(g => {
+                const values = groupStats[g].cwValues;
+                return values.length > 0 ? Math.min(...values).toFixed(2) : 0;
+            });
+            const medianData = groups.map(g => {
+                const values = groupStats[g].cwValues;
+                if (values.length === 0) return 0;
+                values.sort((a, b) => a - b);
+                const median = values.length % 2 === 0
+                    ? (values[values.length / 2 - 1] + values[values.length / 2]) / 2
+                    : values[Math.floor(values.length / 2)];
+                return median.toFixed(2);
+            });
+
+            const option = {
+                tooltip: {
+                    trigger: 'axis',
+                    axisPointer: { type: 'shadow' }
+                },
+                legend: {
+                    data: ['平均值', '最大值', '最小值', '中位数'],
+                    top: 0
+                },
+                grid: {
+                    left: '3%',
+                    right: '4%',
+                    bottom: '15%',
+                    containLabel: true
+                },
+                xAxis: {
+                    type: 'category',
+                    data: groups,
+                    axisLabel: {
+                        rotate: 45,
+                        interval: 0,
+                        fontSize: 10
+                    }
+                },
+                yAxis: {
+                    type: 'value',
+                    name: 'CW'
+                },
+                series: [
+                    {
+                        name: '平均值',
+                        type: 'bar',
+                        data: avgData,
+                        itemStyle: { color: '#fac858' }
+                    },
+                    {
+                        name: '最大值',
+                        type: 'line',
+                        data: maxData,
+                        itemStyle: { color: '#ee6666' }
+                    },
+                    {
+                        name: '最小值',
+                        type: 'line',
+                        data: minData,
+                        itemStyle: { color: '#91cc75' }
+                    },
+                    {
+                        name: '中位数',
+                        type: 'line',
+                        data: medianData,
+                        itemStyle: { color: '#73c0de' },
+                        lineStyle: { type: 'dashed' }
+                    }
+                ]
+            };
+
+            charts.cwStatsChart.setOption(option);
+        }
     </script>
 </body>
 </html>
