@@ -1024,7 +1024,7 @@
 
     <script>
         // 版本号
-        const VERSION = 'v2.0.0';
+        const VERSION = 'v2.0.1';
 
         // 全局数据存储
         let allData = {
@@ -1065,13 +1065,31 @@
         function findColumnIndex(headers, fieldName) {
             const possibleNames = COLUMN_MAPPING[fieldName] || [fieldName];
 
+            // 首先尝试精确匹配
             for (let i = 0; i < headers.length; i++) {
                 const header = (headers[i] || '').toString().trim();
                 for (const name of possibleNames) {
-                    if (header === name || header.includes(name)) {
+                    if (header === name) {
+                        console.log(`列 "${fieldName}" 精确匹配到索引 ${i}: ${header}`);
                         return i;
                     }
                 }
+            }
+
+            // 如果没有精确匹配，尝试包含匹配（但要求完全匹配更长的优先）
+            let bestMatch = { index: -1, matchLength: 0 };
+            for (let i = 0; i < headers.length; i++) {
+                const header = (headers[i] || '').toString().trim();
+                for (const name of possibleNames) {
+                    if (header.includes(name) && name.length > bestMatch.matchLength) {
+                        bestMatch = { index: i, matchLength: name.length };
+                    }
+                }
+            }
+
+            if (bestMatch.index !== -1) {
+                console.log(`列 "${fieldName}" 部分匹配到索引 ${bestMatch.index}`);
+                return bestMatch.index;
             }
 
             console.warn(`未找到列: ${fieldName}, 尝试的列名: ${possibleNames.join(', ')}`);
@@ -1862,7 +1880,7 @@
                     },
                     data: sortedReview.map(([name, value]) => ({
                         name: name,
-                        value: value.amount
+                        value: value.count
                     }))
                 }]
             };
