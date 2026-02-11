@@ -261,6 +261,7 @@
         <div class="container-fluid">
             <span class="navbar-brand mb-0 h1">
                 <i class="fas fa-chart-line"></i> EOP呆滞管控数据看板系统
+                <span class="badge bg-light text-dark ms-2" id="versionBadge">v2.0.0</span>
             </span>
             <span class="text-white">
                 <i class="fas fa-cog"></i> 可自定义分析看板
@@ -1022,6 +1023,9 @@
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
 
     <script>
+        // 版本号
+        const VERSION = 'v2.0.0';
+
         // 全局数据存储
         let allData = {
             L987: [],
@@ -1029,6 +1033,58 @@
         };
         let currentSheet = 'L987';
         let charts = {};
+
+        // 列名映射（标准列名）
+        const COLUMN_MAPPING = {
+            '呆滞金额': ['呆滞金额', '金额'],
+            '分类': ['分类', '呆滞分类'],
+            'PSM专业组': ['PSM专业组', 'PSM组'],
+            'PSM': ['PSM'],
+            '零件类型': ['零件类型', '类型'],
+            'T1物料编码': ['T1物料编码', '物料编码'],
+            'T1零部件名称': ['T1零部件名称', '零部件名称', '零件名称'],
+            'T1供应商编码': ['T1供应商编码', '供应商编码'],
+            'T1供应商名称': ['T1供应商名称', '供应商名称', '供应商'],
+            'Tn零部件品类': ['Tn零部件品类', '零部件品类', '品类'],
+            '是否EOP': ['是否EOP', 'EOP'],
+            'LT': ['LT', 'Lead Time', '交期'],
+            'CW': ['CW', 'Component Weight'],
+            '是否认可为行业内理想专用': ['是否认可为行业内理想专用', '理想专用'],
+            '单价是否合理': ['单价是否合理', '单价合理性'],
+            'CW_LT是否合理': ['CW_LT是否合理', 'CW/LT是否合理'],
+            '理想端呆滞数量': ['理想端呆滞数量', '理想端数量'],
+            'T1端呆滞数量': ['T1端呆滞数量', 'T1端数量'],
+            '理想端呆滞金额': ['理想端呆滞金额', '理想端金额'],
+            'T1端呆滞金额': ['T1端呆滞金额', 'T1端金额'],
+            '呆滞总金额': ['呆滞总金额', '总金额'],
+            '下一步措施': ['下一步措施', '措施', '处理措施'],
+            '内部review': ['内部review', 'review', '审核状态']
+        };
+
+        // 根据列名查找列索引
+        function findColumnIndex(headers, fieldName) {
+            const possibleNames = COLUMN_MAPPING[fieldName] || [fieldName];
+
+            for (let i = 0; i < headers.length; i++) {
+                const header = (headers[i] || '').toString().trim();
+                for (const name of possibleNames) {
+                    if (header === name || header.includes(name)) {
+                        return i;
+                    }
+                }
+            }
+
+            console.warn(`未找到列: ${fieldName}, 尝试的列名: ${possibleNames.join(', ')}`);
+            return -1;
+        }
+
+        // 安全获取列值
+        function getColumnValue(row, index, defaultValue = '') {
+            if (index === -1 || index >= row.length) {
+                return defaultValue;
+            }
+            return row[index] !== undefined && row[index] !== null ? row[index] : defaultValue;
+        }
 
         // 页面加载完成后初始化
         document.addEventListener('DOMContentLoaded', function() {
@@ -1118,50 +1174,88 @@
                     const headers = jsonData[3];
                     const dataRows = jsonData.slice(4);
 
+                    console.log(`${sheetName} 表头:`, headers);
+
+                    // 建立列索引映射
+                    const colMap = {
+                        呆滞金额: findColumnIndex(headers, '呆滞金额'),
+                        分类: findColumnIndex(headers, '分类'),
+                        PSM专业组: findColumnIndex(headers, 'PSM专业组'),
+                        PSM: findColumnIndex(headers, 'PSM'),
+                        零件类型: findColumnIndex(headers, '零件类型'),
+                        T1物料编码: findColumnIndex(headers, 'T1物料编码'),
+                        T1零部件名称: findColumnIndex(headers, 'T1零部件名称'),
+                        T1供应商编码: findColumnIndex(headers, 'T1供应商编码'),
+                        T1供应商名称: findColumnIndex(headers, 'T1供应商名称'),
+                        Tn零部件品类: findColumnIndex(headers, 'Tn零部件品类'),
+                        是否EOP: findColumnIndex(headers, '是否EOP'),
+                        LT: findColumnIndex(headers, 'LT'),
+                        CW: findColumnIndex(headers, 'CW'),
+                        是否认可为行业内理想专用: findColumnIndex(headers, '是否认可为行业内理想专用'),
+                        单价是否合理: findColumnIndex(headers, '单价是否合理'),
+                        CW_LT是否合理: findColumnIndex(headers, 'CW_LT是否合理'),
+                        理想端呆滞数量: findColumnIndex(headers, '理想端呆滞数量'),
+                        T1端呆滞数量: findColumnIndex(headers, 'T1端呆滞数量'),
+                        理想端呆滞金额: findColumnIndex(headers, '理想端呆滞金额'),
+                        T1端呆滞金额: findColumnIndex(headers, 'T1端呆滞金额'),
+                        呆滞总金额: findColumnIndex(headers, '呆滞总金额'),
+                        下一步措施: findColumnIndex(headers, '下一步措施'),
+                        内部review: findColumnIndex(headers, '内部review')
+                    };
+
+                    console.log(`${sheetName} 列映射:`, colMap);
+
                     allData[sheetName] = dataRows.map(row => {
                         if (!row[0]) return null;
 
+                        // 使用动态列索引读取数据
+                        const ltValue = parseFloat(getColumnValue(row, colMap.LT, 0)) || 0;
+                        const cwValue = parseFloat(getColumnValue(row, colMap.CW, 0)) || 0;
+                        const 理想端数量 = parseFloat(getColumnValue(row, colMap.理想端呆滞数量, 0)) || 0;
+                        const T1端数量 = parseFloat(getColumnValue(row, colMap.T1端呆滞数量, 0)) || 0;
+
                         const item = {
-                            呆滞金额: row[0],
-                            分类: row[1],
-                            PSM专业组: row[2],
-                            PSM: row[3],
-                            零件类型: row[5],
-                            T1物料编码: row[6],
-                            T1零部件名称: row[7],
-                            T1供应商编码: row[8],
-                            T1供应商名称: row[9],
-                            Tn零部件品类: row[17],
-                            是否EOP: row[18],
-                            LT: (parseFloat(row[26]) || 0) / 30,  // AA列单位是天，转换为月
-                            CW: (parseFloat(row[27]) || 0) / 30,  // AB列单位是天，转换为月
-                            是否认可为行业内理想专用: row[35] || '',
-                            单价是否合理: row[36] || '',
-                            CW_LT是否合理: row[37] || '',
-                            理想端呆滞数量: row[47] || 0,
-                            T1端呆滞数量: row[48] || 0,
-                            理想端呆滞金额: row[52] || 0,
-                            T1端呆滞金额: row[53] || 0,
-                            呆滞总金额: row[54] || 0,
-                            呆滞总数量: (row[47] || 0) + (row[48] || 0),
-                            下一步措施: row[58] || '',
-                            内部review: row[60] || ''
+                            呆滞金额: getColumnValue(row, colMap.呆滞金额),
+                            分类: getColumnValue(row, colMap.分类),
+                            PSM专业组: getColumnValue(row, colMap.PSM专业组),
+                            PSM: getColumnValue(row, colMap.PSM),
+                            零件类型: getColumnValue(row, colMap.零件类型),
+                            T1物料编码: getColumnValue(row, colMap.T1物料编码),
+                            T1零部件名称: getColumnValue(row, colMap.T1零部件名称),
+                            T1供应商编码: getColumnValue(row, colMap.T1供应商编码),
+                            T1供应商名称: getColumnValue(row, colMap.T1供应商名称),
+                            Tn零部件品类: getColumnValue(row, colMap.Tn零部件品类),
+                            是否EOP: getColumnValue(row, colMap.是否EOP),
+                            LT: ltValue / 30,  // 天转换为月
+                            CW: cwValue / 30,  // 天转换为月
+                            是否认可为行业内理想专用: getColumnValue(row, colMap.是否认可为行业内理想专用),
+                            单价是否合理: getColumnValue(row, colMap.单价是否合理),
+                            CW_LT是否合理: getColumnValue(row, colMap.CW_LT是否合理),
+                            理想端呆滞数量: 理想端数量,
+                            T1端呆滞数量: T1端数量,
+                            理想端呆滞金额: parseFloat(getColumnValue(row, colMap.理想端呆滞金额, 0)) || 0,
+                            T1端呆滞金额: parseFloat(getColumnValue(row, colMap.T1端呆滞金额, 0)) || 0,
+                            呆滞总金额: parseFloat(getColumnValue(row, colMap.呆滞总金额, 0)) || 0,
+                            呆滞总数量: 理想端数量 + T1端数量,
+                            下一步措施: getColumnValue(row, colMap.下一步措施),
+                            内部review: getColumnValue(row, colMap.内部review)
                         };
 
-                        // 调试：输出"左/右前组合灯总成"的原始数据
+                        // 调试：输出组合灯数据
                         if (item.T1零部件名称 && item.T1零部件名称.includes('组合灯')) {
                             console.log('调试 - 组合灯数据:', {
                                 名称: item.T1零部件名称,
-                                'LT原始值(row[26])-天': row[26],
+                                'LT原始值-天': ltValue,
                                 'LT转换后-月': item.LT,
-                                'CW原始值(row[27])-天': row[27],
-                                'CW转换后-月': item.CW,
-                                '完整行数据前30列': row.slice(0, 30)
+                                'CW原始值-天': cwValue,
+                                'CW转换后-月': item.CW
                             });
                         }
 
                         return item;
                     }).filter(item => item !== null);
+
+                    console.log(`${sheetName} 解析完成，共 ${allData[sheetName].length} 条数据`);
                 }
             });
         }
