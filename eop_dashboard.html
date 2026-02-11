@@ -1722,12 +1722,8 @@
                 tooltip: {
                     trigger: 'item',
                     formatter: function(params) {
-                        const review = params.name;
-                        const data = reviewData[review];
-                        return review + '<br/>' +
-                               '呆滞金额: ¥' + (parseFloat(config.formatter(data.amount))).toFixed(2) + '万元<br/>' +
-                               '记录数: ' + data.count + '条<br/>' +
-                               '占比: ' + params.percent + '%';
+                        // 仅显示状态，不显示备注栏内的说明
+                        return params.name + ': ' + params.percent + '%';
                     }
                 },
                 legend: {
@@ -1783,19 +1779,31 @@
 
             data.forEach(item => {
                 let steps = item.下一步措施;
-                if (!steps || steps.trim() === '') {
-                    steps = '未填写';
+
+                // 空白显示为"暂未定"
+                if (!steps || steps.trim() === '' || steps === '-' || steps === '无') {
+                    steps = '暂未定';
                 }
 
                 // 检测可能的多选项（用逗号、分号、顿号等分隔）
                 const stepList = steps.split(/[,，;；、\s]+/).filter(s => s.trim() !== '');
 
                 if (stepList.length === 0) {
-                    stepList.push('未填写');
+                    stepList.push('暂未定');
                 }
 
                 stepList.forEach(step => {
                     step = step.trim();
+
+                    // 如果是"暂未定"，直接使用
+                    if (step === '暂未定') {
+                        if (!nextStepData['暂未定']) {
+                            nextStepData['暂未定'] = { count: 0, amount: 0 };
+                        }
+                        nextStepData['暂未定'].count += 1;
+                        nextStepData['暂未定'].amount += getMetricValue(item, 'total') || 0;
+                        return;
+                    }
 
                     // 匹配标准选项
                     let matchedStep = '其他';
