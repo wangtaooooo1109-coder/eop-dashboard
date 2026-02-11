@@ -1133,8 +1133,8 @@
                             T1供应商名称: row[9],
                             Tn零部件品类: row[17],
                             是否EOP: row[18],
-                            LT: parseFloat(row[26]) || 0,
-                            CW: parseFloat(row[27]) || 0,
+                            LT: (parseFloat(row[26]) || 0) / 30,  // AA列单位是天，转换为月
+                            CW: (parseFloat(row[27]) || 0) / 30,  // AB列单位是天，转换为月
                             是否认可为行业内理想专用: row[35] || '',
                             单价是否合理: row[36] || '',
                             CW_LT是否合理: row[37] || '',
@@ -1152,10 +1152,10 @@
                         if (item.T1零部件名称 && item.T1零部件名称.includes('组合灯')) {
                             console.log('调试 - 组合灯数据:', {
                                 名称: item.T1零部件名称,
-                                'LT原始值(row[26])': row[26],
-                                'LT解析后': item.LT,
-                                'CW原始值(row[27])': row[27],
-                                'CW解析后': item.CW,
+                                'LT原始值(row[26])-天': row[26],
+                                'LT转换后-月': item.LT,
+                                'CW原始值(row[27])-天': row[27],
+                                'CW转换后-月': item.CW,
                                 '完整行数据前30列': row.slice(0, 30)
                             });
                         }
