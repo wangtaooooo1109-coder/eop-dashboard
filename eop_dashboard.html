@@ -197,6 +197,63 @@
             cursor: pointer;
             user-select: none;
         }
+
+        /* 新增样式 - 预警列表 */
+        .alert-list {
+            max-height: 200px;
+            overflow-y: auto;
+            font-size: 0.85rem;
+        }
+
+        .alert-list .alert {
+            padding: 8px 10px;
+            margin-bottom: 8px;
+        }
+
+        .alert-list .alert:last-child {
+            margin-bottom: 0;
+        }
+
+        /* 数据表格样式优化 */
+        .data-table {
+            max-height: 500px;
+            overflow-y: auto;
+        }
+
+        .data-table table thead {
+            position: sticky;
+            top: 0;
+            background: white;
+            z-index: 10;
+        }
+
+        .data-table table th {
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .data-table table th:hover {
+            background: #f0f0f0;
+        }
+
+        /* KPI卡片增强 */
+        .stat-card .stat-value {
+            font-size: 1.8rem;
+        }
+
+        .stat-card small {
+            font-size: 0.75rem;
+            color: #6c757d;
+        }
+
+        /* 可点击图表提示 */
+        .chart-container.clickable {
+            cursor: pointer;
+        }
+
+        .chart-container.clickable:hover {
+            opacity: 0.9;
+        }
     </style>
 </head>
 <body>
@@ -300,6 +357,9 @@
                                     <button class="btn btn-primary btn-sm" onclick="updateDashboard()">
                                         <i class="fas fa-sync"></i> 刷新看板
                                     </button>
+                                    <button class="btn btn-success btn-sm" onclick="exportToExcel()">
+                                        <i class="fas fa-file-excel"></i> 导出Excel
+                                    </button>
                                     <button class="btn btn-danger btn-sm" onclick="exportToPDF()">
                                         <i class="fas fa-file-pdf"></i> 导出PDF
                                     </button>
@@ -341,6 +401,52 @@
                         <i class="fas fa-building fa-2x text-info mb-2"></i>
                         <div class="stat-label">理想端金额</div>
                         <div class="stat-value" id="idealAmount">¥0</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 扩展KPI卡片 - 第二行 -->
+            <div class="row">
+                <div class="col-md-2">
+                    <div class="stat-card">
+                        <i class="fas fa-boxes fa-2x text-primary mb-2"></i>
+                        <div class="stat-label">呆滞总数量</div>
+                        <div class="stat-value" id="totalQuantity">0件</div>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="stat-card">
+                        <i class="fas fa-dollar-sign fa-2x text-success mb-2"></i>
+                        <div class="stat-label">平均单价</div>
+                        <div class="stat-value" id="avgPrice">¥0</div>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="stat-card">
+                        <i class="fas fa-truck fa-2x text-warning mb-2"></i>
+                        <div class="stat-label">供应商总数</div>
+                        <div class="stat-value" id="supplierCount">0</div>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="stat-card">
+                        <i class="fas fa-exclamation-triangle fa-2x text-danger mb-2"></i>
+                        <div class="stat-label">高风险项</div>
+                        <div class="stat-value" id="highRiskCount">0</div>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="stat-card">
+                        <i class="fas fa-tasks fa-2x text-info mb-2"></i>
+                        <div class="stat-label">待处理措施</div>
+                        <div class="stat-value" id="pendingActions">0</div>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="stat-card">
+                        <i class="fas fa-check-circle fa-2x text-success mb-2"></i>
+                        <div class="stat-label">EOP零件数</div>
+                        <div class="stat-value" id="eopCount">0</div>
                     </div>
                 </div>
             </div>
@@ -442,6 +548,43 @@
                 </div>
             </div>
 
+            <!-- 供应商集中度分析 -->
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header">
+                            <i class="fas fa-chart-pie"></i> 供应商集中度分析（Top10占比）
+                        </div>
+                        <div class="card-body">
+                            <div id="supplierConcentrationChart" class="chart-container"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header">
+                            <i class="fas fa-exclamation-triangle"></i> 供应商风险评估（金额vs数量）
+                        </div>
+                        <div class="card-body">
+                            <div id="supplierRiskScatterChart" class="chart-container"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <i class="fas fa-star"></i> 供应商绩效评分（综合LT/CW/单价合理性）
+                        </div>
+                        <div class="card-body">
+                            <div id="supplierPerformanceChart" class="chart-container"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- 新增：理想专用和合理性确认统计 -->
             <div class="row">
                 <div class="col-md-4">
@@ -471,6 +614,137 @@
                         </div>
                         <div class="card-body">
                             <div id="cwReasonableChart" class="chart-container" style="height: 300px;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            </div>
+
+            <!-- 帕累托分析（80/20法则） -->
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header">
+                            <i class="fas fa-chart-line"></i> 帕累托分析 - 零件
+                        </div>
+                        <div class="card-body">
+                            <div id="paretoPartChart" class="chart-container"></div>
+                            <div class="alert alert-info mt-3">
+                                <i class="fas fa-info-circle"></i>
+                                <span id="paretoPartInfo">前20%零件占总金额的__%</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header">
+                            <i class="fas fa-chart-line"></i> 帕累托分析 - 供应商
+                        </div>
+                        <div class="card-body">
+                            <div id="paretoSupplierChart" class="chart-container"></div>
+                            <div class="alert alert-info mt-3">
+                                <i class="fas fa-info-circle"></i>
+                                <span id="paretoSupplierInfo">前20%供应商占总金额的__%</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 数据对比分析（L987 vs L6） -->
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <i class="fas fa-exchange-alt"></i> 项目对比分析（L987 vs L6）
+                            <small class="text-light ms-2">仅在"全部合并"模式下显示</small>
+                        </div>
+                        <div class="card-body" id="comparisonSection">
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div id="comparisonMetricsChart" class="chart-container" style="height: 300px;"></div>
+                                </div>
+                                <div class="col-md-8">
+                                    <div id="comparisonBarChart" class="chart-container" style="height: 300px;"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 智能预警与风险提示 -->
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="card border-warning">
+                        <div class="card-header bg-warning text-dark">
+                            <i class="fas fa-exclamation-triangle"></i> 智能预警与风险提示
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <h6 class="text-danger"><i class="fas fa-fire"></i> 高风险零件</h6>
+                                    <div id="highRiskList" class="alert-list"></div>
+                                </div>
+                                <div class="col-md-4">
+                                    <h6 class="text-warning"><i class="fas fa-clock"></i> 长期呆滞预警</h6>
+                                    <div id="longTermList" class="alert-list"></div>
+                                </div>
+                                <div class="col-md-4">
+                                    <h6 class="text-info"><i class="fas fa-percentage"></i> 集中度风险</h6>
+                                    <div id="concentrationRiskList" class="alert-list"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 单价合理性分析 -->
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header">
+                            <i class="fas fa-dollar-sign"></i> 单价合理性分析
+                        </div>
+                        <div class="card-body">
+                            <div id="priceReasonableChart" class="chart-container" style="height: 350px;"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header">
+                            <i class="fas fa-exclamation-circle"></i> 单价不合理项-按PSM专业组
+                        </div>
+                        <div class="card-body">
+                            <div id="priceUnreasonableByPSMChart" class="chart-container" style="height: 350px;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CW_LT合理性分析 -->
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header">
+                            <i class="fas fa-balance-scale"></i> CW_LT合理性分析
+                        </div>
+                        <div class="card-body">
+                            <div id="cwltReasonableChart" class="chart-container" style="height: 350px;"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header">
+                            <i class="fas fa-chart-pie"></i> CW_LT不合理项金额影响
+                        </div>
+                        <div class="card-body">
+                            <div id="cwltImpactChart" class="chart-container" style="height: 350px;"></div>
                         </div>
                     </div>
                 </div>
@@ -971,6 +1245,16 @@
             updateLTCWQueryPSMOptions(data);
             updateLTCWStats(data);
             updateDataTable(data);
+
+            // 新增图表更新
+            updateParetoAnalysis(data);
+            updateSupplierConcentration(data);
+            updateSupplierRiskScatter(data);
+            updateSupplierPerformance(data);
+            updatePriceReasonabilityAnalysis(data);
+            updateCWLTReasonabilityAnalysis(data);
+            updateSmartAlerts(data);
+            updateProjectComparison();
         }
 
         // 更新统计卡片
@@ -986,6 +1270,39 @@
             document.getElementById('totalAmount').textContent = config.displayFormatter(totalValue);
             document.getElementById('t1Amount').textContent = config.displayFormatter(t1Value);
             document.getElementById('idealAmount').textContent = config.displayFormatter(idealValue);
+
+            // 新增KPI卡片数据
+            // 1. 呆滞总数量
+            const totalQuantity = data.reduce((sum, item) => sum + (parseFloat(item.呆滞总数量) || 0), 0);
+            document.getElementById('totalQuantity').textContent = Math.round(totalQuantity).toLocaleString() + '件';
+
+            // 2. 平均单价（呆滞总金额 / 呆滞总数量）
+            const avgPrice = totalQuantity > 0 ? totalValue / totalQuantity : 0;
+            document.getElementById('avgPrice').textContent = '¥' + avgPrice.toFixed(2);
+
+            // 3. 供应商总数
+            const suppliers = new Set(data.map(item => item.T1供应商名称).filter(s => s));
+            document.getElementById('supplierCount').textContent = suppliers.size.toLocaleString();
+
+            // 4. 高风险项（金额>100万 且 单价不合理或CW_LT不合理）
+            const highRiskItems = data.filter(item => {
+                const amount = parseFloat(item.呆滞总金额) || 0;
+                const priceUnreasonable = (item.单价是否合理 || '').includes('不合理');
+                const cwltUnreasonable = (item.CW_LT是否合理 || '').includes('不合理');
+                return amount > 1000000 && (priceUnreasonable || cwltUnreasonable);
+            });
+            document.getElementById('highRiskCount').textContent = highRiskItems.length.toLocaleString();
+
+            // 5. 待处理措施数量
+            const pendingActions = data.filter(item => {
+                const action = item.下一步措施 || '';
+                return action.trim() !== '' && action.trim() !== '-' && action.trim() !== '无';
+            });
+            document.getElementById('pendingActions').textContent = pendingActions.length.toLocaleString();
+
+            // 6. EOP零件数
+            const eopCount = data.filter(item => (item.是否EOP || '').includes('是')).length;
+            document.getElementById('eopCount').textContent = eopCount.toLocaleString();
         }
 
         // 更新阶梯分布图
@@ -3072,6 +3389,823 @@
             };
 
             charts.cwStatsChart.setOption(option);
+        }
+
+        // ==================== 新增功能函数 ====================
+
+        // 1. 帕累托分析 - 零件
+        function updateParetoAnalysis(data) {
+            // 按零件分组统计金额
+            const partStats = {};
+            data.forEach(item => {
+                const partName = item.T1零部件名称 || '未知';
+                const amount = parseFloat(item.呆滞总金额) || 0;
+                partStats[partName] = (partStats[partName] || 0) + amount;
+            });
+
+            // 排序
+            const sorted = Object.entries(partStats).sort((a, b) => b[1] - a[1]);
+            const totalAmount = sorted.reduce((sum, item) => sum + item[1], 0);
+
+            // 计算累计百分比
+            let cumulative = 0;
+            const paretoData = sorted.map(([name, amount]) => {
+                cumulative += amount;
+                return {
+                    name,
+                    amount,
+                    cumulative: (cumulative / totalAmount * 100).toFixed(2)
+                };
+            });
+
+            // 计算80/20信息
+            const top20Percent = Math.ceil(paretoData.length * 0.2);
+            const top20Amount = paretoData.slice(0, top20Percent).reduce((sum, item) => sum + item.amount, 0);
+            const top20Ratio = ((top20Amount / totalAmount) * 100).toFixed(1);
+
+            document.getElementById('paretoPartInfo').textContent =
+                `前20%零件(${top20Percent}个)占总金额的${top20Ratio}%`;
+
+            // 绘制图表
+            const chartDom = document.getElementById('paretoPartChart');
+            if (!charts.paretoPartChart) {
+                charts.paretoPartChart = echarts.init(chartDom);
+            }
+
+            const option = {
+                tooltip: {
+                    trigger: 'axis',
+                    axisPointer: { type: 'cross' }
+                },
+                legend: {
+                    data: ['金额', '累计占比']
+                },
+                xAxis: {
+                    type: 'category',
+                    data: paretoData.slice(0, 30).map(item => item.name),
+                    axisLabel: { rotate: 45, interval: 0, fontSize: 10 }
+                },
+                yAxis: [
+                    {
+                        type: 'value',
+                        name: '金额(万元)',
+                        axisLabel: { formatter: value => (value / 10000).toFixed(0) }
+                    },
+                    {
+                        type: 'value',
+                        name: '累计占比(%)',
+                        min: 0,
+                        max: 100
+                    }
+                ],
+                series: [
+                    {
+                        name: '金额',
+                        type: 'bar',
+                        data: paretoData.slice(0, 30).map(item => item.amount),
+                        itemStyle: { color: '#5470c6' }
+                    },
+                    {
+                        name: '累计占比',
+                        type: 'line',
+                        yAxisIndex: 1,
+                        data: paretoData.slice(0, 30).map(item => parseFloat(item.cumulative)),
+                        itemStyle: { color: '#ee6666' },
+                        lineStyle: { width: 2 },
+                        markLine: {
+                            data: [{ yAxis: 80, name: '80%线', lineStyle: { type: 'dashed', color: '#ff0000' } }]
+                        }
+                    }
+                ]
+            };
+
+            charts.paretoPartChart.setOption(option);
+
+            // 供应商帕累托分析
+            const supplierStats = {};
+            data.forEach(item => {
+                const supplier = item.T1供应商名称 || '未知';
+                const amount = parseFloat(item.呆滞总金额) || 0;
+                supplierStats[supplier] = (supplierStats[supplier] || 0) + amount;
+            });
+
+            const sortedSuppliers = Object.entries(supplierStats).sort((a, b) => b[1] - a[1]);
+            let cumulativeSupplier = 0;
+            const paretoSupplierData = sortedSuppliers.map(([name, amount]) => {
+                cumulativeSupplier += amount;
+                return {
+                    name,
+                    amount,
+                    cumulative: (cumulativeSupplier / totalAmount * 100).toFixed(2)
+                };
+            });
+
+            const top20SupplierCount = Math.ceil(paretoSupplierData.length * 0.2);
+            const top20SupplierAmount = paretoSupplierData.slice(0, top20SupplierCount).reduce((sum, item) => sum + item.amount, 0);
+            const top20SupplierRatio = ((top20SupplierAmount / totalAmount) * 100).toFixed(1);
+
+            document.getElementById('paretoSupplierInfo').textContent =
+                `前20%供应商(${top20SupplierCount}家)占总金额的${top20SupplierRatio}%`;
+
+            const chartDom2 = document.getElementById('paretoSupplierChart');
+            if (!charts.paretoSupplierChart) {
+                charts.paretoSupplierChart = echarts.init(chartDom2);
+            }
+
+            const option2 = {
+                tooltip: {
+                    trigger: 'axis',
+                    axisPointer: { type: 'cross' }
+                },
+                legend: {
+                    data: ['金额', '累计占比']
+                },
+                xAxis: {
+                    type: 'category',
+                    data: paretoSupplierData.slice(0, 20).map(item => item.name),
+                    axisLabel: { rotate: 45, interval: 0, fontSize: 10 }
+                },
+                yAxis: [
+                    {
+                        type: 'value',
+                        name: '金额(万元)',
+                        axisLabel: { formatter: value => (value / 10000).toFixed(0) }
+                    },
+                    {
+                        type: 'value',
+                        name: '累计占比(%)',
+                        min: 0,
+                        max: 100
+                    }
+                ],
+                series: [
+                    {
+                        name: '金额',
+                        type: 'bar',
+                        data: paretoSupplierData.slice(0, 20).map(item => item.amount),
+                        itemStyle: { color: '#91cc75' }
+                    },
+                    {
+                        name: '累计占比',
+                        type: 'line',
+                        yAxisIndex: 1,
+                        data: paretoSupplierData.slice(0, 20).map(item => parseFloat(item.cumulative)),
+                        itemStyle: { color: '#fac858' },
+                        lineStyle: { width: 2 },
+                        markLine: {
+                            data: [{ yAxis: 80, name: '80%线', lineStyle: { type: 'dashed', color: '#ff0000' } }]
+                        }
+                    }
+                ]
+            };
+
+            charts.paretoSupplierChart.setOption(option2);
+        }
+
+        // 2. 供应商集中度分析
+        function updateSupplierConcentration(data) {
+            const supplierStats = {};
+            data.forEach(item => {
+                const supplier = item.T1供应商名称 || '未知';
+                const amount = parseFloat(item.呆滞总金额) || 0;
+                supplierStats[supplier] = (supplierStats[supplier] || 0) + amount;
+            });
+
+            const sorted = Object.entries(supplierStats).sort((a, b) => b[1] - a[1]);
+            const top10 = sorted.slice(0, 10);
+            const othersAmount = sorted.slice(10).reduce((sum, item) => sum + item[1], 0);
+            const totalAmount = sorted.reduce((sum, item) => sum + item[1], 0);
+
+            const chartData = top10.map(([name, amount]) => ({
+                name,
+                value: amount
+            }));
+
+            if (othersAmount > 0) {
+                chartData.push({ name: '其他供应商', value: othersAmount });
+            }
+
+            const chartDom = document.getElementById('supplierConcentrationChart');
+            if (!charts.supplierConcentrationChart) {
+                charts.supplierConcentrationChart = echarts.init(chartDom);
+            }
+
+            const option = {
+                tooltip: {
+                    trigger: 'item',
+                    formatter: params => {
+                        const percent = ((params.value / totalAmount) * 100).toFixed(2);
+                        return `${params.name}<br/>金额: ¥${(params.value / 10000).toFixed(2)}万<br/>占比: ${percent}%`;
+                    }
+                },
+                legend: {
+                    orient: 'vertical',
+                    left: 'left',
+                    type: 'scroll'
+                },
+                series: [
+                    {
+                        type: 'pie',
+                        radius: ['40%', '70%'],
+                        avoidLabelOverlap: false,
+                        label: {
+                            show: true,
+                            formatter: '{b}: {d}%'
+                        },
+                        emphasis: {
+                            label: {
+                                show: true,
+                                fontSize: 14,
+                                fontWeight: 'bold'
+                            }
+                        },
+                        data: chartData
+                    }
+                ]
+            };
+
+            charts.supplierConcentrationChart.setOption(option);
+        }
+
+        // 3. 供应商风险散点图
+        function updateSupplierRiskScatter(data) {
+            const supplierStats = {};
+
+            data.forEach(item => {
+                const supplier = item.T1供应商名称 || '未知';
+                const amount = parseFloat(item.呆滞总金额) || 0;
+                const quantity = parseFloat(item.呆滞总数量) || 0;
+
+                if (!supplierStats[supplier]) {
+                    supplierStats[supplier] = { amount: 0, quantity: 0 };
+                }
+                supplierStats[supplier].amount += amount;
+                supplierStats[supplier].quantity += quantity;
+            });
+
+            const scatterData = Object.entries(supplierStats).map(([name, stats]) => [
+                stats.amount / 10000,  // 金额(万元)
+                stats.quantity,         // 数量
+                name                    // 供应商名称
+            ]);
+
+            const chartDom = document.getElementById('supplierRiskScatterChart');
+            if (!charts.supplierRiskScatterChart) {
+                charts.supplierRiskScatterChart = echarts.init(chartDom);
+            }
+
+            const option = {
+                tooltip: {
+                    formatter: params => {
+                        return `${params.data[2]}<br/>金额: ¥${params.data[0].toFixed(2)}万<br/>数量: ${params.data[1]}件`;
+                    }
+                },
+                xAxis: {
+                    name: '呆滞金额(万元)',
+                    type: 'value',
+                    splitLine: { show: true }
+                },
+                yAxis: {
+                    name: '呆滞数量(件)',
+                    type: 'value',
+                    splitLine: { show: true }
+                },
+                series: [
+                    {
+                        type: 'scatter',
+                        symbolSize: 10,
+                        data: scatterData,
+                        itemStyle: {
+                            color: params => {
+                                // 高风险: 金额>100万 或 数量>1000
+                                if (params.data[0] > 100 || params.data[1] > 1000) {
+                                    return '#ee6666';
+                                }
+                                return '#5470c6';
+                            }
+                        }
+                    }
+                ]
+            };
+
+            charts.supplierRiskScatterChart.setOption(option);
+        }
+
+        // 4. 供应商绩效评分
+        function updateSupplierPerformance(data) {
+            const supplierPerf = {};
+
+            data.forEach(item => {
+                const supplier = item.T1供应商名称 || '未知';
+                if (!supplierPerf[supplier]) {
+                    supplierPerf[supplier] = {
+                        totalItems: 0,
+                        ltSum: 0,
+                        cwSum: 0,
+                        priceReasonable: 0,
+                        cwltReasonable: 0
+                    };
+                }
+
+                supplierPerf[supplier].totalItems++;
+                supplierPerf[supplier].ltSum += parseFloat(item.LT) || 0;
+                supplierPerf[supplier].cwSum += parseFloat(item.CW) || 0;
+
+                if ((item.单价是否合理 || '').includes('合理') && !(item.单价是否合理 || '').includes('不合理')) {
+                    supplierPerf[supplier].priceReasonable++;
+                }
+                if ((item.CW_LT是否合理 || '').includes('合理') && !(item.CW_LT是否合理 || '').includes('不合理')) {
+                    supplierPerf[supplier].cwltReasonable++;
+                }
+            });
+
+            // 计算综合评分（0-100分）
+            const supplierScores = Object.entries(supplierPerf).map(([name, perf]) => {
+                const avgLT = perf.ltSum / perf.totalItems;
+                const avgCW = perf.cwSum / perf.totalItems;
+                const priceRatio = perf.priceReasonable / perf.totalItems;
+                const cwltRatio = perf.cwltReasonable / perf.totalItems;
+
+                // 评分逻辑: LT越小越好(max=30分), CW越小越好(max=30分), 合理性各20分
+                const ltScore = Math.max(0, 30 - avgLT * 2);  // LT每增加0.5扣1分
+                const cwScore = Math.max(0, 30 - avgCW * 2);
+                const priceScore = priceRatio * 20;
+                const cwltScore = cwltRatio * 20;
+
+                const totalScore = ltScore + cwScore + priceScore + cwltScore;
+
+                return {
+                    name,
+                    score: Math.round(totalScore)
+                };
+            }).sort((a, b) => b.score - a.score).slice(0, 20);
+
+            const chartDom = document.getElementById('supplierPerformanceChart');
+            if (!charts.supplierPerformanceChart) {
+                charts.supplierPerformanceChart = echarts.init(chartDom);
+            }
+
+            const option = {
+                tooltip: {
+                    trigger: 'axis',
+                    axisPointer: { type: 'shadow' }
+                },
+                xAxis: {
+                    type: 'value',
+                    max: 100
+                },
+                yAxis: {
+                    type: 'category',
+                    data: supplierScores.map(s => s.name),
+                    axisLabel: { fontSize: 10 }
+                },
+                series: [
+                    {
+                        type: 'bar',
+                        data: supplierScores.map(s => ({
+                            value: s.score,
+                            itemStyle: {
+                                color: s.score >= 80 ? '#67c23a' : s.score >= 60 ? '#e6a23c' : '#f56c6c'
+                            }
+                        })),
+                        label: {
+                            show: true,
+                            position: 'right',
+                            formatter: '{c}分'
+                        }
+                    }
+                ]
+            };
+
+            charts.supplierPerformanceChart.setOption(option);
+        }
+
+        // 5. 单价合理性详细分析
+        function updatePriceReasonabilityAnalysis(data) {
+            // 单价合理性统计
+            const priceStats = {
+                '合理': 0,
+                '不合理': 0,
+                '待确认': 0
+            };
+
+            data.forEach(item => {
+                const status = item.单价是否合理 || '';
+                if (status.includes('不合理')) {
+                    priceStats['不合理']++;
+                } else if (status.includes('合理')) {
+                    priceStats['合理']++;
+                } else {
+                    priceStats['待确认']++;
+                }
+            });
+
+            const chartDom = document.getElementById('priceReasonableChart');
+            if (!charts.priceReasonableChart) {
+                charts.priceReasonableChart = echarts.init(chartDom);
+            }
+
+            const option = {
+                tooltip: {
+                    trigger: 'item',
+                    formatter: '{b}: {c}件 ({d}%)'
+                },
+                legend: {
+                    orient: 'vertical',
+                    left: 'left'
+                },
+                series: [
+                    {
+                        type: 'pie',
+                        radius: '60%',
+                        data: [
+                            { value: priceStats['合理'], name: '合理', itemStyle: { color: '#67c23a' } },
+                            { value: priceStats['不合理'], name: '不合理', itemStyle: { color: '#f56c6c' } },
+                            { value: priceStats['待确认'], name: '待确认', itemStyle: { color: '#e6a23c' } }
+                        ],
+                        emphasis: {
+                            itemStyle: {
+                                shadowBlur: 10,
+                                shadowOffsetX: 0,
+                                shadowColor: 'rgba(0, 0, 0, 0.5)'
+                            }
+                        }
+                    }
+                ]
+            };
+
+            charts.priceReasonableChart.setOption(option);
+
+            // 单价不合理按PSM专业组分布
+            const unreasonableByPSM = {};
+            data.filter(item => (item.单价是否合理 || '').includes('不合理')).forEach(item => {
+                const psm = item.PSM专业组 || '未知';
+                const amount = parseFloat(item.呆滞总金额) || 0;
+                unreasonableByPSM[psm] = (unreasonableByPSM[psm] || 0) + amount;
+            });
+
+            const chartDom2 = document.getElementById('priceUnreasonableByPSMChart');
+            if (!charts.priceUnreasonableByPSMChart) {
+                charts.priceUnreasonableByPSMChart = echarts.init(chartDom2);
+            }
+
+            const option2 = {
+                tooltip: {
+                    trigger: 'axis',
+                    axisPointer: { type: 'shadow' },
+                    formatter: params => `${params[0].name}<br/>金额: ¥${(params[0].value / 10000).toFixed(2)}万`
+                },
+                xAxis: {
+                    type: 'category',
+                    data: Object.keys(unreasonableByPSM),
+                    axisLabel: { rotate: 30, interval: 0 }
+                },
+                yAxis: {
+                    type: 'value',
+                    name: '金额(万元)',
+                    axisLabel: { formatter: value => (value / 10000).toFixed(0) }
+                },
+                series: [
+                    {
+                        type: 'bar',
+                        data: Object.values(unreasonableByPSM),
+                        itemStyle: { color: '#f56c6c' }
+                    }
+                ]
+            };
+
+            charts.priceUnreasonableByPSMChart.setOption(option2);
+        }
+
+        // 6. CW_LT合理性详细分析
+        function updateCWLTReasonabilityAnalysis(data) {
+            // CW_LT合理性统计
+            const cwltStats = {
+                '合理': 0,
+                '不合理': 0,
+                '待确认': 0
+            };
+
+            data.forEach(item => {
+                const status = item.CW_LT是否合理 || '';
+                if (status.includes('不合理')) {
+                    cwltStats['不合理']++;
+                } else if (status.includes('合理')) {
+                    cwltStats['合理']++;
+                } else {
+                    cwltStats['待确认']++;
+                }
+            });
+
+            const chartDom = document.getElementById('cwltReasonableChart');
+            if (!charts.cwltReasonableChart) {
+                charts.cwltReasonableChart = echarts.init(chartDom);
+            }
+
+            const option = {
+                tooltip: {
+                    trigger: 'item',
+                    formatter: '{b}: {c}件 ({d}%)'
+                },
+                legend: {
+                    orient: 'vertical',
+                    left: 'left'
+                },
+                series: [
+                    {
+                        type: 'pie',
+                        radius: '60%',
+                        data: [
+                            { value: cwltStats['合理'], name: '合理', itemStyle: { color: '#67c23a' } },
+                            { value: cwltStats['不合理'], name: '不合理', itemStyle: { color: '#f56c6c' } },
+                            { value: cwltStats['待确认'], name: '待确认', itemStyle: { color: '#e6a23c' } }
+                        ]
+                    }
+                ]
+            };
+
+            charts.cwltReasonableChart.setOption(option);
+
+            // CW_LT不合理项金额影响
+            const unreasonableAmount = data
+                .filter(item => (item.CW_LT是否合理 || '').includes('不合理'))
+                .reduce((sum, item) => sum + (parseFloat(item.呆滞总金额) || 0), 0);
+
+            const totalAmount = data.reduce((sum, item) => sum + (parseFloat(item.呆滞总金额) || 0), 0);
+            const reasonableAmount = totalAmount - unreasonableAmount;
+
+            const chartDom2 = document.getElementById('cwltImpactChart');
+            if (!charts.cwltImpactChart) {
+                charts.cwltImpactChart = echarts.init(chartDom2);
+            }
+
+            const option2 = {
+                tooltip: {
+                    trigger: 'item',
+                    formatter: params => `${params.name}<br/>金额: ¥${(params.value / 10000).toFixed(2)}万<br/>占比: ${params.percent}%`
+                },
+                legend: {
+                    orient: 'vertical',
+                    left: 'left'
+                },
+                series: [
+                    {
+                        type: 'pie',
+                        radius: ['40%', '70%'],
+                        data: [
+                            { value: reasonableAmount, name: 'CW_LT合理金额', itemStyle: { color: '#67c23a' } },
+                            { value: unreasonableAmount, name: 'CW_LT不合理金额', itemStyle: { color: '#f56c6c' } }
+                        ],
+                        label: {
+                            formatter: '{b}\n¥{c}'
+                        }
+                    }
+                ]
+            };
+
+            charts.cwltImpactChart.setOption(option2);
+        }
+
+        // 7. 智能预警
+        function updateSmartAlerts(data) {
+            // 高风险零件（金额>100万 且有不合理项）
+            const highRiskItems = data.filter(item => {
+                const amount = parseFloat(item.呆滞总金额) || 0;
+                const priceUnreasonable = (item.单价是否合理 || '').includes('不合理');
+                const cwltUnreasonable = (item.CW_LT是否合理 || '').includes('不合理');
+                return amount > 1000000 && (priceUnreasonable || cwltUnreasonable);
+            }).sort((a, b) => (parseFloat(b.呆滞总金额) || 0) - (parseFloat(a.呆滞总金额) || 0)).slice(0, 5);
+
+            let highRiskHtml = '';
+            if (highRiskItems.length === 0) {
+                highRiskHtml = '<div class="alert alert-success">暂无高风险项</div>';
+            } else {
+                highRiskItems.forEach(item => {
+                    highRiskHtml += `<div class="alert alert-danger alert-sm">
+                        <strong>${item.T1零部件名称}</strong><br/>
+                        金额: ¥${((parseFloat(item.呆滞总金额) || 0) / 10000).toFixed(2)}万<br/>
+                        ${(item.单价是否合理 || '').includes('不合理') ? '⚠️ 单价不合理 ' : ''}
+                        ${(item.CW_LT是否合理 || '').includes('不合理') ? '⚠️ CW_LT不合理' : ''}
+                    </div>`;
+                });
+            }
+            document.getElementById('highRiskList').innerHTML = highRiskHtml;
+
+            // 长期呆滞预警（LT > 12个月）
+            const longTermItems = data.filter(item => (parseFloat(item.LT) || 0) > 12)
+                .sort((a, b) => (parseFloat(b.LT) || 0) - (parseFloat(a.LT) || 0))
+                .slice(0, 5);
+
+            let longTermHtml = '';
+            if (longTermItems.length === 0) {
+                longTermHtml = '<div class="alert alert-success">暂无长期呆滞项</div>';
+            } else {
+                longTermItems.forEach(item => {
+                    longTermHtml += `<div class="alert alert-warning alert-sm">
+                        <strong>${item.T1零部件名称}</strong><br/>
+                        LT: ${(parseFloat(item.LT) || 0).toFixed(1)}个月<br/>
+                        金额: ¥${((parseFloat(item.呆滞总金额) || 0) / 10000).toFixed(2)}万
+                    </div>`;
+                });
+            }
+            document.getElementById('longTermList').innerHTML = longTermHtml;
+
+            // 集中度风险（单一供应商占比>20%）
+            const supplierStats = {};
+            const totalAmount = data.reduce((sum, item) => sum + (parseFloat(item.呆滞总金额) || 0), 0);
+
+            data.forEach(item => {
+                const supplier = item.T1供应商名称 || '未知';
+                const amount = parseFloat(item.呆滞总金额) || 0;
+                supplierStats[supplier] = (supplierStats[supplier] || 0) + amount;
+            });
+
+            const concentrationRisks = Object.entries(supplierStats)
+                .map(([name, amount]) => ({ name, amount, ratio: (amount / totalAmount * 100).toFixed(1) }))
+                .filter(item => item.ratio > 20)
+                .sort((a, b) => b.ratio - a.ratio);
+
+            let concentrationHtml = '';
+            if (concentrationRisks.length === 0) {
+                concentrationHtml = '<div class="alert alert-success">暂无集中度风险</div>';
+            } else {
+                concentrationRisks.forEach(item => {
+                    concentrationHtml += `<div class="alert alert-info alert-sm">
+                        <strong>${item.name}</strong><br/>
+                        占比: ${item.ratio}%<br/>
+                        金额: ¥${(item.amount / 10000).toFixed(2)}万
+                    </div>`;
+                });
+            }
+            document.getElementById('concentrationRiskList').innerHTML = concentrationHtml;
+        }
+
+        // 8. 项目对比分析
+        function updateProjectComparison() {
+            // 只在"全部合并"模式下显示
+            const currentSheet = document.getElementById('sheetSelector').value;
+
+            if (currentSheet !== 'ALL') {
+                document.getElementById('comparisonSection').style.display = 'none';
+                return;
+            }
+
+            document.getElementById('comparisonSection').style.display = 'block';
+
+            const l987Data = allData.L987 || [];
+            const l6Data = allData.L6 || [];
+
+            const l987Amount = l987Data.reduce((sum, item) => sum + (parseFloat(item.呆滞总金额) || 0), 0);
+            const l6Amount = l6Data.reduce((sum, item) => sum + (parseFloat(item.呆滞总金额) || 0), 0);
+
+            const l987Quantity = l987Data.reduce((sum, item) => sum + (parseFloat(item.呆滞总数量) || 0), 0);
+            const l6Quantity = l6Data.reduce((sum, item) => sum + (parseFloat(item.呆滞总数量) || 0), 0);
+
+            // 对比雷达图
+            const chartDom = document.getElementById('comparisonMetricsChart');
+            if (!charts.comparisonMetricsChart) {
+                charts.comparisonMetricsChart = echarts.init(chartDom);
+            }
+
+            const option = {
+                tooltip: {},
+                legend: {
+                    data: ['L987', 'L6']
+                },
+                radar: {
+                    indicator: [
+                        { name: '记录数', max: Math.max(l987Data.length, l6Data.length) * 1.2 },
+                        { name: '金额', max: Math.max(l987Amount, l6Amount) * 1.2 },
+                        { name: '数量', max: Math.max(l987Quantity, l6Quantity) * 1.2 }
+                    ]
+                },
+                series: [
+                    {
+                        type: 'radar',
+                        data: [
+                            { value: [l987Data.length, l987Amount, l987Quantity], name: 'L987' },
+                            { value: [l6Data.length, l6Amount, l6Quantity], name: 'L6' }
+                        ]
+                    }
+                ]
+            };
+
+            charts.comparisonMetricsChart.setOption(option);
+
+            // 对比柱状图
+            const chartDom2 = document.getElementById('comparisonBarChart');
+            if (!charts.comparisonBarChart) {
+                charts.comparisonBarChart = echarts.init(chartDom2);
+            }
+
+            const option2 = {
+                tooltip: {
+                    trigger: 'axis',
+                    axisPointer: { type: 'shadow' }
+                },
+                legend: {
+                    data: ['L987', 'L6']
+                },
+                xAxis: {
+                    type: 'category',
+                    data: ['记录数', '金额(万元)', '数量(件)', '供应商数']
+                },
+                yAxis: {
+                    type: 'value'
+                },
+                series: [
+                    {
+                        name: 'L987',
+                        type: 'bar',
+                        data: [
+                            l987Data.length,
+                            l987Amount / 10000,
+                            l987Quantity,
+                            new Set(l987Data.map(item => item.T1供应商名称)).size
+                        ],
+                        itemStyle: { color: '#5470c6' }
+                    },
+                    {
+                        name: 'L6',
+                        type: 'bar',
+                        data: [
+                            l6Data.length,
+                            l6Amount / 10000,
+                            l6Quantity,
+                            new Set(l6Data.map(item => item.T1供应商名称)).size
+                        ],
+                        itemStyle: { color: '#91cc75' }
+                    }
+                ]
+            };
+
+            charts.comparisonBarChart.setOption(option2);
+        }
+
+        // 9. Excel导出功能
+        function exportToExcel() {
+            let data = [];
+            if (currentSheet === 'ALL') {
+                data = [...allData.L987, ...allData.L6];
+            } else {
+                data = allData[currentSheet] || [];
+            }
+
+            // 应用当前筛选
+            const selectedTiers = Array.from(document.querySelectorAll('.tier-checkbox:checked')).map(cb => cb.value);
+            if (selectedTiers.length > 0) {
+                data = data.filter(item => selectedTiers.includes(item.分类));
+            }
+
+            const selectedTypes = Array.from(document.querySelectorAll('.type-checkbox:checked')).map(cb => cb.value);
+            if (selectedTypes.length > 0) {
+                data = data.filter(item => {
+                    const partType = item.零件类型 || '';
+                    if (selectedTypes.includes('总成') && partType.includes('总成')) return true;
+                    if (selectedTypes.includes('物料') && !partType.includes('总成')) return true;
+                    return false;
+                });
+            }
+
+            // 准备导出数据
+            const exportData = data.map(item => ({
+                '工作表': currentSheet,
+                '呆滞金额': item.呆滞金额,
+                '分类': item.分类,
+                'PSM专业组': item.PSM专业组,
+                'PSM': item.PSM,
+                '零件类型': item.零件类型,
+                'T1物料编码': item.T1物料编码,
+                'T1零部件名称': item.T1零部件名称,
+                'T1供应商编码': item.T1供应商编码,
+                'T1供应商名称': item.T1供应商名称,
+                'Tn零部件品类': item.Tn零部件品类,
+                '是否EOP': item.是否EOP,
+                'LT': item.LT,
+                'CW': item.CW,
+                '是否认可为行业内理想专用': item.是否认可为行业内理想专用,
+                '单价是否合理': item.单价是否合理,
+                'CW_LT是否合理': item.CW_LT是否合理,
+                '理想端呆滞数量': item.理想端呆滞数量,
+                'T1端呆滞数量': item.T1端呆滞数量,
+                '理想端呆滞金额': item.理想端呆滞金额,
+                'T1端呆滞金额': item.T1端呆滞金额,
+                '呆滞总金额': item.呆滞总金额,
+                '呆滞总数量': item.呆滞总数量,
+                '下一步措施': item.下一步措施,
+                '内部review': item.内部review
+            }));
+
+            // 创建工作簿
+            const ws = XLSX.utils.json_to_sheet(exportData);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "EOP数据");
+
+            // 下载文件
+            const fileName = `EOP呆滞数据_${currentSheet}_${new Date().toISOString().split('T')[0]}.xlsx`;
+            XLSX.writeFile(wb, fileName);
+
+            alert(`Excel文件已导出: ${fileName}`);
         }
     </script>
 </body>
