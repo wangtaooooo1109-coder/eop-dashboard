@@ -1121,7 +1121,7 @@
                     allData[sheetName] = dataRows.map(row => {
                         if (!row[0]) return null;
 
-                        return {
+                        const item = {
                             呆滞金额: row[0],
                             分类: row[1],
                             PSM专业组: row[2],
@@ -1147,6 +1147,20 @@
                             下一步措施: row[58] || '',
                             内部review: row[60] || ''
                         };
+
+                        // 调试：输出"左/右前组合灯总成"的原始数据
+                        if (item.T1零部件名称 && item.T1零部件名称.includes('组合灯')) {
+                            console.log('调试 - 组合灯数据:', {
+                                名称: item.T1零部件名称,
+                                'LT原始值(row[26])': row[26],
+                                'LT解析后': item.LT,
+                                'CW原始值(row[27])': row[27],
+                                'CW解析后': item.CW,
+                                '完整行数据前30列': row.slice(0, 30)
+                            });
+                        }
+
+                        return item;
                     }).filter(item => item !== null);
                 }
             });
