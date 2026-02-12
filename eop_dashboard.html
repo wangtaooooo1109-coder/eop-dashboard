@@ -745,7 +745,16 @@
                                                     </div>
                                                 </div>
                                             </div>
-                                            <div id="ltcwStatsChart" class="chart-container"></div>
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <h6 class="text-center">LT统计</h6>
+                                                    <div id="ltStatsChart" class="chart-container"></div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <h6 class="text-center">CW统计</h6>
+                                                    <div id="cwStatsChart" class="chart-container"></div>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -929,7 +938,7 @@
                                             <i class="fas fa-tasks"></i> Review状态分析
                                         </div>
                                         <div class="card-body">
-                                            <div id="reviewStatusChart" class="chart-container" style="height: 400px;"></div>
+                                            <div id="reviewChart" class="chart-container" style="height: 400px;"></div>
                                         </div>
                                     </div>
                                 </div>
@@ -1399,6 +1408,12 @@
             updateParetoAnalysis(data);
             updateSupplierConcentration(data);
             updateCWLTReasonabilityAnalysis(data);
+
+            // 专用性分析图表更新
+            updateExclusiveByTypeChart(data);
+            updateExclusiveByGroupChart(data);
+            updateExclusiveComparisonChart(data);
+            updateExclusiveQueryPSMOptions(data);
 
         }
 
