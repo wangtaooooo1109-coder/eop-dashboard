@@ -520,3 +520,30 @@ function updateDistributionAnalysis() {
 - [ ] 专用零件交互查询表格显示正常
 - [ ] 版本号显示为v2.3.21
 
+
+### 2026-02-12 v2.3.22 - 重写三个专用性分析函数 - 完全复用成功逻辑
+
+**用户需求：** 保证与"是否认可为理想专用"完全一致
+
+**问题根因：**
+- v2.3.21版本中，三个函数包含console.log导致性能或执行问题
+- 函数逻辑与updateIdealExclusiveChart不一致
+- 导致三个图表完全空白
+
+**修复内容：**
+1. `updateExclusiveByTypeChart`: 移除所有console.log，完全复用updateIdealExclusiveChart的成功逻辑
+2. `updateExclusiveByGroupChart`: 简化为饼图，移除多余的console.log
+3. `updateExclusiveComparisonChart`: 移除console.log，与updateIdealExclusiveChart完全一致的逻辑
+4. 更新版本号到v2.3.22
+
+**所有四个函数现在都使用相同的处理逻辑：**
+- 直接读取`item.是否认可为行业内理想专用`值
+- 空值处理为"未填写"
+- 按金额排序显示
+
+**测试验证：**
+- [ ] 按零件类型的专用件占比图表显示正常
+- [ ] 按PSM专业组的专用件分布图表显示正常
+- [ ] 专用 vs 非专用金额对比图表显示正常
+- [ ] 版本号显示为v2.3.22
+
