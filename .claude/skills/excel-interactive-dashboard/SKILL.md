@@ -455,16 +455,22 @@ Co-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>"
 ## Real-World Example
 
 See the complete implementation at `/Users/wangtao1/eop_dashboard.html`:
-- 5350+ lines single HTML file
+- 5000+ lines single HTML file
 - Supports L987 and L6 sheet templates
 - 10 KPI cards, multiple chart types, Pareto analysis
 - Dynamic column mapping with 23 field mappings
-- **Version v2.1.0 features**:
-  - **Tab-based layout** (v2.1.0):
-    - 5 tabs: 数据概览, 帕累托分析, 状态分析, LT&CW分析, CW标准对比
-    - Better organization, reduced visual clutter
-    - One-chart-per-row layout for key analyses (Pareto, LT&CW query)
-    - Auto-resize charts on tab switch
+- **Version v2.2.0 features**:
+  - **Complete tab reorganization with 6 logical tabs** (v2.2.0):
+    - Tab 1: 综合分析 - Pareto charts (parts/suppliers), tier distribution, PSM groups, part types, category (with Top N selector), T1 vs Ideal (pie chart)
+    - Tab 2: 供应商分析 - Supplier ranking (with Top N selector and percentage), supplier concentration
+    - Tab 3: LT&CW分析 - All LT/CW related charts and tables
+    - Tab 4: 专用性分析 - Ideal exclusive recognition, exclusivity analysis, interactive query
+    - Tab 5: 进度跟进 - Review status, next steps analysis
+    - Tab 6: 数据正确性确认 - Price reasonableness, CW/LT reasonableness
+  - 零部件品类 chart supports Top N selection (10/15/20/50/All)
+  - 供应商呆滞金额排名 chart supports Top N selection and shows percentage per supplier
+  - T1端 vs 理想端对比 converted from bar chart to pie chart
+  - Removed: 供应商风险评估, 供应商绩效评分, 项目对比分析, 单价合理性分析, 单价不合理项
   - Bug fixes for supplier display and review chart proportions (v2.0.1)
   - CW/LT distribution charts by 2-week intervals (v2.0.2)
   - Multi-dimensional cascading filters (PSM group → parts, category, range)
