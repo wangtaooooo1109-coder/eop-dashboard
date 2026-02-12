@@ -264,7 +264,7 @@
         <div class="container-fluid">
             <span class="navbar-brand mb-0 h1">
                 <i class="fas fa-chart-line"></i> EOP呆滞管控数据看板系统
-                <span class="badge bg-light text-dark ms-2" id="versionBadge">v2.3.0</span>
+                <span class="badge bg-light text-dark ms-2" id="versionBadge">v2.3.1</span>
                 <span class="badge bg-info text-dark ms-2" id="filenameBadge" style="display: none;"></span>
             </span>
             <span class="text-white">
@@ -1003,7 +1003,7 @@
 
     <script>
         // 版本号
-        const VERSION = 'v2.3.0';
+        const VERSION = 'v2.3.1';
 
         // CW中品类参考标准数据（天数）
         const CW_STANDARDS = [
@@ -1253,6 +1253,7 @@
                         理想端呆滞金额: findColumnIndex(headers, '理想端呆滞金额'),
                         T1端呆滞金额: findColumnIndex(headers, 'T1端呆滞金额'),
                         呆滞总金额: findColumnIndex(headers, '呆滞总金额'),
+                        呆滞总数量: findColumnIndex(headers, '呆滞总数量'),
                         下一步措施: findColumnIndex(headers, '下一步措施'),
                         内部review: findColumnIndex(headers, '内部review')
                     };
