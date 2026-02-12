@@ -264,7 +264,7 @@
         <div class="container-fluid">
             <span class="navbar-brand mb-0 h1">
                 <i class="fas fa-chart-line"></i> EOP呆滞管控数据看板系统
-                <span class="badge bg-light text-dark ms-2" id="versionBadge">v2.3.8</span>
+                <span class="badge bg-light text-dark ms-2" id="versionBadge">v2.3.9</span>
                 <span class="badge bg-info text-dark ms-2" id="filenameBadge" style="display: none;"></span>
             </span>
             <span class="text-white">
@@ -881,6 +881,20 @@
                                 </div>
                             </div>
 
+                            <!-- 专用件金额对比 -->
+                            <div class="row mb-3">
+                                <div class="col-md-12">
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <i class="fas fa-balance-scale"></i> 专用 vs 非专用金额对比
+                                        </div>
+                                        <div class="card-body">
+                                            <div id="exclusiveComparisonChart" class="chart-container"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
                             <!-- 专用零件交互查询 -->
                             <div class="row">
                                 <div class="col-12">
@@ -894,6 +908,12 @@
                                                     <label>选择PSM专业组</label>
                                                     <select class="form-select" id="exclusiveQueryPSM" onchange="updateExclusiveQueryParts()">
                                                         <option value="">--请选择--</option>
+                                                    </select>
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <label>选择零件</label>
+                                                    <select class="form-select" id="exclusiveQueryPart" onchange="updateExclusivePartDetail()">
+                                                        <option value="">--全部零件--</option>
                                                     </select>
                                                 </div>
                                                 <div class="col-md-6">
@@ -1003,7 +1023,7 @@
 
     <script>
         // 版本号
-        const VERSION = 'v2.3.8';
+        const VERSION = 'v2.3.9';
 
         // CW中品类参考标准数据（天数）
         const CW_STANDARDS = [
@@ -2595,7 +2615,11 @@
             const exclusiveAmount = exclusiveData.reduce((sum, item) => sum + (getMetricValue(item, 'total') || 0), 0);
             const nonExclusiveAmount = nonExclusiveData.reduce((sum, item) => sum + (getMetricValue(item, 'total') || 0), 0);
 
-            const chartDom = safeGetElement('exclusiveComparisonChart');
+            const chartDom = safeGetElement('exclusiveComparisonChart'); // v2.3.9
+            if (!chartDom) {
+                console.warn('[Exclusive] Chart container not found: exclusiveComparisonChart');
+                return;
+            }
             if (!charts.exclusiveComparisonChart) {
                 charts.exclusiveComparisonChart = echarts.init(chartDom);
             }
