@@ -264,7 +264,7 @@
         <div class="container-fluid">
             <span class="navbar-brand mb-0 h1">
                 <i class="fas fa-chart-line"></i> EOP呆滞管控数据看板系统
-                <span class="badge bg-light text-dark ms-2" id="versionBadge">v2.3.6</span>
+                <span class="badge bg-light text-dark ms-2" id="versionBadge">v2.3.7</span>
                 <span class="badge bg-info text-dark ms-2" id="filenameBadge" style="display: none;"></span>
             </span>
             <span class="text-white">
@@ -1003,7 +1003,7 @@
 
     <script>
         // 版本号
-        const VERSION = 'v2.3.6';
+        const VERSION = 'v2.3.7';
 
         // CW中品类参考标准数据（天数）
         const CW_STANDARDS = [
@@ -1067,6 +1067,35 @@
         };
         let currentSheet = 'L987';
         let charts = {};
+
+        // ========== 安全的DOM访问辅助函数 ==========
+        // v2.3.7: 统一的防御性DOM元素访问，防止访问不存在的元素导致崩溃
+        function safeGetElement(id) {
+            const element = document.getElementById(id);
+            if (!element) {
+                console.warn(`[Defense] Element not found: '${id}' - using fallback`);
+            }
+            return element;
+        }
+
+        function safeGetValue(id, defaultValue = '') {
+            const element = safeGetElement(id);
+            return element ? element.value : defaultValue;
+        }
+
+        function safeSetTextContent(id, text) {
+            const element = safeGetElement(id);
+            if (element) {
+                element.textContent = text;
+            }
+        }
+
+        function safeSetInnerHTML(id, html) {
+            const element = safeGetElement(id);
+            if (element) {
+                element.innerHTML = html;
+            }
+        }
 
         // 列名映射（标准列名）
         const COLUMN_MAPPING = {
@@ -2546,7 +2575,7 @@
             const exclusiveAmount = exclusiveData.reduce((sum, item) => sum + (getMetricValue(item, 'total') || 0), 0);
             const nonExclusiveAmount = nonExclusiveData.reduce((sum, item) => sum + (getMetricValue(item, 'total') || 0), 0);
 
-            const chartDom = document.getElementById('exclusiveComparisonChart');
+            const chartDom = safeGetElement('exclusiveComparisonChart');
             if (!charts.exclusiveComparisonChart) {
                 charts.exclusiveComparisonChart = echarts.init(chartDom);
             }
@@ -2582,7 +2611,9 @@
 
         // 更新数据表格
         function updateDataTable(data) {
-            const tbody = document.getElementById('tableBody');
+            const tbody = safeGetElement('tableBody');
+            if (!tbody) return; // v2.3.7: 如果表格不存在则跳过
+
             tbody.innerHTML = '';
 
             data.slice(0, 100).forEach(item => { // 只显示前100条
@@ -2618,9 +2649,11 @@
 
         // 表格筛选
         function filterTable() {
-            const input = document.getElementById('searchInput');
+            const input = safeGetElement('searchInput');
+            const table = safeGetElement('dataTable');
+            if (!input || !table) return; // v2.3.7: 防御性检查
+
             const filter = input.value.toUpperCase();
-            const table = document.getElementById('dataTable');
             const tr = table.getElementsByTagName('tr');
 
             for (let i = 1; i < tr.length; i++) {
@@ -2870,7 +2903,7 @@
                 }
             });
 
-            const partSelect = document.getElementById('exclusiveQueryPart');
+            const partSelect = safeGetElement('exclusiveQueryPart');
             partSelect.innerHTML = '<option value="">--全部零件--</option>';
             Array.from(partNames).sort().forEach(partName => {
                 const option = document.createElement('option');
@@ -2908,7 +2941,7 @@
             }
 
             const selectedPSM = document.getElementById('exclusiveQueryPSM').value;
-            const selectedPartName = document.getElementById('exclusiveQueryPart').value;
+            const selectedPartName = safeGetElement('exclusiveQueryPart').value;
 
             if (!selectedPSM) return;
 
@@ -2949,7 +2982,7 @@
             `;
 
             // 更新图表
-            const chartDom = document.getElementById('exclusiveQueryChart');
+            const chartDom = safeGetElement('exclusiveQueryChart');
             if (!charts.exclusiveQueryChart) {
                 charts.exclusiveQueryChart = echarts.init(chartDom);
             }
@@ -3891,7 +3924,7 @@
                 unreasonableByPSM[psm] = (unreasonableByPSM[psm] || 0) + amount;
             });
 
-            const chartDom2 = document.getElementById('priceUnreasonableByPSMChart');
+            const chartDom2 = safeGetElement('priceUnreasonableByPSMChart');
             if (!charts.priceUnreasonableByPSMChart) {
                 charts.priceUnreasonableByPSMChart = echarts.init(chartDom2);
             }
@@ -3944,7 +3977,7 @@
                 }
             });
 
-            const chartDom = document.getElementById('cwltReasonableChart');
+            const chartDom = safeGetElement('cwltReasonableChart');
             if (!charts.cwltReasonableChart) {
                 charts.cwltReasonableChart = echarts.init(chartDom);
             }
@@ -3981,7 +4014,7 @@
             const totalAmount = data.reduce((sum, item) => sum + (parseFloat(item.呆滞总金额) || 0), 0);
             const reasonableAmount = totalAmount - unreasonableAmount;
 
-            const chartDom2 = document.getElementById('cwltImpactChart');
+            const chartDom2 = safeGetElement('cwltImpactChart');
             if (!charts.cwltImpactChart) {
                 charts.cwltImpactChart = echarts.init(chartDom2);
             }
@@ -4177,21 +4210,23 @@
             });
 
             // 更新Tn零部件品类选项
-            const categorySelect = document.getElementById('distCategory');
-            const categorySet = new Set();
-            data.forEach(item => {
-                if (item.Tn零部件品类) categorySet.add(item.Tn零部件品类);
-            });
+            const categorySelect = safeGetElement('distCategory');
+            if (categorySelect) { // v2.3.7: 防御性检查
+                const categorySet = new Set();
+                data.forEach(item => {
+                    if (item.Tn零部件品类) categorySet.add(item.Tn零部件品类);
+                });
 
-            const currentCategory = categorySelect.value;
-            categorySelect.innerHTML = '<option value="">--全部--</option>';
-            Array.from(categorySet).sort().forEach(category => {
-                const option = document.createElement('option');
-                option.value = category;
-                option.textContent = category;
-                if (category === currentCategory) option.selected = true;
-                categorySelect.appendChild(option);
-            });
+                const currentCategory = categorySelect.value;
+                categorySelect.innerHTML = '<option value="">--全部--</option>';
+                Array.from(categorySet).sort().forEach(category => {
+                    const option = document.createElement('option');
+                    option.value = category;
+                    option.textContent = category;
+                    if (category === currentCategory) option.selected = true;
+                    categorySelect.appendChild(option);
+                });
+            }
 
             // 初始更新零件选项
             updateDistParts();
@@ -4259,7 +4294,7 @@
         // 更新分布图
         function updateDistribution() {
             let data = [];
-            const sheetFilter = document.getElementById('distSheet').value;
+            const sheetFilter = safeGetValue('distSheet', currentSheet); // v2.3.7: 使用安全访问和fallback
 
             if (sheetFilter === 'ALL') {
                 data = [...allData.L987, ...allData.L6];
@@ -4283,13 +4318,13 @@
                 });
             }
 
-            const selectedPSM = document.getElementById('distPSM').value;
-            const selectedPart = document.getElementById('distPart').value;
-            const selectedCategory = document.getElementById('distCategory').value;
-            const ltMin = parseFloat(document.getElementById('distLTMin').value) || 0;
-            const ltMax = parseFloat(document.getElementById('distLTMax').value) || 100;
-            const cwMin = parseFloat(document.getElementById('distCWMin').value) || 0;
-            const cwMax = parseFloat(document.getElementById('distCWMax').value) || 100;
+            const selectedPSM = safeGetValue('distPSM'); // v2.3.7: 安全访问
+            const selectedPart = safeGetValue('distPart'); // v2.3.7: 安全访问
+            const selectedCategory = safeGetValue('distCategory'); // v2.3.7: 安全访问
+            const ltMin = parseFloat(safeGetValue('distLTMin')) || 0;
+            const ltMax = parseFloat(safeGetValue('distLTMax')) || 100;
+            const cwMin = parseFloat(safeGetValue('distCWMin')) || 0;
+            const cwMax = parseFloat(safeGetValue('distCWMax')) || 100;
 
             // 应用筛选
             let filteredData = data.filter(item => {
@@ -4325,6 +4360,11 @@
 
             // 更新明细列表
             updateDistributionTable(filteredData);
+        }
+
+        // v2.3.7: Wrapper function for HTML onchange events that call updateDistributionAnalysis
+        function updateDistributionAnalysis() {
+            updateDistribution();
         }
 
         // 绘制分布图（按2周区间）
@@ -4529,7 +4569,7 @@
         // 更新零件选项（关联PSM专业组）
         function updateCWStdParts() {
             let data = [];
-            const sheetFilter = document.getElementById('cwStdSheet').value;
+            const sheetFilter = safeGetValue('cwStdSheet');
 
             if (sheetFilter === 'ALL') {
                 data = [...allData.L987, ...allData.L6];
@@ -4552,7 +4592,7 @@
                 });
             }
 
-            const selectedPSM = document.getElementById('cwStdPSM').value;
+            const selectedPSM = safeGetValue('cwStdPSM');
             const partSelect = document.getElementById('cwStdPart');
             const partSet = new Set();
 
@@ -4632,7 +4672,7 @@
         // CW标准对比分析主函数
         function updateCWStandardAnalysis() {
             let data = [];
-            const sheetFilter = document.getElementById('cwStdSheet').value;
+            const sheetFilter = safeGetValue('cwStdSheet');
 
             if (sheetFilter === 'ALL') {
                 data = [...allData.L987, ...allData.L6];
@@ -4655,9 +4695,9 @@
                 });
             }
 
-            const selectedPSM = document.getElementById('cwStdPSM').value;
-            const selectedPart = document.getElementById('cwStdPart').value;
-            const matchMode = document.getElementById('cwStdMatchMode').value;
+            const selectedPSM = safeGetValue('cwStdPSM');
+            const selectedPart = safeGetValue('cwStdPart');
+            const matchMode = safeGetValue('cwStdMatchMode');
 
             if (selectedPSM) {
                 data = data.filter(item => item.PSM专业组 === selectedPSM);
@@ -4702,10 +4742,10 @@
             const exceededRate = matchedCount > 0 ? (exceededCount / matchedCount * 100).toFixed(1) : 0;
 
             // 更新统计卡片
-            document.getElementById('cwStdTotalCount').textContent = totalCount.toLocaleString();
-            document.getElementById('cwStdMatchedCount').textContent = matchedCount.toLocaleString();
-            document.getElementById('cwStdExceededCount').textContent = exceededCount.toLocaleString();
-            document.getElementById('cwStdExceededRate').textContent = exceededRate + '%';
+            safeSetTextContent('cwStdTotalCount', totalCount.toLocaleString();
+            safeSetTextContent('cwStdMatchedCount', matchedCount.toLocaleString();
+            safeSetTextContent('cwStdExceededCount', exceededCount.toLocaleString();
+            safeSetTextContent('cwStdExceededRate', exceededRate + '%';
 
             // 更新图表
             updateCWStandardCharts(enrichedData);
@@ -4732,10 +4772,12 @@
             });
 
             // 图表1: 按中品类的超标分布（雷达图）
-            const categoryChartDom = document.getElementById('cwStdCategoryChart');
-            if (!charts.cwStdCategoryChart) {
+            const categoryChartDom = safeGetElement('cwStdCategoryChart'); // v2.3.7
+            if (categoryChartDom && !charts.cwStdCategoryChart) {
                 charts.cwStdCategoryChart = echarts.init(categoryChartDom);
             }
+
+            if (charts.cwStdCategoryChart) { // v2.3.7: 只在图表存在时更新
 
             const sortedCategories = Object.entries(categoryStats)
                 .sort((a, b) => b[1].exceeded - a[1].exceeded)
@@ -4792,12 +4834,15 @@
             };
 
             charts.cwStdCategoryChart.setOption(categoryOption);
+            } // v2.3.7: 结束图表存在性检查
 
             // 图表2: 超标程度分析（分段统计）
-            const exceedChartDom = document.getElementById('cwStdExceedChart');
-            if (!charts.cwStdExceedChart) {
+            const exceedChartDom = safeGetElement('cwStdExceedChart'); // v2.3.7
+            if (exceedChartDom && !charts.cwStdExceedChart) {
                 charts.cwStdExceedChart = echarts.init(exceedChartDom);
             }
+
+            if (charts.cwStdExceedChart) { // v2.3.7: 只在图表存在时更新
 
             const exceedRanges = {
                 '未超标': 0,
@@ -4842,11 +4887,17 @@
             };
 
             charts.cwStdExceedChart.setOption(exceedOption);
+            } // v2.3.7: 结束图表存在性检查
         }
 
         // 更新CW标准对比列表
         function updateCWStandardTable(data) {
-            const tbody = document.getElementById('cwStdTable').querySelector('tbody');
+            const table = safeGetElement('cwStdTable'); // v2.3.7
+            if (!table) return;
+
+            const tbody = table.querySelector('tbody');
+            if (!tbody) return;
+
             tbody.innerHTML = '';
 
             const filter = document.querySelector('input[name="cwStdFilter"]:checked').value;

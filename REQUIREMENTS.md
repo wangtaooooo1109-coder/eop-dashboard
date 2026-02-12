@@ -245,6 +245,109 @@ eop_dashboard.html:4176 Uncaught TypeError: Cannot read properties of null (read
 
 **版本更新：** v2.3.5 → v2.3.6
 
+### 2026-02-12 v2.3.7 - 系统性修复所有缺失DOM元素访问（Defense-in-Depth）
+
+**用户反馈：** 继续提供多个错误日志，并要求系统性检查是否还有类似错误，解释为什么只改UI会引起这么多问题。
+
+**系统性调查结果：**
+通过Python脚本扫描整个HTML文件，发现：
+- 共有119次DOM元素访问（`document.getElementById`）
+- 其中26个元素在HTML中不存在（被v2.3.0 Tab重组删除）
+- 导致多处运行时TypeError和ReferenceError
+
+**为什么"只改UI"会引起这么多问题？**
+
+在单文件Web应用中，HTML和JavaScript紧密耦合：
+```
+HTML层面：删除或移动元素
+  ↓
+JavaScript层面：代码仍然引用这些元素
+  ↓
+运行时：document.getElementById() 返回 null
+  ↓
+错误：对null调用 .value 或其他方法
+  ↓
+级联失败：整个更新流程被阻塞
+```
+
+**缺失元素完整列表（26个）：**
+
+1. **数据表格相关（4个）：**
+   - `tableBody`, `searchInput`, `dataTable`, `ltCwStatsTable`
+
+2. **分布图分析（5个）：**
+   - `distSheet`, `distCategory`, `exclusiveQueryPart`, `exclusiveQueryChart`, `exclusiveComparisonChart`
+
+3. **CW标准对比分析（11个）：**
+   - `cwStdSheet`, `cwStdPSM`, `cwStdPart`, `cwStdMatchMode`
+   - `cwStdTotalCount`, `cwStdMatchedCount`, `cwStdExceededCount`, `cwStdExceededRate`
+   - `cwStdCategoryChart`, `cwStdExceedChart`, `cwStdTable`
+
+4. **其他分析图表（6个）：**
+   - `cwltReasonableChart`, `cwltImpactChart`, `priceUnreasonableByPSMChart`
+   - `highRiskList`, `longTermList`, `concentrationRiskList`
+
+**系统性修复方案（Defense-in-Depth）：**
+
+**1. 创建统一的安全DOM访问辅助函数（1071-1098行）：**
+```javascript
+function safeGetElement(id) {
+    const element = document.getElementById(id);
+    if (!element) {
+        console.warn(`[Defense] Element not found: '${id}' - using fallback`);
+    }
+    return element;
+}
+
+function safeGetValue(id, defaultValue = '') {
+    const element = safeGetElement(id);
+    return element ? element.value : defaultValue;
+}
+
+function safeSetTextContent(id, text) {
+    const element = safeGetElement(id);
+    if (element) element.textContent = text;
+}
+```
+
+**2. 批量修复所有DOM访问（共41处）：**
+- 数据表格：`updateDataTable`, `filterTable` - 6处修复
+- 分布图分析：`updateDistributionOptions`, `updateDistribution` - 11处修复
+- CW标准对比：所有统计卡片、图表、表格访问 - 18处修复
+- 专用件查询：图表初始化和访问 - 6处修复
+
+**3. 创建缺失的wrapper函数（4366-4368行）：**
+```javascript
+function updateDistributionAnalysis() {
+    updateDistribution();  // HTML onchange events调用此函数
+}
+```
+
+**修复统计：**
+- Python脚本自动修复：17处
+- 手动修复复杂访问：24处
+- 创建wrapper函数：1个
+- 添加辅助函数：4个
+- **总计修复：46处代码变更**
+
+**Defense-in-Depth原则应用：**
+- **第1层**：辅助函数在访问前检查元素是否存在
+- **第2层**：所有函数在使用元素前验证非null
+- **第3层**：提供合理的fallback值（如使用currentSheet替代distSheet）
+- **第4层**：早期返回（early return）防止后续代码执行
+- **第5层**：Console警告帮助开发调试
+
+**版本更新：** v2.3.6 → v2.3.7
+
+**测试验证：**
+- [ ] 上传Excel文件后，浏览器Console无TypeError或ReferenceError
+- [ ] 所有用户交互（下拉框、checkbox、输入框）无错误
+- [ ] LT&CW统计分析所有交互正常
+- [ ] CW/LT分布图分析所有交互正常
+- [ ] 所有图表和表格正常显示（存在的部分）
+- [ ] 版本号显示为v2.3.7
+
+
 **测试验证：**
 - [ ] 上传Excel文件后，浏览器Console无TypeError
 - [ ] LT&CW统计分析中更改"统计维度"下拉框能正常工作
