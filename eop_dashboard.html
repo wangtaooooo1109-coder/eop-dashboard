@@ -990,23 +990,13 @@
 
                             <!-- 专用性多维度分析 -->
                             <div class="row mb-3">
-                                <div class="col-md-6">
+                                <div class="col-md-12">
                                     <div class="card">
                                         <div class="card-header">
                                             <i class="fas fa-project-diagram"></i> 按PSM专业组的专用性分布
                                         </div>
                                         <div class="card-body">
                                             <div id="exclusivityMultiChart" class="chart-container"></div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="card">
-                                        <div class="card-header">
-                                            <i class="fas fa-chart-pie"></i> 专用性饼图分布
-                                        </div>
-                                        <div class="card-body">
-                                            <div id="exclusivityPieChart" class="chart-container"></div>
                                         </div>
                                     </div>
                                 </div>
@@ -1052,6 +1042,12 @@
                                                     <div class="alert alert-info mb-0" id="exclusiveQueryStats">
                                                         请选择PSM专业组
                                                     </div>
+                                                </div>
+                                            </div>
+                                            <!-- 专用性饼图 -->
+                                            <div class="row mb-3">
+                                                <div class="col-md-12">
+                                                    <div id="exclusivityPieChart" class="chart-container" style="height: 400px;"></div>
                                                 </div>
                                             </div>
                                             <div class="row">
@@ -1154,7 +1150,7 @@
 
     <script>
         // 版本号
-        const VERSION = 'v2.3.22';
+        const VERSION = 'v2.3.23';
 
         // CW中品类参考标准数据（天数）
         const CW_STANDARDS = [
@@ -2551,45 +2547,14 @@
             return status.includes('是') || status.includes('认可') || status.toLowerCase().includes('yes');
         }
 
-        // 更新按零件类型的专用件占比图表 v2.3.22: 完全复用updateIdealExclusiveChart的成功逻辑
+        // 更新按零件类型的专用件占比图表 v2.3.22
         function updateExclusiveByTypeChart(data) {
-            window.console.log('===== updateExclusiveByTypeChart 被调用，数据条数:', data.length, '=====');
-
-            // 测试：显示测试数据先确认UI是否工作
-            const testOption = {
-                tooltip: { trigger: 'item' },
-                series: [{
-                    type: 'pie',
-                    radius: '70%',
-                    data: [
-                        { name: '测试A', value: 100 },
-                        { name: '测试B', value: 200 },
-                        { name: '测试C', value: 150 }
-                    ],
-                    label: { show: true, formatter: '{b}\n{d}%' }
-                }]
-            };
-
-            const chartDom = safeGetElement('exclusivityPieChart');
-            if (!chartDom) {
-                window.console.error('【ERROR】exclusivityPieChart 元素不存在');
-                return;
-            }
-
-            if (!charts.exclusiveByTypeChart) {
-                charts.exclusiveByTypeChart = echarts.init(chartDom);
-                window.console.log('图表初始化完成');
-            }
-
-            charts.exclusiveByTypeChart.setOption(testOption);
-            window.console.log('测试图表显示完成，开始处理实际数据...');
-
+            console.log('===== updateExclusiveByTypeChart 开始 =====');
             const config = getMetricConfig();
             const typeData = {};
 
             data.forEach(item => {
-                window.console.log('  -> 处理:', item.零件类型, '状态:', item.是否认可为行业内理想专用);
-
+                // 读取状态 - 与updateIdealExclusiveChart完全一致
                 let status = item.是否认可为行业内理想专用;
                 if (!status || status.trim() === '') {
                     status = '未填写';
@@ -2602,36 +2567,59 @@
                     typeData[type] = { 是: { count: 0, amount: 0 }, 否: { count: 0, amount: 0 }, 未填写: { count: 0, amount: 0 } };
                 }
 
+                // 确保状态只有三种可能值
                 const statusKey = status === '是' ? '是' : (status === '否' ? '否' : '未填写');
                 typeData[type][statusKey].count += 1;
                 typeData[type][statusKey].amount += amount;
             });
 
-            window.console.log('typeData统计结果:', typeData);
+            console.log('typeData 统计结果:', typeData);
 
+            const chartDom = document.getElementById('exclusivityPieChart');
+            console.log('chartDom:', chartDom);
+            if (!chartDom) {
+                console.error('exclusivityPieChart 元素不存在');
+                return;
+            }
+
+            if (!charts.exclusiveByTypeChart) {
+                charts.exclusiveByTypeChart = echarts.init(chartDom);
+                console.log('图表初始化完成');
+            }
+
+            // 修复：显示所有有数据的状态，而不只是"是"状态
+            // 先按总金额降序排序所有类型
             const sortedTypes = Object.entries(typeData)
-                .sort((a, b) => b[1].是.amount - a[1].是.amount)
-                .filter(([_, data]) => data.是.count > 0)
-                .map(([name, value]) => ({
-                    name: name,
-                    value: value.是.amount,
-                    count: value.是.count
-                }));
+                .map(([name, value]) => {
+                    // 计算该类型的总金额
+                    const totalAmount = value.是.amount + value.否.amount + value.未填写.amount;
+                    return {
+                        name: name,
+                        value: totalAmount,
+                        detail: value
+                    };
+                })
+                .sort((a, b) => b.value - a.value);
 
-            window.console.log('排序后数据(专用件):', sortedTypes);
+            console.log('sortedTypes:', sortedTypes);
 
             const option = {
                 tooltip: {
                     trigger: 'item',
                     formatter: function(params) {
-                        if (!typeData[params.name]) return params.name;
-                        const dataRef = typeData[params.name];
-                        return params.name + '<br/>是: ' + dataRef.是.count + '条<br/>金额: ¥' + (parseFloat(config.formatter(dataRef.是.amount))).toFixed(2) + '万<br/>占比: ' + params.percent + '%';
+                        const type = params.name;
+                        const data = typeData[type];
+                        let result = type + '<br/>';
+                        result += '是: ' + data.是.count + '条 (¥' + (parseFloat(config.formatter(data.是.amount))).toFixed(2) + '万)<br/>';
+                        result += '否: ' + data.否.count + '条 (¥' + (parseFloat(config.formatter(data.否.amount))).toFixed(2) + '万)<br/>';
+                        result += '未填写: ' + data.未填写.count + '条 (¥' + (parseFloat(config.formatter(data.未填写.amount))).toFixed(2) + '万)<br/>';
+                        result += '占比: ' + params.percent + '%';
+                        return result;
                     }
                 },
                 legend: { orient: 'vertical', left: 'left' },
                 series: [{
-                    name: '专用件',
+                    name: '零件类型',
                     type: 'pie',
                     radius: '70%',
                     data: sortedTypes,
@@ -2641,11 +2629,12 @@
             };
 
             charts.exclusiveByTypeChart.setOption(option);
-            window.console.log('===== updateExclusiveByTypeChart 完成 =====');
+            console.log('===== updateExclusiveByTypeChart 完成 =====');
         }
 
         // 更新按PSM专业组的专用件占比图表 v2.3.22
         function updateExclusiveByGroupChart(data) {
+            console.log('===== updateExclusiveByGroupChart 开始 =====');
             const config = getMetricConfig();
             const groupData = {};
 
@@ -2667,26 +2656,52 @@
                 groupData[group][statusKey].amount += amount;
             });
 
-            const chartDom = safeGetElement('exclusivityMultiChart');
-            if (!chartDom) return;
+            console.log('groupData 统计结果:', groupData);
+
+            const chartDom = document.getElementById('exclusivityMultiChart');
+            console.log('chartDom:', chartDom);
+            if (!chartDom) {
+                console.error('exclusivityMultiChart 元素不存在');
+                return;
+            }
 
             if (!charts.exclusiveByGroupChart) {
                 charts.exclusiveByGroupChart = echarts.init(chartDom);
+                console.log('图表初始化完成');
             }
 
+            // 修复：显示所有有数据的状态，而不只是"是"状态
             const sortedGroups = Object.entries(groupData)
-                .sort((a, b) => b[1].是.amount - a[1].是.amount)
-                .filter(([_, data]) => data.是.count > 0)
-                .map(([name, value]) => ({
-                    name: name,
-                    value: value.是.amount
-                }));
+                .map(([name, value]) => {
+                    // 计算该专业组的总金额
+                    const totalAmount = value.是.amount + value.否.amount + value.未填写.amount;
+                    return {
+                        name: name,
+                        value: totalAmount,
+                        detail: value
+                    };
+                })
+                .sort((a, b) => b.value - a.value);
+
+            console.log('sortedGroups:', sortedGroups);
 
             const option = {
-                tooltip: { trigger: 'item', formatter: '{b}: ¥{c}万' },
+                tooltip: {
+                    trigger: 'item',
+                    formatter: function(params) {
+                        const group = params.name;
+                        const data = groupData[group];
+                        let result = group + '<br/>';
+                        result += '是: ' + data.是.count + '条 (¥' + (parseFloat(config.formatter(data.是.amount))).toFixed(2) + '万)<br/>';
+                        result += '否: ' + data.否.count + '条 (¥' + (parseFloat(config.formatter(data.否.amount))).toFixed(2) + '万)<br/>';
+                        result += '未填写: ' + data.未填写.count + '条 (¥' + (parseFloat(config.formatter(data.未填写.amount))).toFixed(2) + '万)<br/>';
+                        result += '占比: ' + params.percent + '%';
+                        return result;
+                    }
+                },
                 legend: { orient: 'vertical', left: 'left' },
                 series: [{
-                    name: '专用件',
+                    name: 'PSM专业组',
                     type: 'pie',
                     radius: '70%',
                     data: sortedGroups,
@@ -2696,10 +2711,12 @@
             };
 
             charts.exclusiveByGroupChart.setOption(option);
+            console.log('===== updateExclusiveByGroupChart 完成 =====');
         }
 
         // 更新专用件对比分析 v2.3.22
         function updateExclusiveComparisonChart(data) {
+            console.log('===== updateExclusiveComparisonChart 开始 =====');
             const config = getMetricConfig();
             const exclusiveData = {};
 
@@ -2715,29 +2732,59 @@
                 exclusiveData[status].amount += getMetricValue(item, 'total') || 0;
             });
 
-            const chartDom = safeGetElement('exclusiveComparisonChart');
-            if (!chartDom) return;
+            console.log('exclusiveData 统计结果:', exclusiveData);
+
+            const chartDom = document.getElementById('exclusiveComparisonChart');
+            console.log('chartDom:', chartDom);
+            if (!chartDom) {
+                console.error('exclusiveComparisonChart 元素不存在');
+                return;
+            }
 
             if (!charts.exclusiveComparisonChart) {
                 charts.exclusiveComparisonChart = echarts.init(chartDom);
+                console.log('图表初始化完成');
             }
 
             const sortedData = Object.entries(exclusiveData)
                 .sort((a, b) => b[1].amount - a[1].amount);
 
+            console.log('sortedData:', sortedData);
+
             const option = {
-                tooltip: { trigger: 'item', formatter: '{b}: {c}万元 ({d}%)' },
+                tooltip: {
+                    trigger: 'item',
+                    formatter: function(params) {
+                        const status = params.name;
+                        const data = exclusiveData[status];
+                        return status + '<br/>' +
+                               '呆滞金额: ¥' + (parseFloat(config.formatter(data.amount))).toFixed(2) + '万元<br/>' +
+                               '记录数: ' + data.count + '条<br/>' +
+                               '占比: ' + params.percent + '%';
+                    }
+                },
                 legend: { orient: 'vertical', left: 'left' },
                 series: [{
                     type: 'pie',
                     radius: '70%',
-                    data: sortedData.map(([name, value]) => ({ name: name, value: value.amount })),
-                    itemStyle: { borderRadius: 5, borderColor: '#fff', borderWidth: 2 },
-                    label: { show: true, formatter: '{b}\n{d}%' }
+                    data: sortedData.map(([name, value]) => ({
+                        name: name,
+                        value: value.amount
+                    })),
+                    itemStyle: {
+                        borderRadius: 5,
+                        borderColor: '#fff',
+                        borderWidth: 2
+                    },
+                    label: {
+                        show: true,
+                        formatter: '{b}\n{d}%'
+                    }
                 }]
             };
 
             charts.exclusiveComparisonChart.setOption(option);
+            console.log('===== updateExclusiveComparisonChart 完成 =====');
         }
 
         // 更新数据表格
@@ -2962,24 +3009,83 @@
 
             // Tab切换时调整图表大小
             document.querySelectorAll('button[data-bs-toggle="tab"]').forEach(button => {
-                button.addEventListener('shown.bs.tab', function () {
+                button.addEventListener('shown.bs.tab', function (event) {
+                    const targetId = event.target.getAttribute('data-bs-target');
+                    console.log('Tab切换到:', targetId);
+
                     setTimeout(() => {
                         Object.values(charts).forEach(chart => {
                             if (chart) chart.resize();
                         });
                     }, 100);
+
+                    // 如果切换到专用性分析Tab，重新初始化专用性图表
+                    if (targetId === '#exclusive' || event.target.id === 'exclusive-tab') {
+                        console.log('切换到专用性分析Tab，初始化图表');
+                        let data = [];
+                        if (currentSheet === 'ALL') {
+                            data = [...allData.L987, ...allData.L6];
+                        } else {
+                            data = allData[currentSheet] || [];
+                        }
+
+                        // 应用筛选
+                        const selectedTiers = Array.from(document.querySelectorAll('.tier-checkbox:checked')).map(cb => cb.value);
+                        if (selectedTiers.length > 0) {
+                            data = data.filter(item => selectedTiers.includes(item.分类));
+                        }
+                        const selectedTypes = Array.from(document.querySelectorAll('.type-checkbox:checked')).map(cb => cb.value);
+                        if (selectedTypes.length > 0) {
+                            data = data.filter(item => {
+                                const partType = item.零件类型 || '';
+                                if (selectedTypes.includes('总成') && partType.includes('总成')) return true;
+                                if (selectedTypes.includes('物料') && !partType.includes('总成')) return true;
+                                return false;
+                            });
+                        }
+
+                        // 销毁旧的图表实例，重新初始化
+                        if (charts.exclusiveByGroupChart) {
+                            charts.exclusiveByGroupChart.dispose();
+                            charts.exclusiveByGroupChart = null;
+                        }
+                        if (charts.exclusiveComparisonChart) {
+                            charts.exclusiveComparisonChart.dispose();
+                            charts.exclusiveComparisonChart = null;
+                        }
+
+                        // 重新渲染（专用性饼图通过PSM选择刷新）
+                        updateExclusiveByGroupChart(data);
+                        updateExclusiveComparisonChart(data);
+                        updateExclusiveQueryPSMOptions(data);
+                        // 初始显示全部数据的饼图
+                        updateExclusiveByTypeChart(data);
+                    }
                 });
             });
         }
 
         // 更新PSM专业组选项
         function updateExclusiveQueryPSMOptions(data) {
+            console.log('===== updateExclusiveQueryPSMOptions 开始，数据条数:', data.length, '=====');
+
             const psmSelect = document.getElementById('exclusiveQueryPSM');
+            console.log('psmSelect 元素:', psmSelect);
+
+            if (!psmSelect) {
+                console.error('exclusiveQueryPSM 元素不存在');
+                return;
+            }
+
             const psmSet = new Set();
 
             data.forEach(item => {
-                if (item.PSM专业组) psmSet.add(item.PSM专业组);
+                if (item.PSM专业组) {
+                    psmSet.add(item.PSM专业组);
+                }
             });
+
+            console.log('PSM专业组数量:', psmSet.size, '内容:', Array.from(psmSet));
 
             psmSelect.innerHTML = '<option value="">--请选择--</option>';
             Array.from(psmSet).sort().forEach(psm => {
@@ -2988,10 +3094,14 @@
                 option.textContent = psm;
                 psmSelect.appendChild(option);
             });
+
+            console.log('PSM下拉框选项数量:', psmSelect.options.length);
+            console.log('===== updateExclusiveQueryPSMOptions 完成 =====');
         }
 
-        // 当选择PSM专业组后，更新零件选项
+        // 当选择PSM专业组后，更新零件选项和饼图
         function updateExclusiveQueryParts() {
+            console.log('===== updateExclusiveQueryParts 开始 =====');
             let data = [];
             if (currentSheet === 'ALL') {
                 data = [...allData.L987, ...allData.L6];
@@ -3015,11 +3125,17 @@
             }
 
             const selectedPSM = document.getElementById('exclusiveQueryPSM').value;
+            console.log('选择的PSM专业组:', selectedPSM);
+
+            // 刷新专用性饼图：有选择专业组时显示该组，否则显示全部
+            updateExclusiveByTypeChart(selectedPSM ? data.filter(item => item.PSM专业组 === selectedPSM) : data);
+
             if (!selectedPSM) {
                 document.getElementById('exclusiveQueryStats').innerHTML = '请选择PSM专业组';
                 document.getElementById('exclusiveQueryPart').innerHTML = '<option value="">--全部零件--</option>';
                 if (charts.exclusiveQueryChart) charts.exclusiveQueryChart.clear();
                 document.getElementById('exclusivePartsTable').querySelector('tbody').innerHTML = '';
+                console.log('===== updateExclusiveQueryParts 完成（未选择PSM） =====');
                 return;
             }
 
@@ -3045,6 +3161,7 @@
 
             // 显示该PSM专业组的统计
             updateExclusivePartDetail();
+            console.log('===== updateExclusiveQueryParts 完成 =====');
         }
 
         // 更新专用件详情 v2.3.21: 与updateIdealExclusiveChart逻辑一致
