@@ -459,7 +459,12 @@ See the complete implementation at `/Users/wangtao1/eop_dashboard.html`:
 - Supports L987 and L6 sheet templates
 - 10 KPI cards, multiple chart types, Pareto analysis
 - Dynamic column mapping with 23 field mappings
-- **Version v2.0.4 features**:
+- **Version v2.1.0 features**:
+  - **Tab-based layout** (v2.1.0):
+    - 5 tabs: 数据概览, 帕累托分析, 状态分析, LT&CW分析, CW标准对比
+    - Better organization, reduced visual clutter
+    - One-chart-per-row layout for key analyses (Pareto, LT&CW query)
+    - Auto-resize charts on tab switch
   - Bug fixes for supplier display and review chart proportions (v2.0.1)
   - CW/LT distribution charts by 2-week intervals (v2.0.2)
   - Multi-dimensional cascading filters (PSM group → parts, category, range)
