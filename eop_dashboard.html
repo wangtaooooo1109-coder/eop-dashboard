@@ -261,7 +261,7 @@
         <div class="container-fluid">
             <span class="navbar-brand mb-0 h1">
                 <i class="fas fa-chart-line"></i> EOP呆滞管控数据看板系统
-                <span class="badge bg-light text-dark ms-2" id="versionBadge">v2.2.0</span>
+                <span class="badge bg-light text-dark ms-2" id="versionBadge">v2.2.1</span>
                 <span class="badge bg-info text-dark ms-2" id="filenameBadge" style="display: none;"></span>
             </span>
             <span class="text-white">
@@ -991,7 +991,7 @@
 
     <script>
         // 版本号
-        const VERSION = 'v2.2.0';
+        const VERSION = 'v2.2.1';
 
         // CW中品类参考标准数据（天数）
         const CW_STANDARDS = [
@@ -1138,18 +1138,17 @@
             const fileInput = document.getElementById('fileInput');
             const selectFileButton = document.getElementById('selectFileButton');
 
-            // 点击"选择文件"按钮
+            // 直接在按钮上触发文件选择（最简单可靠的方式）
             if (selectFileButton) {
-                selectFileButton.addEventListener('click', (e) => {
-                    e.stopPropagation(); // 防止事件冒泡到uploadArea
+                selectFileButton.onclick = function() {
                     fileInput.click();
-                });
+                };
             }
 
-            // 点击上传区域（不包括按钮）
-            uploadArea.addEventListener('click', (e) => {
-                // 如果点击的是按钮，不处理（由按钮的监听器处理）
-                if (selectFileButton && (e.target === selectFileButton || selectFileButton.contains(e.target))) {
+            // 点击上传区域的其他地方触发文件选择
+            uploadArea.addEventListener('click', function(e) {
+                // 不处理按钮点击（已由按钮自身的onclick处理）
+                if (e.target === selectFileButton || selectFileButton && selectFileButton.contains(e.target)) {
                     return;
                 }
                 fileInput.click();
@@ -1159,16 +1158,16 @@
             fileInput.addEventListener('change', handleFileSelect);
 
             // 拖拽功能
-            uploadArea.addEventListener('dragover', (e) => {
+            uploadArea.addEventListener('dragover', function(e) {
                 e.preventDefault();
                 uploadArea.classList.add('dragover');
             });
 
-            uploadArea.addEventListener('dragleave', () => {
+            uploadArea.addEventListener('dragleave', function() {
                 uploadArea.classList.remove('dragover');
             });
 
-            uploadArea.addEventListener('drop', (e) => {
+            uploadArea.addEventListener('drop', function(e) {
                 e.preventDefault();
                 uploadArea.classList.remove('dragover');
                 const files = e.dataTransfer.files;
