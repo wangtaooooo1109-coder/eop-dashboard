@@ -264,7 +264,7 @@
         <div class="container-fluid">
             <span class="navbar-brand mb-0 h1">
                 <i class="fas fa-chart-line"></i> EOP呆滞管控数据看板系统
-                <span class="badge bg-light text-dark ms-2" id="versionBadge">v2.3.1</span>
+                <span class="badge bg-light text-dark ms-2" id="versionBadge">v2.3.2</span>
                 <span class="badge bg-info text-dark ms-2" id="filenameBadge" style="display: none;"></span>
             </span>
             <span class="text-white">
@@ -1003,7 +1003,7 @@
 
     <script>
         // 版本号
-        const VERSION = 'v2.3.1';
+        const VERSION = 'v2.3.2';
 
         // CW中品类参考标准数据（天数）
         const CW_STANDARDS = [
@@ -1259,6 +1259,17 @@
                     };
 
                     console.log(`${sheetName} 列映射:`, colMap);
+
+                    // 验证关键列是否找到
+                    const missingColumns = [];
+                    for (const [key, value] of Object.entries(colMap)) {
+                        if (value === -1) {
+                            missingColumns.push(key);
+                        }
+                    }
+                    if (missingColumns.length > 0) {
+                        console.warn(`${sheetName} 缺失列:`, missingColumns);
+                    }
 
                     allData[sheetName] = dataRows.map(row => {
                         if (!row[0]) return null;
@@ -2528,8 +2539,8 @@
 
         // 更新专用件对比分析
         function updateExclusiveComparisonChart(data) {
-            const exclusiveData = data.filter(item => (item.是否认可为理想专用 || '').includes('是'));
-            const nonExclusiveData = data.filter(item => !(item.是否认可为理想专用 || '').includes('是'));
+            const exclusiveData = data.filter(item => (item.是否认可为行业内理想专用 || '').includes('是'));
+            const nonExclusiveData = data.filter(item => !(item.是否认可为行业内理想专用 || '').includes('是'));
 
             const config = getMetricConfig();
             const exclusiveAmount = exclusiveData.reduce((sum, item) => sum + (getMetricValue(item, 'total') || 0), 0);
