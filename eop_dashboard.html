@@ -261,7 +261,7 @@
         <div class="container-fluid">
             <span class="navbar-brand mb-0 h1">
                 <i class="fas fa-chart-line"></i> EOP呆滞管控数据看板系统
-                <span class="badge bg-light text-dark ms-2" id="versionBadge">v2.0.3</span>
+                <span class="badge bg-light text-dark ms-2" id="versionBadge">v2.0.4</span>
             </span>
             <span class="text-white">
                 <i class="fas fa-cog"></i> 可自定义分析看板
@@ -1267,7 +1267,7 @@
 
     <script>
         // 版本号
-        const VERSION = 'v2.0.3';
+        const VERSION = 'v2.0.4';
 
         // CW中品类参考标准数据（天数）
         const CW_STANDARDS = [
@@ -3505,6 +3505,36 @@
                             { offset: 0, color: '#83bff6' },
                             { offset: 1, color: '#188df0' }
                         ])
+                    },
+                    markLine: {
+                        data: [
+                            {
+                                name: '平均值',
+                                yAxis: ltStats.avg,
+                                lineStyle: {
+                                    color: '#5470c6',
+                                    type: 'solid',
+                                    width: 2
+                                },
+                                label: {
+                                    formatter: '平均: ' + ltStats.avg.toFixed(2) + '月',
+                                    position: 'end'
+                                }
+                            },
+                            {
+                                name: '中位值',
+                                yAxis: ltStats.median,
+                                lineStyle: {
+                                    color: '#ee6666',
+                                    type: 'dashed',
+                                    width: 2
+                                },
+                                label: {
+                                    formatter: '中位: ' + ltStats.median.toFixed(2) + '月',
+                                    position: 'end'
+                                }
+                            }
+                        ]
                     }
                 }]
             };
@@ -3538,6 +3568,36 @@
                             { offset: 0, color: '#fccb05' },
                             { offset: 1, color: '#f77062' }
                         ])
+                    },
+                    markLine: {
+                        data: [
+                            {
+                                name: '平均值',
+                                yAxis: cwStats.avg,
+                                lineStyle: {
+                                    color: '#5470c6',
+                                    type: 'solid',
+                                    width: 2
+                                },
+                                label: {
+                                    formatter: '平均: ' + cwStats.avg.toFixed(2) + '月',
+                                    position: 'end'
+                                }
+                            },
+                            {
+                                name: '中位值',
+                                yAxis: cwStats.median,
+                                lineStyle: {
+                                    color: '#ee6666',
+                                    type: 'dashed',
+                                    width: 2
+                                },
+                                label: {
+                                    formatter: '中位: ' + cwStats.median.toFixed(2) + '月',
+                                    position: 'end'
+                                }
+                            }
+                        ]
                     }
                 }]
             };
@@ -5217,7 +5277,7 @@
                 }
             });
 
-            // 图表1: 按中品类的超标分布
+            // 图表1: 按中品类的超标分布（雷达图）
             const categoryChartDom = document.getElementById('cwStdCategoryChart');
             if (!charts.cwStdCategoryChart) {
                 charts.cwStdCategoryChart = echarts.init(categoryChartDom);
@@ -5225,36 +5285,56 @@
 
             const sortedCategories = Object.entries(categoryStats)
                 .sort((a, b) => b[1].exceeded - a[1].exceeded)
-                .slice(0, 10);
+                .slice(0, 8); // 雷达图取前8个品类
+
+            // 计算最大值用于雷达图刻度
+            const maxTotal = Math.max(...sortedCategories.map(item => item[1].total));
+            const maxExceeded = Math.max(...sortedCategories.map(item => item[1].exceeded));
 
             const categoryOption = {
                 tooltip: {
-                    trigger: 'axis',
-                    axisPointer: { type: 'shadow' }
-                },
-                legend: { data: ['总数', '超标'] },
-                grid: { left: '3%', right: '4%', bottom: '3%', containLabel: true },
-                xAxis: {
-                    type: 'value'
-                },
-                yAxis: {
-                    type: 'category',
-                    data: sortedCategories.map(item => item[0])
-                },
-                series: [
-                    {
-                        name: '总数',
-                        type: 'bar',
-                        data: sortedCategories.map(item => item[1].total),
-                        itemStyle: { color: '#91cc75' }
-                    },
-                    {
-                        name: '超标',
-                        type: 'bar',
-                        data: sortedCategories.map(item => item[1].exceeded),
-                        itemStyle: { color: '#ee6666' }
+                    trigger: 'item',
+                    formatter: function(params) {
+                        const category = sortedCategories[params.dataIndex];
+                        return `${category[0]}<br/>` +
+                               `总数: ${category[1].total}条<br/>` +
+                               `超标: ${category[1].exceeded}条<br/>` +
+                               `超标率: ${(category[1].exceeded / category[1].total * 100).toFixed(1)}%`;
                     }
-                ]
+                },
+                legend: {
+                    data: ['总数', '超标数', '超标率'],
+                    bottom: 0
+                },
+                radar: {
+                    indicator: sortedCategories.map(item => ({
+                        name: item[0],
+                        max: maxTotal
+                    })),
+                    radius: '60%',
+                    splitNumber: 4
+                },
+                series: [{
+                    type: 'radar',
+                    data: [
+                        {
+                            value: sortedCategories.map(item => item[1].total),
+                            name: '总数',
+                            areaStyle: {
+                                color: 'rgba(145, 204, 117, 0.3)'
+                            },
+                            lineStyle: { color: '#91cc75', width: 2 }
+                        },
+                        {
+                            value: sortedCategories.map(item => item[1].exceeded),
+                            name: '超标数',
+                            areaStyle: {
+                                color: 'rgba(238, 102, 102, 0.3)'
+                            },
+                            lineStyle: { color: '#ee6666', width: 2 }
+                        }
+                    ]
+                }]
             };
 
             charts.cwStdCategoryChart.setOption(categoryOption);
