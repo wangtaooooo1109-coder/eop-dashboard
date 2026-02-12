@@ -283,7 +283,7 @@
                     <p class="text-muted">拖拽文件到此处，或点击选择文件</p>
                     <p class="text-muted small">支持格式: .xlsx, .xls</p>
                     <input type="file" id="fileInput" accept=".xlsx,.xls" style="display: none;">
-                    <button class="btn btn-primary mt-3" id="selectFileButton" type="button" onclick="triggerFileSelect()">
+                    <button class="btn btn-primary mt-3" onclick="document.getElementById('fileInput').click()">
                         <i class="fas fa-folder-open"></i> 选择文件
                     </button>
                 </div>
@@ -1139,9 +1139,6 @@
         function initUploadArea() {
             const uploadArea = document.getElementById('uploadArea');
             const fileInput = document.getElementById('fileInput');
-            const selectFileButton = document.getElementById('selectFileButton');
-
-            console.log('initUploadArea called', { uploadArea, fileInput, selectFileButton });
 
             // 处理文件选择
             fileInput.addEventListener('change', handleFileSelect);
@@ -1164,12 +1161,6 @@
                     handleFile(files[0]);
                 }
             });
-
-            // 全局函数用于打开文件选择
-            window.triggerFileSelect = function() {
-                console.log('triggerFileSelect called');
-                fileInput.click();
-            };
         }
 
         // 处理文件选择
