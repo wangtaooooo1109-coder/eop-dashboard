@@ -264,7 +264,7 @@
         <div class="container-fluid">
             <span class="navbar-brand mb-0 h1">
                 <i class="fas fa-chart-line"></i> EOP呆滞管控数据看板系统
-                <span class="badge bg-light text-dark ms-2" id="versionBadge">v2.3.9</span>
+                <span class="badge bg-light text-dark ms-2" id="versionBadge">v2.3.10</span>
                 <span class="badge bg-info text-dark ms-2" id="filenameBadge" style="display: none;"></span>
             </span>
             <span class="text-white">
@@ -1023,7 +1023,7 @@
 
     <script>
         // 版本号
-        const VERSION = 'v2.3.9';
+        const VERSION = 'v2.3.10';
 
         // CW中品类参考标准数据（天数）
         const CW_STANDARDS = [
@@ -1472,6 +1472,7 @@
             updateCWLTReasonabilityAnalysis(data);
 
             // 专用性分析图表更新
+            console.log('[DEBUG v2.3.10] 开始更新专用性分析，数据条数:', data.length);
             updateExclusiveByTypeChart(data);
             updateExclusiveByGroupChart(data);
             updateExclusiveComparisonChart(data);
@@ -2417,6 +2418,7 @@
 
         // 更新按零件类型的专用件占比图表
         function updateExclusiveByTypeChart(data) {
+            console.log('[DEBUG v2.3.10] updateExclusiveByTypeChart 收到数据:', data.length, '条');
             const config = getMetricConfig();
             const typeData = {};
 
@@ -2438,6 +2440,8 @@
                     typeData[type].nonExclusive.amount += amount;
                 }
             });
+
+            console.log('[DEBUG v2.3.10] typeData统计结果:', Object.keys(typeData).length, '种类型', typeData);
 
             const chartDom = safeGetElement('exclusivityPieChart'); // v2.3.7.4
             if (!chartDom) {
@@ -2484,6 +2488,7 @@
 
         // 更新按PSM专业组的专用件占比图表
         function updateExclusiveByGroupChart(data) {
+            console.log('[DEBUG v2.3.10] updateExclusiveByGroupChart 收到数据:', data.length, '条');
             const config = getMetricConfig();
             const groupData = {};
 
@@ -2505,6 +2510,8 @@
                     groupData[group].nonExclusive.amount += amount;
                 }
             });
+
+            console.log('[DEBUG v2.3.10] groupData统计结果:', Object.keys(groupData).length, '个专业组', groupData);
 
             const sortedGroups = Object.entries(groupData)
                 .sort((a, b) => (b[1].exclusive.amount + b[1].nonExclusive.amount) - (a[1].exclusive.amount + a[1].nonExclusive.amount))
@@ -2608,8 +2615,11 @@
 
         // 更新专用件对比分析
         function updateExclusiveComparisonChart(data) {
+            console.log('[DEBUG v2.3.10] updateExclusiveComparisonChart 收到数据:', data.length, '条');
             const exclusiveData = data.filter(item => (item.是否认可为行业内理想专用 || '').includes('是'));
             const nonExclusiveData = data.filter(item => !(item.是否认可为行业内理想专用 || '').includes('是'));
+
+            console.log('[DEBUG v2.3.10] 专用件:', exclusiveData.length, '条, 非专用件:', nonExclusiveData.length, '条');
 
             const config = getMetricConfig();
             const exclusiveAmount = exclusiveData.reduce((sum, item) => sum + (getMetricValue(item, 'total') || 0), 0);
@@ -3025,13 +3035,14 @@
                 专用件${config.label}：${config.displayFormatter(exclusiveAmount)}
             `;
 
-            // 更新图表
+            // 更新图表（如果容器存在）
             const chartDom = safeGetElement('exclusiveQueryChart');
-            if (!charts.exclusiveQueryChart) {
-                charts.exclusiveQueryChart = echarts.init(chartDom);
-            }
+            if (chartDom) {
+                if (!charts.exclusiveQueryChart) {
+                    charts.exclusiveQueryChart = echarts.init(chartDom);
+                }
 
-            const option = {
+                const option = {
                 tooltip: {
                     trigger: 'item',
                     formatter: '{b}: {c}条 ({d}%)'
@@ -3049,7 +3060,8 @@
                 }]
             };
 
-            charts.exclusiveQueryChart.setOption(option);
+                charts.exclusiveQueryChart.setOption(option);
+            }
 
             // 更新零件列表
             const tbody = document.getElementById('exclusivePartsTable').querySelector('tbody');
