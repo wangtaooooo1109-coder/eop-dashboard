@@ -264,7 +264,7 @@
         <div class="container-fluid">
             <span class="navbar-brand mb-0 h1">
                 <i class="fas fa-chart-line"></i> EOP呆滞管控数据看板系统
-                <span class="badge bg-light text-dark ms-2" id="versionBadge">v2.3.17</span>
+                <span class="badge bg-light text-dark ms-2" id="versionBadge">v2.3.18</span>
                 <span class="badge bg-info text-dark ms-2" id="filenameBadge" style="display: none;"></span>
             </span>
             <span class="text-white">
@@ -1154,7 +1154,7 @@
 
     <script>
         // 版本号
-        const VERSION = 'v2.3.17';
+        const VERSION = 'v2.3.18';
 
         // CW中品类参考标准数据（天数）
         const CW_STANDARDS = [
@@ -4904,17 +4904,21 @@
                 data = allData[sheetFilter] || [];
             }
 
-            // v2.3.17: 只应用CW模块内部的PSM和零件筛选
+            // v2.3.18: 先应用PSM和零件筛选，再匹配CW标准
             const selectedPSM = safeGetValue('cwStdPSM');
             const selectedPart = safeGetValue('cwStdPart');
             const matchMode = safeGetValue('cwStdMatchMode');
 
+            // 应用PSM和零件筛选
             if (selectedPSM) {
                 data = data.filter(item => item.PSM专业组 === selectedPSM);
             }
             if (selectedPart) {
                 data = data.filter(item => item.T1零部件名称 === selectedPart);
             }
+
+            // 记录筛选后的原始数量
+            const filteredRawCount = data.length;
 
             // 为每条数据匹配CW标准
             const enrichedData = data.map(item => {
@@ -4959,8 +4963,10 @@
             });
 
             // 统计数据
-            // v2.3.16: 总物料数使用筛选后的数据总数，不是未筛选的
-            const totalCount = enrichedData.length;
+            // v2.3.18: 总物料数 = 筛选后的所有行数（未匹配CW前的数量）
+            // 匹配数 = 匹配到CW标准的数量
+            // 超标数 = 超标的数量
+            const totalCount = filteredRawCount;
             const matchedCount = enrichedData.filter(item => item.matchedStandard).length;
             const exceededCount = enrichedData.filter(item => item.exceeded).length;
             const exceededRate = matchedCount > 0 ? (exceededCount / matchedCount * 100).toFixed(1) : 0;
