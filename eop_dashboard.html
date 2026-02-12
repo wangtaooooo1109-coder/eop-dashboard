@@ -264,7 +264,7 @@
         <div class="container-fluid">
             <span class="navbar-brand mb-0 h1">
                 <i class="fas fa-chart-line"></i> EOP呆滞管控数据看板系统
-                <span class="badge bg-light text-dark ms-2" id="versionBadge">v2.3.11</span>
+                <span class="badge bg-light text-dark ms-2" id="versionBadge">v2.3.12</span>
                 <span class="badge bg-info text-dark ms-2" id="filenameBadge" style="display: none;"></span>
             </span>
             <span class="text-white">
@@ -838,6 +838,138 @@
                                     </div>
                                 </div>
                             </div>
+
+                            <!-- CW标准对比分析 -->
+                            <div class="row mb-3">
+                                <div class="col-12">
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <i class="fas fa-ruler-combined"></i> CW标准对比分析
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="row mb-3">
+                                                <div class="col-md-2">
+                                                    <label>项目筛选</label>
+                                                    <select class="form-select form-select-sm" id="cwStdSheet" onchange="updateCWStdParts()">
+                                                        <option value="ALL">全部合并</option>
+                                                        <option value="L987">L987</option>
+                                                        <option value="L6">L6</option>
+                                                    </select>
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <label>PSM专业组</label>
+                                                    <select class="form-select form-select-sm" id="cwStdPSM" onchange="updateCWStdParts()">
+                                                        <option value="">--全部--</option>
+                                                    </select>
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <label>零件名称</label>
+                                                    <select class="form-select form-select-sm" id="cwStdPart" onchange="updateCWStandardAnalysis()">
+                                                        <option value="">--全部零件--</option>
+                                                    </select>
+                                                </div>
+                                                <div class="col-md-2">
+                                                    <label>匹配模式</label>
+                                                    <select class="form-select form-select-sm" id="cwStdMatchMode" onchange="updateCWStandardAnalysis()">
+                                                        <option value="strict">严格匹配</option>
+                                                        <option value="fuzzy" selected>模糊匹配</option>
+                                                    </select>
+                                                </div>
+                                                <div class="col-md-2 d-flex align-items-end">
+                                                    <button class="btn btn-primary btn-sm w-100" onclick="updateCWStandardAnalysis()">
+                                                        <i class="fas fa-sync-alt"></i> 分析
+                                                    </button>
+                                                </div>
+                                            </div>
+
+                                            <!-- 统计卡片 -->
+                                            <div class="row mb-3">
+                                                <div class="col-md-3">
+                                                    <div class="card bg-light">
+                                                        <div class="card-body text-center">
+                                                            <h6 class="card-title">总零件数</h6>
+                                                            <h4 id="cwStdTotalCount">0</h4>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <div class="card bg-info text-white">
+                                                        <div class="card-body text-center">
+                                                            <h6 class="card-title">已匹配标准</h6>
+                                                            <h4 id="cwStdMatchedCount">0</h4>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <div class="card bg-warning text-white">
+                                                        <div class="card-body text-center">
+                                                            <h6 class="card-title">超标零件数</h6>
+                                                            <h4 id="cwStdExceededCount">0</h4>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <div class="card bg-danger text-white">
+                                                        <div class="card-body text-center">
+                                                            <h6 class="card-title">超标比例</h6>
+                                                            <h4 id="cwStdExceededRate">0%</h4>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <!-- 图表展示 -->
+                                            <div class="row mb-3">
+                                                <div class="col-md-6">
+                                                    <div class="card">
+                                                        <div class="card-header">
+                                                            <i class="fas fa-chart-bar"></i> 各品类超标情况
+                                                        </div>
+                                                        <div class="card-body">
+                                                            <div id="cwStdCategoryChart" style="height: 350px;"></div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="card">
+                                                        <div class="card-header">
+                                                            <i class="fas fa-chart-pie"></i> 超标程度分布
+                                                        </div>
+                                                        <div class="card-body">
+                                                            <div id="cwStdExceedChart" style="height: 350px;"></div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <!-- 明细表格 -->
+                                            <div class="row">
+                                                <div class="col-12">
+                                                    <h6>超标零件明细（显示前100条）</h6>
+                                                    <div style="max-height: 400px; overflow-y: auto;">
+                                                        <table class="table table-sm table-striped table-hover" id="cwStdTable">
+                                                            <thead class="sticky-top bg-white">
+                                                                <tr>
+                                                                    <th>零部件名称</th>
+                                                                    <th>零部件品类</th>
+                                                                    <th>PSM专业组</th>
+                                                                    <th>实际CW(天)</th>
+                                                                    <th>标准CW(天)</th>
+                                                                    <th>超标(天)</th>
+                                                                    <th>超标比例</th>
+                                                                    <th>匹配大类</th>
+                                                                    <th>匹配中类</th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody></tbody>
+                                                        </table>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                         <!-- End Tab 3: LT&CW分析 -->
 
@@ -1023,7 +1155,7 @@
 
     <script>
         // 版本号
-        const VERSION = 'v2.3.11';
+        const VERSION = 'v2.3.12';
 
         // CW中品类参考标准数据（天数）
         const CW_STANDARDS = [
