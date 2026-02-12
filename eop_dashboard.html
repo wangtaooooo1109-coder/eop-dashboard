@@ -261,7 +261,8 @@
         <div class="container-fluid">
             <span class="navbar-brand mb-0 h1">
                 <i class="fas fa-chart-line"></i> EOP呆滞管控数据看板系统
-                <span class="badge bg-light text-dark ms-2" id="versionBadge">v2.1.0</span>
+                <span class="badge bg-light text-dark ms-2" id="versionBadge">v2.2.0</span>
+                <span class="badge bg-info text-dark ms-2" id="filenameBadge" style="display: none;"></span>
             </span>
             <span class="text-white">
                 <i class="fas fa-cog"></i> 可自定义分析看板
@@ -279,7 +280,7 @@
                     <p class="text-muted">拖拽文件到此处，或点击选择文件</p>
                     <p class="text-muted small">支持格式: .xlsx, .xls</p>
                     <input type="file" id="fileInput" accept=".xlsx,.xls" style="display: none;">
-                    <button class="btn btn-primary mt-3" onclick="document.getElementById('fileInput').click()">
+                    <button class="btn btn-primary mt-3" id="selectFileButton">
                         <i class="fas fa-folder-open"></i> 选择文件
                     </button>
                 </div>
@@ -990,7 +991,7 @@
 
     <script>
         // 版本号
-        const VERSION = 'v2.1.0';
+        const VERSION = 'v2.2.0';
 
         // CW中品类参考标准数据（天数）
         const CW_STANDARDS = [
@@ -1128,15 +1129,27 @@
         // 页面加载完成后初始化
         document.addEventListener('DOMContentLoaded', function() {
             initUploadArea();
+            setupChartResize();
         });
 
         // 初始化上传区域
         function initUploadArea() {
             const uploadArea = document.getElementById('uploadArea');
             const fileInput = document.getElementById('fileInput');
+            const selectFileButton = document.getElementById('selectFileButton');
 
-            // 点击上传区域
-            uploadArea.addEventListener('click', () => {
+            // 点击"选择文件"按钮
+            selectFileButton?.addEventListener('click', (e) => {
+                e.stopPropagation(); // 防止事件冒泡到uploadArea
+                fileInput.click();
+            });
+
+            // 点击上传区域（但不包括按钮）
+            uploadArea.addEventListener('click', (e) => {
+                // 如果点击的是按钮本身，不处理（由按钮的监听器处理）
+                if (e.target === selectFileButton || selectFileButton?.contains(e.target)) {
+                    return;
+                }
                 fileInput.click();
             });
 
@@ -1180,6 +1193,11 @@
 
             document.getElementById('loading').classList.add('active');
             document.getElementById('uploadSection').style.display = 'none';
+
+            // 显示文件名
+            const filenameBadge = document.getElementById('filenameBadge');
+            filenameBadge.textContent = file.name;
+            filenameBadge.style.display = 'inline-block';
 
             const reader = new FileReader();
             reader.onload = function(e) {
@@ -1384,11 +1402,6 @@
             updateIdealExclusiveChart(data);
             updatePriceReasonableChart(data);
             updateCWReasonableChart(data);
-            updateExclusiveByTypeChart(data);
-            updateExclusiveByGroupChart(data);
-            updateExclusiveAmountChart(data);
-            updateExclusiveComparisonChart(data);
-            updateExclusiveQueryPSMOptions(data);
             updateLTCWQueryPSMOptions(data);
             updateLTCWStats(data);
             updateDistributionOptions(data);
@@ -1398,12 +1411,8 @@
             // 新增图表更新
             updateParetoAnalysis(data);
             updateSupplierConcentration(data);
-            updateSupplierRiskScatter(data);
-            updateSupplierPerformance(data);
-            updatePriceReasonabilityAnalysis(data);
             updateCWLTReasonabilityAnalysis(data);
-            updateSmartAlerts(data);
-            updateProjectComparison();
+
         }
 
         // 更新统计卡片
@@ -2354,91 +2363,37 @@
                 }
             });
 
-            const categories = Object.keys(typeData);
-            const exclusiveCounts = categories.map(cat => typeData[cat].exclusive.count);
-            const nonExclusiveCounts = categories.map(cat => typeData[cat].nonExclusive.count);
-            const exclusivePercentages = categories.map(cat => {
-                const total = typeData[cat].exclusive.count + typeData[cat].nonExclusive.count;
-                return total > 0 ? ((typeData[cat].exclusive.count / total) * 100).toFixed(1) : 0;
-            });
-
-            const chartDom = document.getElementById('exclusiveByTypeChart');
+            const chartDom = document.getElementById('exclusivityPieChart');
             if (!charts.exclusiveByTypeChart) {
                 charts.exclusiveByTypeChart = echarts.init(chartDom);
             }
 
             const option = {
                 tooltip: {
-                    trigger: 'axis',
-                    axisPointer: { type: 'shadow' },
-                    formatter: function(params) {
-                        const type = params[0].axisValue;
-                        const data = typeData[type];
-                        const total = data.exclusive.count + data.nonExclusive.count;
-                        const percentage = total > 0 ? ((data.exclusive.count / total) * 100).toFixed(1) : 0;
-                        return type + '<br/>' +
-                               '专用件: ' + data.exclusive.count + '条 (¥' + (parseFloat(config.formatter(data.exclusive.amount))).toFixed(2) + '万)<br/>' +
-                               '非专用件: ' + data.nonExclusive.count + '条 (¥' + (data.parseFloat(config.formatter(nonExclusive.amount))).toFixed(2) + '万)<br/>' +
-                               '专用件占比: ' + percentage + '%';
-                    }
+                    trigger: 'item',
+                    formatter: '{a} <br/>{b}: {c} ({d}%)'
                 },
                 legend: {
-                    data: ['专用件', '非专用件', '专用件占比'],
-                    top: 10
+                    orient: 'vertical',
+                    left: 'left'
                 },
-                grid: { left: '3%', right: '10%', bottom: '3%', containLabel: true },
-                xAxis: {
-                    type: 'category',
-                    data: categories
-                },
-                yAxis: [
-                    {
-                        type: 'value',
-                        name: '数量(条)',
-                        position: 'left'
-                    },
-                    {
-                        type: 'value',
-                        name: '占比(%)',
-                        position: 'right',
-                        max: 100
-                    }
-                ],
                 series: [
                     {
                         name: '专用件',
-                        type: 'bar',
-                        stack: 'total',
-                        data: exclusiveCounts,
-                        itemStyle: { color: '#667eea' },
+                        type: 'pie',
+                        radius: ['40%', '70%'],
+                        center: ['50%', '50%'],
+                        data: Object.entries(typeData).map(([name, value]) => ({
+                            name: name,
+                            value: value.exclusive.count
+                        })),
+                        itemStyle: {
+                            borderRadius: 5,
+                            borderColor: '#fff',
+                            borderWidth: 2
+                        },
                         label: {
-                            show: true,
-                            position: 'inside',
-                            formatter: '{c}'
-                        }
-                    },
-                    {
-                        name: '非专用件',
-                        type: 'bar',
-                        stack: 'total',
-                        data: nonExclusiveCounts,
-                        itemStyle: { color: '#e0e0e0' },
-                        label: {
-                            show: true,
-                            position: 'inside',
-                            formatter: '{c}'
-                        }
-                    },
-                    {
-                        name: '专用件占比',
-                        type: 'line',
-                        yAxisIndex: 1,
-                        data: exclusivePercentages,
-                        itemStyle: { color: '#f5576c' },
-                        label: {
-                            show: true,
-                            position: 'top',
-                            formatter: '{c}%'
+                            show: true
                         }
                     }
                 ]
@@ -2482,7 +2437,7 @@
                 return total > 0 ? ((groupData[group].exclusive.count / total) * 100).toFixed(1) : 0;
             });
 
-            const chartDom = document.getElementById('exclusiveByGroupChart');
+            const chartDom = document.getElementById('exclusivityMultiChart');
             if (!charts.exclusiveByGroupChart) {
                 charts.exclusiveByGroupChart = echarts.init(chartDom);
             }
@@ -2567,158 +2522,6 @@
             charts.exclusiveByGroupChart.setOption(option);
         }
 
-        // 更新专用件金额占比总览
-        function updateExclusiveAmountChart(data) {
-            const config = getMetricConfig();
-            let exclusiveAmount = 0;
-            let nonExclusiveAmount = 0;
-
-            data.forEach(item => {
-                const amount = getMetricValue(item, 'total') || 0;
-                if (isExclusive(item)) {
-                    exclusiveAmount += amount;
-                } else {
-                    nonExclusiveAmount += amount;
-                }
-            });
-
-            const total = exclusiveAmount + nonExclusiveAmount;
-            const exclusivePercentage = total > 0 ? ((exclusiveAmount / total) * 100).toFixed(1) : 0;
-
-            const chartDom = document.getElementById('exclusiveAmountChart');
-            if (!charts.exclusiveAmountChart) {
-                charts.exclusiveAmountChart = echarts.init(chartDom);
-            }
-
-            const option = {
-                title: {
-                    text: `专用件金额占比\n${exclusivePercentage}%`,
-                    left: 'center',
-                    top: 'center',
-                    textStyle: {
-                        fontSize: 24,
-                        fontWeight: 'bold',
-                        color: '#667eea'
-                    }
-                },
-                tooltip: {
-                    trigger: 'item',
-                    formatter: function(params) {
-                        return params.name + '<br/>' +
-                               '金额: ¥' + (params.value / 10000).toFixed(2) + '万元<br/>' +
-                               '占比: ' + params.percent + '%';
-                    }
-                },
-                legend: {
-                    bottom: '5%',
-                    left: 'center'
-                },
-                series: [{
-                    type: 'pie',
-                    radius: ['45%', '70%'],
-                    avoidLabelOverlap: false,
-                    itemStyle: {
-                        borderRadius: 10,
-                        borderColor: '#fff',
-                        borderWidth: 3
-                    },
-                    label: {
-                        show: true,
-                        formatter: function(params) {
-                            return params.name + '\n¥' + (params.value / 10000).toFixed(1) + '万';
-                        }
-                    },
-                    data: [
-                        {
-                            name: '专用件',
-                            value: exclusiveAmount,
-                            itemStyle: { color: '#667eea' }
-                        },
-                        {
-                            name: '非专用件',
-                            value: nonExclusiveAmount,
-                            itemStyle: { color: '#e0e0e0' }
-                        }
-                    ]
-                }]
-            };
-
-            charts.exclusiveAmountChart.setOption(option);
-        }
-
-        // 更新专用vs非专用对比图表
-        function updateExclusiveComparisonChart(data) {
-            const config = getMetricConfig();
-            let exclusiveData = { count: 0, amount: 0 };
-            let nonExclusiveData = { count: 0, amount: 0 };
-
-            data.forEach(item => {
-                const amount = getMetricValue(item, 'total') || 0;
-                if (isExclusive(item)) {
-                    exclusiveData.count += 1;
-                    exclusiveData.amount += amount;
-                } else {
-                    nonExclusiveData.count += 1;
-                    nonExclusiveData.amount += amount;
-                }
-            });
-
-            const chartDom = document.getElementById('exclusiveComparisonChart');
-            if (!charts.exclusiveComparisonChart) {
-                charts.exclusiveComparisonChart = echarts.init(chartDom);
-            }
-
-            const option = {
-                tooltip: {
-                    trigger: 'axis',
-                    axisPointer: { type: 'shadow' }
-                },
-                legend: {
-                    data: ['数量(条)', '金额(万元)']
-                },
-                grid: { left: '3%', right: '4%', bottom: '3%', containLabel: true },
-                xAxis: {
-                    type: 'category',
-                    data: ['专用件', '非专用件']
-                },
-                yAxis: [
-                    {
-                        type: 'value',
-                        name: '数量(条)',
-                        position: 'left'
-                    },
-                    {
-                        type: 'value',
-                        name: config.unit,
-                        position: 'right'
-                    }
-                ],
-                series: [
-                    {
-                        name: '数量(条)',
-                        type: 'bar',
-                        data: [exclusiveData.count, nonExclusiveData.count],
-                        itemStyle: {
-                            color: new echarts.graphic.LinearGradient(0, 1, 0, 0, [
-                                { offset: 0, color: '#667eea' },
-                                { offset: 1, color: '#764ba2' }
-                            ])
-                        },
-                        label: {
-                            show: true,
-                            position: 'top',
-                            formatter: '{c}条'
-                        }
-                    },
-                    {
-                        name: config.unit,
-                        type: 'bar',
-                        yAxisIndex: 1,
-                        data: [parseFloat(config.formatter(exclusiveData.amount)), parseFloat(config.formatter(nonExclusiveData.amount))],
-                        itemStyle: {
-                            color: new echarts.graphic.LinearGradient(0, 1, 0, 0, [
-                                { offset: 0, color: '#f093fb' },
-                                { offset: 1, color: '#f5576c' }
                             ])
                         },
                         label: {
@@ -2940,25 +2743,28 @@
             updateDashboard();
         }
 
-        // 响应式图表调整
-        window.addEventListener('resize', function() {
-            Object.values(charts).forEach(chart => {
-                if (chart) chart.resize();
-            });
-        });
-
-        // Tab切换时调整图表大小
-        document.querySelectorAll('button[data-bs-toggle="tab"]').forEach(button => {
-            button.addEventListener('shown.bs.tab', function () {
-                setTimeout(() => {
-                    Object.values(charts).forEach(chart => {
-                        if (chart) chart.resize();
-                    });
-                }, 100);
-            });
-        });
-
         // ========== 专用零件交互查询功能 ==========
+
+        // 响应式图表调整
+        function setupChartResize() {
+            // 窗口大小改变时调整图表
+            window.addEventListener('resize', function() {
+                Object.values(charts).forEach(chart => {
+                    if (chart) chart.resize();
+                });
+            });
+
+            // Tab切换时调整图表大小
+            document.querySelectorAll('button[data-bs-toggle="tab"]').forEach(button => {
+                button.addEventListener('shown.bs.tab', function () {
+                    setTimeout(() => {
+                        Object.values(charts).forEach(chart => {
+                            if (chart) chart.resize();
+                        });
+                    }, 100);
+                });
+            });
+        }
 
         // 更新PSM专业组选项
         function updateExclusiveQueryPSMOptions(data) {
