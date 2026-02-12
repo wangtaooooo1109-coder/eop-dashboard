@@ -11,7 +11,15 @@
 - **部署目标**: https://wangtaooooo1109-coder.github.io/eop-dashboard/eop_dashboard.html
 - **需求文档**: `/Users/wangtao1/REQUIREMENTS.md`
 
-### 2. 每次修改后的必做步骤
+### 2. 版本号管理（强制）
+
+每次修改必须同时更新两个位置：
+1. JavaScript常量：`const VERSION = 'v{版本号}';`（约第1153行）
+2. Navbar Badge：`<span id="versionBadge">v{版本号}</span>`（约第267行）
+
+**⚠️ 两个版本号必须一致，不允许不同步！**
+
+### 3. 每次修改后的必做步骤
 
 #### 步骤1: 更新版本号
 修改 `eop_dashboard.html` 中的版本号：
@@ -61,6 +69,11 @@ v{版本号}: {功能描述}
 - {具体修改项2}
 - ...
 
+⚠️ 请确保以下内容已检查：
+✓ navbar badge 版本号已更新（约第267行）
+✓ const VERSION 常量已更新（约第1153行）
+✓ 两个版本号一致
+
 Co-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>
 ```
 
@@ -101,8 +114,10 @@ v2.3.22 → v2.3.23 → v2.3.24 → ...
 
 修改完成后，检查以下项目：
 
-- [ ] 版本号已更新（const VERSION）
+- [ ] navbar badge 版本号已更新（约第267行）
+- [ ] const VERSION 常量已更新（约第1153行）
+- [ ] 两个版本号一致 ⚠️ 必须相同
 - [ ] git add eop_dashboard.html
 - [ ] git commit 包含版本号和用户需求
 - [ ] git push 成功
-- [ ] 验证在线地址是否更新
+- [ ] 验证 GitHub Actions 自动部署成功
