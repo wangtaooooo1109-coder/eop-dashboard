@@ -455,16 +455,22 @@ Co-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>"
 ## Real-World Example
 
 See the complete implementation at `/Users/wangtao1/eop_dashboard.html`:
-- 4700+ lines single HTML file
+- 5350+ lines single HTML file
 - Supports L987 and L6 sheet templates
 - 10 KPI cards, multiple chart types, Pareto analysis
 - Dynamic column mapping with 23 field mappings
-- **Version v2.0.2 features**:
+- **Version v2.0.3 features**:
   - Bug fixes for supplier display and review chart proportions (v2.0.1)
-  - CW/LT distribution charts by 2-week intervals
+  - CW/LT distribution charts by 2-week intervals (v2.0.2)
   - Multi-dimensional cascading filters (PSM group → parts, category, range)
   - Real-time chart updates on filter changes
   - Sortable detail tables (by LT/CW/amount)
+  - **CW标准对比分析** (v2.0.3):
+    - Embedded 51 CW reference standards (6 major categories)
+    - Smart matching algorithm (exact/fuzzy/keyword-based)
+    - Exceeds standard analysis with percentage breakdown
+    - Category-wise comparison charts
+    - Filter by PSM/part/data source
 
 ## Testing Checklist
 
