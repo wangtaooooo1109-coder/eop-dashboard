@@ -292,6 +292,101 @@ function updatePieChart(data, useCount = true) {
 
 **Important**: For status distribution, use `count` not `amount` to show correct proportions.
 
+### 5. Distribution Chart by Interval (Histogram)
+
+```javascript
+// Create distribution chart with fixed bin size (e.g., 2 weeks = 0.5 months)
+function createDistributionChart(values, binSize, chartId) {
+    if (values.length === 0) {
+        charts[chartId].clear();
+        return;
+    }
+
+    // Calculate bins
+    const maxValue = Math.max(...values);
+    const binCount = Math.ceil(maxValue / binSize);
+    const bins = new Array(binCount).fill(0);
+    const binLabels = [];
+
+    // Count items in each bin
+    values.forEach(value => {
+        const binIndex = Math.min(Math.floor(value / binSize), binCount - 1);
+        bins[binIndex]++;
+    });
+
+    // Generate labels
+    for (let i = 0; i < binCount; i++) {
+        const start = (i * binSize).toFixed(1);
+        const end = ((i + 1) * binSize).toFixed(1);
+        binLabels.push(`${start}-${end}`);
+    }
+
+    const option = {
+        xAxis: {
+            type: 'category',
+            data: binLabels,
+            axisLabel: {
+                rotate: 45,
+                interval: Math.floor(binCount / 10) // Prevent label crowding
+            }
+        },
+        yAxis: { type: 'value', name: '数量(条)' },
+        series: [{
+            type: 'bar',
+            data: bins,
+            label: {
+                show: true,
+                position: 'top',
+                formatter: (params) => params.value > 0 ? params.value : ''
+            }
+        }]
+    };
+
+    charts[chartId].setOption(option);
+}
+
+// Usage: LT distribution by 2-week intervals
+createDistributionChart(ltValues, 0.5, 'ltDistChart');  // 0.5 month = ~2 weeks
+```
+
+**Use case**: Analyze Lead Time (LT) or Component Weight (CW) distribution by fixed time intervals. Helps identify common ranges and outliers.
+
+### 6. Cascading Filters (Parent-Child Dropdowns)
+
+```javascript
+// Update child dropdown based on parent selection
+function updateCascadingFilter(data, parentValue, childSelectId) {
+    const childSelect = document.getElementById(childSelectId);
+    const childSet = new Set();
+
+    // Filter data by parent, collect unique child values
+    data.filter(item => !parentValue || item.parentField === parentValue)
+        .forEach(item => {
+            if (item.childField) childSet.add(item.childField);
+        });
+
+    // Preserve current selection if still valid
+    const currentSelection = childSelect.value;
+    childSelect.innerHTML = '<option value="">--全部--</option>';
+
+    Array.from(childSet).sort().forEach(value => {
+        const option = document.createElement('option');
+        option.value = value;
+        option.textContent = value;
+        if (value === currentSelection) option.selected = true;
+        childSelect.appendChild(option);
+    });
+}
+
+// Example: PSM group changes → update parts dropdown
+document.getElementById('psmSelect').onchange = function() {
+    updateCascadingFilter(data, this.value, 'partSelect');
+    updateCharts(); // Refresh visualizations
+};
+```
+
+**Pattern**: When user selects PSM group, parts dropdown shows only relevant parts. Reduces clutter and improves UX.
+
 ## Deployment Pattern
 
 **Single HTML file advantages**:
@@ -360,11 +455,16 @@ Co-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>"
 ## Real-World Example
 
 See the complete implementation at `/Users/wangtao1/eop_dashboard.html`:
-- 4200+ lines single HTML file
+- 4700+ lines single HTML file
 - Supports L987 and L6 sheet templates
-- 10 KPI cards, 8 chart types, Pareto analysis
+- 10 KPI cards, multiple chart types, Pareto analysis
 - Dynamic column mapping with 23 field mappings
-- Version v2.0.1 with bug fixes for supplier display and review chart proportions
+- **Version v2.0.2 features**:
+  - Bug fixes for supplier display and review chart proportions (v2.0.1)
+  - CW/LT distribution charts by 2-week intervals
+  - Multi-dimensional cascading filters (PSM group → parts, category, range)
+  - Real-time chart updates on filter changes
+  - Sortable detail tables (by LT/CW/amount)
 
 ## Testing Checklist
 
