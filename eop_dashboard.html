@@ -1094,6 +1094,132 @@
                 </div>
             </div>
 
+            <!-- CW标准对比分析 -->
+            <div class="row">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <i class="fas fa-clipboard-check"></i> CW标准对比分析
+                        </div>
+                        <div class="card-body">
+                            <!-- 筛选条件 -->
+                            <div class="row mb-3">
+                                <div class="col-md-3">
+                                    <label>PSM专业组</label>
+                                    <select class="form-select form-select-sm" id="cwStdPSM" onchange="updateCWStdParts(); updateCWStandardAnalysis();">
+                                        <option value="">--全部--</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-3">
+                                    <label>零件（总成）</label>
+                                    <select class="form-select form-select-sm" id="cwStdPart" onchange="updateCWStandardAnalysis();">
+                                        <option value="">--全部--</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-3">
+                                    <label>数据来源</label>
+                                    <select class="form-select form-select-sm" id="cwStdSheet" onchange="updateCWStandardAnalysis();">
+                                        <option value="ALL">全部数据</option>
+                                        <option value="L987">仅L987</option>
+                                        <option value="L6">仅L6</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-3">
+                                    <label>匹配模式</label>
+                                    <select class="form-select form-select-sm" id="cwStdMatchMode" onchange="updateCWStandardAnalysis();">
+                                        <option value="auto">智能匹配（推荐）</option>
+                                        <option value="exact">精确匹配</option>
+                                        <option value="fuzzy">模糊匹配</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- 统计摘要 -->
+                            <div class="row mb-3">
+                                <div class="col-md-3">
+                                    <div class="alert alert-primary mb-0">
+                                        <strong>总记录数</strong><br>
+                                        <h4 id="cwStdTotalCount">-</h4>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="alert alert-success mb-0">
+                                        <strong>已匹配</strong><br>
+                                        <h4 id="cwStdMatchedCount">-</h4>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="alert alert-warning mb-0">
+                                        <strong>超标数量</strong><br>
+                                        <h4 id="cwStdExceededCount">-</h4>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="alert alert-danger mb-0">
+                                        <strong>超标比例</strong><br>
+                                        <h4 id="cwStdExceededRate">-</h4>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 图表 -->
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <h6 class="text-center">CW超标分布（按中品类）</h6>
+                                    <div id="cwStdCategoryChart" class="chart-container" style="height: 350px;"></div>
+                                </div>
+                                <div class="col-md-6">
+                                    <h6 class="text-center">超标程度分析</h6>
+                                    <div id="cwStdExceedChart" class="chart-container" style="height: 350px;"></div>
+                                </div>
+                            </div>
+
+                            <!-- 明细列表 -->
+                            <div class="row mt-3">
+                                <div class="col-12">
+                                    <h6>CW对比明细列表</h6>
+                                    <div class="mb-2">
+                                        <label class="me-2">筛选：</label>
+                                        <div class="btn-group btn-group-sm" role="group">
+                                            <input type="radio" class="btn-check" name="cwStdFilter" id="cwStdFilterAll" value="all" checked onchange="updateCWStandardAnalysis();">
+                                            <label class="btn btn-outline-primary" for="cwStdFilterAll">全部</label>
+
+                                            <input type="radio" class="btn-check" name="cwStdFilter" id="cwStdFilterMatched" value="matched" onchange="updateCWStandardAnalysis();">
+                                            <label class="btn btn-outline-success" for="cwStdFilterMatched">已匹配</label>
+
+                                            <input type="radio" class="btn-check" name="cwStdFilter" id="cwStdFilterExceeded" value="exceeded" onchange="updateCWStandardAnalysis();">
+                                            <label class="btn btn-outline-danger" for="cwStdFilterExceeded">仅超标</label>
+
+                                            <input type="radio" class="btn-check" name="cwStdFilter" id="cwStdFilterUnmatched" value="unmatched" onchange="updateCWStandardAnalysis();">
+                                            <label class="btn btn-outline-secondary" for="cwStdFilterUnmatched">未匹配</label>
+                                        </div>
+                                    </div>
+                                    <div style="max-height: 500px; overflow-y: auto;">
+                                        <table class="table table-sm table-striped table-hover" id="cwStdTable">
+                                            <thead class="sticky-top bg-white">
+                                                <tr>
+                                                    <th>序号</th>
+                                                    <th>PSM专业组</th>
+                                                    <th>零部件名称</th>
+                                                    <th>Tn品类</th>
+                                                    <th>实际CW(天)</th>
+                                                    <th>匹配品类</th>
+                                                    <th>标准CW(天)</th>
+                                                    <th>超标(天)</th>
+                                                    <th>状态</th>
+                                                    <th>呆滞金额</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody></tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- 数据表格 -->
             <div class="row">
                 <div class="col-12">
@@ -1141,7 +1267,62 @@
 
     <script>
         // 版本号
-        const VERSION = 'v2.0.2';
+        const VERSION = 'v2.0.3';
+
+        // CW中品类参考标准数据（天数）
+        const CW_STANDARDS = [
+{"大类":"无机非金属材料","中品类":"碳材料","小类":"石墨、增碳剂、碳纤维","进口CW":60,"国产CW":60},
+{"大类":null,"中品类":"玻璃","小类":"车窗、天窗、玻璃盖板","进口CW":90,"国产CW":60},
+{"大类":null,"中品类":"陶瓷制品","小类":"陶瓷棒、传统陶瓷、结构陶瓷、功能陶瓷、搪瓷","进口CW":90,"国产CW":60},
+{"大类":null,"中品类":"多元素组合物质","小类":"氧化物，碳化物等，碳酸钡、氧化铅、钛白粉，多元素催化剂","进口CW":90,"国产CW":60},
+{"大类":null,"中品类":"人工晶体","小类":"人工水晶，人工金刚石，装饰用晶石","进口CW":90,"国产CW":60},
+{"大类":"金属材料","中品类":"金属标准件","小类":"螺钉、螺母等金属标准件","进口CW":null,"国产CW":60},
+{"大类":null,"中品类":"磁性材料","小类":"铁氧永磁体、磁钢","进口CW":null,"国产CW":60},
+{"大类":null,"中品类":"钢铁制品","小类":"钢板/钢丝/钢管/其他钢铁制品，金属包装等","进口CW":null,"国产CW":60},
+{"大类":null,"中品类":"铝制品","小类":"轮毂，盖板，后门背板，前地板、壳体类、支架类、挤出件等","进口CW":null,"国产CW":60},
+{"大类":null,"中品类":"锡制品","小类":"锡膏、锡丝等","进口CW":null,"国产CW":60},
+{"大类":null,"中品类":"铜制品","小类":"铜、含铜制品","进口CW":null,"国产CW":60},
+{"大类":null,"中品类":"贵金属制品","小类":"金、银、铂等","进口CW":90,"国产CW":60},
+{"大类":null,"中品类":"稀有金属制品","小类":"钯、铑、镍、钴等，或者金属催化剂","进口CW":90,"国产CW":60},
+{"大类":null,"中品类":"合金材料","小类":"钢合金、铝合金等合金材料","进口CW":90,"国产CW":60},
+{"大类":null,"中品类":"机加工制品","小类":"高精度齿轴、轴承、金属管路等","进口CW":90,"国产CW":60},
+{"大类":null,"中品类":"压铸制品","小类":"车门板、翼子板等冲压大件","进口CW":null,"国产CW":60},
+{"大类":"高分子材料","中品类":"塑料/橡胶标准件","小类":"橡胶塑料标准件（硅胶垫片）","进口CW":null,"国产CW":60},
+{"大类":null,"中品类":"塑料","小类":"仪表板、保险杠、塑料保护膜，包装类等塑料和树脂类产品","进口CW":75,"国产CW":55},
+{"大类":null,"中品类":"橡胶","小类":"轮胎，密封圈，密封条，垫片等橡胶制品","进口CW":null,"国产CW":60},
+{"大类":null,"中品类":"固化剂","小类":"固化剂/胶水，固体胶，双面胶，胶带","进口CW":null,"国产CW":60},
+{"大类":null,"中品类":"油脂类","小类":"润滑油，黄油，润滑剂等","进口CW":null,"国产CW":45},
+{"大类":null,"中品类":"涂料液体类","小类":"油漆、油墨、油/水性清洗溶剂、清洁剂、稀释剂等，电泳液，电镀液等","进口CW":null,"国产CW":30},
+{"大类":null,"中品类":"纺织纤维","小类":"地毯，纺织品，顶棚等纤维类产品","进口CW":null,"国产CW":30},
+{"大类":null,"中品类":"加工纸制品","小类":"纸质标签、纸质包装等","进口CW":null,"国产CW":30},
+{"大类":null,"中品类":"木质材料","小类":"天然木材，合成木材等","进口CW":null,"国产CW":30},
+{"大类":null,"中品类":"海绵制品","小类":"海绵、吸音绵、泡绵、珍珠绵包材","进口CW":null,"国产CW":21},
+{"大类":"复合材料","中品类":"线束连接器","小类":"端子、防水栓、护套","进口CW":120,"国产CW":56},
+{"大类":null,"中品类":"线束附件","小类":"卡扣、扎带、橡胶件、支架、波纹管","进口CW":56,"国产CW":30},
+{"大类":null,"中品类":"线束天线类","小类":"5G/射频天线等","进口CW":90,"国产CW":21},
+{"大类":null,"中品类":"PCB","小类":"PCB","进口CW":null,"国产CW":60},
+{"大类":null,"中品类":"继电器","小类":"继电器","进口CW":90,"国产CW":null},
+{"大类":null,"中品类":"皮质类","小类":"座椅覆面，方向盘材质","进口CW":105,"国产CW":90},
+{"大类":null,"中品类":"脱模剂","小类":"脱模剂","进口CW":null,"国产CW":30},
+{"大类":"高价值组合材料","中品类":"电池类","小类":"绝缘膜、Pack、电解液、隔膜、电芯","进口CW":150,"国产CW":90},
+{"大类":null,"中品类":"摄像头类","小类":"摄像头FPC","进口CW":150,"国产CW":90},
+{"大类":null,"中品类":"屏幕类","小类":"屏幕模组","进口CW":150,"国产CW":90},
+{"大类":null,"中品类":"阀体类","小类":"电磁阀，球阀等","进口CW":150,"国产CW":90},
+{"大类":null,"中品类":"电机类","小类":"马达电机，伺服电机，转子，后视镜折叠电机","进口CW":150,"国产CW":90},
+{"大类":null,"中品类":"PCBA类","小类":"PCBA半成品","进口CW":120,"国产CW":90},
+{"大类":"半导体材料","中品类":"被动器件(电容/电感）","小类":"铝电解电容\n钽电容\n陶瓷电容\n电感","进口CW":120,"国产CW":60},
+{"大类":null,"中品类":"电源芯片","小类":"PMIC\nSBC\nDCDC\nLDO\nVoltage Reference","进口CW":140,"国产CW":98},
+{"大类":null,"中品类":"分立器件(IGBT/MOSFET)","小类":"Sic\nIGBT\nMOSFET","进口CW":140,"国产CW":60},
+{"大类":null,"中品类":"传感器芯片","小类":"传感器芯片","进口CW":126,"国产CW":null},
+{"大类":null,"中品类":"逻辑与模拟芯片","小类":"逻辑门/Gate\n触发器/Trigger\n寄存器\n电平转换/LevelShifter\nAFE\n放大器\n比较器\n多路数据选择器","进口CW":98,"国产CW":60},
+{"大类":null,"中品类":"存储芯片","小类":"DDR\neMMC\nUFS\nNor Flash\nEEPROM","进口CW":147,"国产CW":126},
+{"大类":null,"中品类":"通信芯片","小类":"SerDes\nEthernet Switch/PHY\nDaisy Chain\nCAN/CAN-FD/LIN\nA2B\nFM/DAB","进口CW":180,"国产CW":60},
+{"大类":null,"中品类":"处理器","小类":"SoC\nMCU","进口CW":120,"国产CW":100},
+{"大类":null,"中品类":"分立器件(二三极管/TVS)","小类":"二三极管\nTVS","进口CW":105,"国产CW":56},
+{"大类":null,"中品类":"驱动与隔离芯片","小类":"Smart HSD/LSD\nMulti HSD/LSD\n全桥\n半桥\n多路半桥\nLED驱动\n火工品点爆驱动芯片\n数字隔离\n电源隔离\n隔离驱动\n隔离运放\n隔离ADC/隔离CAN","进口CW":126,"国产CW":42},
+{"大类":null,"中品类":"被动器件(电阻/晶体/晶振)","小类":"电阻\n晶体/晶振","进口CW":98,"国产CW":60},
+{"大类":"其他","中品类":"其他，当前品类无法覆盖","小类":"需联系对应PSM确认是否无法覆盖，然后PSM内部讨论后迭代","进口CW":null,"国产CW":null}
+        ];
 
         // 全局数据存储
         let allData = {
@@ -1488,6 +1669,7 @@
             updateLTCWQueryPSMOptions(data);
             updateLTCWStats(data);
             updateDistributionOptions(data);
+            updateCWStandardOptions(data);
             updateDataTable(data);
 
             // 新增图表更新
@@ -4763,6 +4945,406 @@
                 const row = tbody.insertRow();
                 const cell = row.insertCell(0);
                 cell.colSpan = 9;
+                cell.className = 'text-center text-muted';
+                cell.textContent = '没有符合条件的数据';
+            }
+        }
+
+        // ========== CW标准对比分析功能 ==========
+
+        // 初始化CW标准分析选项
+        function updateCWStandardOptions(data) {
+            // 更新PSM专业组选项
+            const psmSelect = document.getElementById('cwStdPSM');
+            const psmSet = new Set();
+            data.forEach(item => {
+                if (item.PSM专业组) psmSet.add(item.PSM专业组);
+            });
+
+            const currentPSM = psmSelect.value;
+            psmSelect.innerHTML = '<option value="">--全部--</option>';
+            Array.from(psmSet).sort().forEach(psm => {
+                const option = document.createElement('option');
+                option.value = psm;
+                option.textContent = psm;
+                if (psm === currentPSM) option.selected = true;
+                psmSelect.appendChild(option);
+            });
+
+            updateCWStdParts();
+        }
+
+        // 更新零件选项（关联PSM专业组）
+        function updateCWStdParts() {
+            let data = [];
+            const sheetFilter = document.getElementById('cwStdSheet').value;
+
+            if (sheetFilter === 'ALL') {
+                data = [...allData.L987, ...allData.L6];
+            } else {
+                data = allData[sheetFilter] || [];
+            }
+
+            const selectedTiers = Array.from(document.querySelectorAll('.tier-checkbox:checked')).map(cb => cb.value);
+            if (selectedTiers.length > 0) {
+                data = data.filter(item => selectedTiers.includes(item.分类));
+            }
+
+            const selectedTypes = Array.from(document.querySelectorAll('.type-checkbox:checked')).map(cb => cb.value);
+            if (selectedTypes.length > 0) {
+                data = data.filter(item => {
+                    const partType = item.零件类型 || '';
+                    if (selectedTypes.includes('总成') && partType.includes('总成')) return true;
+                    if (selectedTypes.includes('物料') && !partType.includes('总成')) return true;
+                    return false;
+                });
+            }
+
+            const selectedPSM = document.getElementById('cwStdPSM').value;
+            const partSelect = document.getElementById('cwStdPart');
+            const partSet = new Set();
+
+            if (selectedPSM) {
+                data.filter(item => item.PSM专业组 === selectedPSM).forEach(item => {
+                    if (item.T1零部件名称 && item.T1零部件名称.trim() !== '') {
+                        partSet.add(item.T1零部件名称);
+                    }
+                });
+            } else {
+                data.forEach(item => {
+                    if (item.T1零部件名称 && item.T1零部件名称.trim() !== '') {
+                        partSet.add(item.T1零部件名称);
+                    }
+                });
+            }
+
+            const currentPart = partSelect.value;
+            partSelect.innerHTML = '<option value="">--全部--</option>';
+            Array.from(partSet).sort().forEach(part => {
+                const option = document.createElement('option');
+                option.value = part;
+                option.textContent = part;
+                if (part === currentPart) option.selected = true;
+                partSelect.appendChild(option);
+            });
+        }
+
+        // CW标准匹配算法
+        function matchCWStandard(tnCategory, matchMode = 'auto') {
+            if (!tnCategory || tnCategory.trim() === '') return null;
+
+            const category = tnCategory.trim();
+
+            // 精确匹配：直接匹配中品类
+            for (const std of CW_STANDARDS) {
+                if (std.中品类 === category) {
+                    return std;
+                }
+            }
+
+            // 模糊匹配：包含关系
+            if (matchMode === 'fuzzy' || matchMode === 'auto') {
+                // 先尝试Tn品类包含标准中品类
+                for (const std of CW_STANDARDS) {
+                    if (category.includes(std.中品类)) {
+                        return std;
+                    }
+                }
+
+                // 再尝试标准中品类或小类包含Tn品类
+                for (const std of CW_STANDARDS) {
+                    if (std.中品类.includes(category) || (std.小类 && std.小类.includes(category))) {
+                        return std;
+                    }
+                }
+
+                // 关键词匹配
+                const keywords = ['电池', '摄像头', '屏幕', '电机', '芯片', '传感器', '处理器',
+                                '电容', '电感', '电阻', '晶振', '二极管', '三极管', 'IGBT', 'MOSFET',
+                                '塑料', '橡胶', '金属', '铝', '钢', '铜', '玻璃', '陶瓷', '线束'];
+
+                for (const keyword of keywords) {
+                    if (category.includes(keyword)) {
+                        for (const std of CW_STANDARDS) {
+                            if (std.中品类.includes(keyword) || (std.小类 && std.小类.includes(keyword))) {
+                                return std;
+                            }
+                        }
+                    }
+                }
+            }
+
+            return null;
+        }
+
+        // CW标准对比分析主函数
+        function updateCWStandardAnalysis() {
+            let data = [];
+            const sheetFilter = document.getElementById('cwStdSheet').value;
+
+            if (sheetFilter === 'ALL') {
+                data = [...allData.L987, ...allData.L6];
+            } else {
+                data = allData[sheetFilter] || [];
+            }
+
+            const selectedTiers = Array.from(document.querySelectorAll('.tier-checkbox:checked')).map(cb => cb.value);
+            if (selectedTiers.length > 0) {
+                data = data.filter(item => selectedTiers.includes(item.分类));
+            }
+
+            const selectedTypes = Array.from(document.querySelectorAll('.type-checkbox:checked')).map(cb => cb.value);
+            if (selectedTypes.length > 0) {
+                data = data.filter(item => {
+                    const partType = item.零件类型 || '';
+                    if (selectedTypes.includes('总成') && partType.includes('总成')) return true;
+                    if (selectedTypes.includes('物料') && !partType.includes('总成')) return true;
+                    return false;
+                });
+            }
+
+            const selectedPSM = document.getElementById('cwStdPSM').value;
+            const selectedPart = document.getElementById('cwStdPart').value;
+            const matchMode = document.getElementById('cwStdMatchMode').value;
+
+            if (selectedPSM) {
+                data = data.filter(item => item.PSM专业组 === selectedPSM);
+            }
+            if (selectedPart) {
+                data = data.filter(item => item.T1零部件名称 === selectedPart);
+            }
+
+            // 为每条数据匹配CW标准
+            const enrichedData = data.map(item => {
+                const matched = matchCWStandard(item.Tn零部件品类, matchMode);
+                const actualCWDays = item.CW * 30; // 转换为天数
+
+                let standardCW = null;
+                let exceeded = false;
+                let exceededDays = 0;
+
+                if (matched) {
+                    // 优先使用国产标准，如果没有则使用进口标准
+                    standardCW = matched.国产CW || matched.进口CW;
+
+                    if (standardCW && actualCWDays > standardCW) {
+                        exceeded = true;
+                        exceededDays = actualCWDays - standardCW;
+                    }
+                }
+
+                return {
+                    ...item,
+                    matchedStandard: matched,
+                    standardCW: standardCW,
+                    actualCWDays: actualCWDays,
+                    exceeded: exceeded,
+                    exceededDays: exceededDays
+                };
+            });
+
+            // 统计数据
+            const totalCount = enrichedData.length;
+            const matchedCount = enrichedData.filter(item => item.matchedStandard).length;
+            const exceededCount = enrichedData.filter(item => item.exceeded).length;
+            const exceededRate = matchedCount > 0 ? (exceededCount / matchedCount * 100).toFixed(1) : 0;
+
+            // 更新统计卡片
+            document.getElementById('cwStdTotalCount').textContent = totalCount.toLocaleString();
+            document.getElementById('cwStdMatchedCount').textContent = matchedCount.toLocaleString();
+            document.getElementById('cwStdExceededCount').textContent = exceededCount.toLocaleString();
+            document.getElementById('cwStdExceededRate').textContent = exceededRate + '%';
+
+            // 更新图表
+            updateCWStandardCharts(enrichedData);
+
+            // 更新列表
+            updateCWStandardTable(enrichedData);
+        }
+
+        // 更新CW标准对比图表
+        function updateCWStandardCharts(data) {
+            // 按中品类统计超标情况
+            const categoryStats = {};
+            data.forEach(item => {
+                if (!item.matchedStandard) return;
+
+                const category = item.matchedStandard.中品类;
+                if (!categoryStats[category]) {
+                    categoryStats[category] = { total: 0, exceeded: 0 };
+                }
+                categoryStats[category].total++;
+                if (item.exceeded) {
+                    categoryStats[category].exceeded++;
+                }
+            });
+
+            // 图表1: 按中品类的超标分布
+            const categoryChartDom = document.getElementById('cwStdCategoryChart');
+            if (!charts.cwStdCategoryChart) {
+                charts.cwStdCategoryChart = echarts.init(categoryChartDom);
+            }
+
+            const sortedCategories = Object.entries(categoryStats)
+                .sort((a, b) => b[1].exceeded - a[1].exceeded)
+                .slice(0, 10);
+
+            const categoryOption = {
+                tooltip: {
+                    trigger: 'axis',
+                    axisPointer: { type: 'shadow' }
+                },
+                legend: { data: ['总数', '超标'] },
+                grid: { left: '3%', right: '4%', bottom: '3%', containLabel: true },
+                xAxis: {
+                    type: 'value'
+                },
+                yAxis: {
+                    type: 'category',
+                    data: sortedCategories.map(item => item[0])
+                },
+                series: [
+                    {
+                        name: '总数',
+                        type: 'bar',
+                        data: sortedCategories.map(item => item[1].total),
+                        itemStyle: { color: '#91cc75' }
+                    },
+                    {
+                        name: '超标',
+                        type: 'bar',
+                        data: sortedCategories.map(item => item[1].exceeded),
+                        itemStyle: { color: '#ee6666' }
+                    }
+                ]
+            };
+
+            charts.cwStdCategoryChart.setOption(categoryOption);
+
+            // 图表2: 超标程度分析（分段统计）
+            const exceedChartDom = document.getElementById('cwStdExceedChart');
+            if (!charts.cwStdExceedChart) {
+                charts.cwStdExceedChart = echarts.init(exceedChartDom);
+            }
+
+            const exceedRanges = {
+                '未超标': 0,
+                '超标1-30天': 0,
+                '超标31-60天': 0,
+                '超标61-90天': 0,
+                '超标90天以上': 0
+            };
+
+            data.forEach(item => {
+                if (!item.matchedStandard) return;
+
+                if (!item.exceeded) {
+                    exceedRanges['未超标']++;
+                } else if (item.exceededDays <= 30) {
+                    exceedRanges['超标1-30天']++;
+                } else if (item.exceededDays <= 60) {
+                    exceedRanges['超标31-60天']++;
+                } else if (item.exceededDays <= 90) {
+                    exceedRanges['超标61-90天']++;
+                } else {
+                    exceedRanges['超标90天以上']++;
+                }
+            });
+
+            const exceedOption = {
+                tooltip: {
+                    trigger: 'item',
+                    formatter: '{b}: {c}条 ({d}%)'
+                },
+                series: [{
+                    type: 'pie',
+                    radius: ['40%', '70%'],
+                    data: Object.entries(exceedRanges).map(([name, value]) => ({
+                        name: name,
+                        value: value
+                    })),
+                    label: {
+                        formatter: '{b}\n{c}条'
+                    }
+                }]
+            };
+
+            charts.cwStdExceedChart.setOption(exceedOption);
+        }
+
+        // 更新CW标准对比列表
+        function updateCWStandardTable(data) {
+            const tbody = document.getElementById('cwStdTable').querySelector('tbody');
+            tbody.innerHTML = '';
+
+            const filter = document.querySelector('input[name="cwStdFilter"]:checked').value;
+
+            let filteredData = data;
+            if (filter === 'matched') {
+                filteredData = data.filter(item => item.matchedStandard);
+            } else if (filter === 'exceeded') {
+                filteredData = data.filter(item => item.exceeded);
+            } else if (filter === 'unmatched') {
+                filteredData = data.filter(item => !item.matchedStandard);
+            }
+
+            const config = getMetricConfig();
+
+            filteredData.slice(0, 500).forEach((item, index) => {
+                const row = tbody.insertRow();
+                row.insertCell(0).textContent = index + 1;
+                row.insertCell(1).textContent = item.PSM专业组 || '-';
+                row.insertCell(2).textContent = item.T1零部件名称 || '-';
+                row.insertCell(3).textContent = item.Tn零部件品类 || '-';
+                row.insertCell(4).textContent = item.actualCWDays ? item.actualCWDays.toFixed(1) : '-';
+
+                const matchedCell = row.insertCell(5);
+                if (item.matchedStandard) {
+                    matchedCell.textContent = item.matchedStandard.中品类;
+                    matchedCell.style.color = '#52c41a';
+                } else {
+                    matchedCell.textContent = '未匹配';
+                    matchedCell.style.color = '#999';
+                }
+
+                row.insertCell(6).textContent = item.standardCW ? item.standardCW.toFixed(0) : '-';
+
+                const exceededCell = row.insertCell(7);
+                if (item.exceeded) {
+                    exceededCell.textContent = '+' + item.exceededDays.toFixed(1);
+                    exceededCell.style.color = '#ff4d4f';
+                    exceededCell.style.fontWeight = 'bold';
+                } else if (item.matchedStandard) {
+                    exceededCell.textContent = '合格';
+                    exceededCell.style.color = '#52c41a';
+                } else {
+                    exceededCell.textContent = '-';
+                }
+
+                const statusCell = row.insertCell(8);
+                if (item.exceeded) {
+                    statusCell.innerHTML = '<span class="badge bg-danger">超标</span>';
+                } else if (item.matchedStandard) {
+                    statusCell.innerHTML = '<span class="badge bg-success">正常</span>';
+                } else {
+                    statusCell.innerHTML = '<span class="badge bg-secondary">未匹配</span>';
+                }
+
+                row.insertCell(9).textContent = config.displayFormatter(getMetricValue(item, 'total'));
+            });
+
+            if (filteredData.length > 500) {
+                const row = tbody.insertRow();
+                const cell = row.insertCell(0);
+                cell.colSpan = 10;
+                cell.className = 'text-center text-muted';
+                cell.textContent = `显示前500条，共${filteredData.length}条记录`;
+            }
+
+            if (filteredData.length === 0) {
+                const row = tbody.insertRow();
+                const cell = row.insertCell(0);
+                cell.colSpan = 10;
                 cell.className = 'text-center text-muted';
                 cell.textContent = '没有符合条件的数据';
             }
