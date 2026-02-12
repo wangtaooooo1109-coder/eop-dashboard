@@ -264,7 +264,7 @@
         <div class="container-fluid">
             <span class="navbar-brand mb-0 h1">
                 <i class="fas fa-chart-line"></i> EOP呆滞管控数据看板系统
-                <span class="badge bg-light text-dark ms-2" id="versionBadge">v2.3.3</span>
+                <span class="badge bg-light text-dark ms-2" id="versionBadge">v2.3.4</span>
                 <span class="badge bg-info text-dark ms-2" id="filenameBadge" style="display: none;"></span>
             </span>
             <span class="text-white">
@@ -1003,7 +1003,7 @@
 
     <script>
         // 版本号
-        const VERSION = 'v2.3.3';
+        const VERSION = 'v2.3.4';
 
         // CW中品类参考标准数据（天数）
         const CW_STANDARDS = [
@@ -1070,7 +1070,7 @@
 
         // 列名映射（标准列名）
         const COLUMN_MAPPING = {
-            '呆滞金额': ['呆滞金额', '金额'],
+            '呆滞金额': ['呆滞金额'],  // A列，仅用于显示的万元汇总值
             '分类': ['分类', '呆滞分类'],
             'PSM专业组': ['PSM专业组', 'PSM组'],
             'PSM': ['PSM'],
@@ -1090,7 +1090,7 @@
             'T1端呆滞数量': ['T1端预计呆滞数量', 'T1端呆滞数量', 'T1端数量', 'T1端-呆滞数量', 'T1-呆滞数量'],
             '理想端呆滞金额': ['理想端呆滞金额（元）-公式', '理想端呆滞金额', '理想端金额', '理想端-呆滞金额', '理想-呆滞金额'],
             'T1端呆滞金额': ['T1端呆滞金额（元）-公式', 'T1端呆滞金额', 'T1端金额', 'T1端-呆滞金额', 'T1-呆滞金额'],
-            '呆滞总金额': ['呆滞总金额（元）-公式', '呆滞总金额', '总金额', '呆滞金额合计'],
+            '呆滞总金额': ['呆滞总金额（元）-公式', '呆滞总金额', '总金额', '呆滞金额合计'],  // 优先匹配BC列带公式的
             '呆滞总数量': ['呆滞总数量', '总数量', '呆滞数量合计', '数量'],
             '下一步措施': ['下一步措施', '措施', '处理措施'],
             '内部review': ['内部review', 'review', '审核状态', 'Review']
