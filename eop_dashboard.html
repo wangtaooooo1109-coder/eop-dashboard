@@ -2553,11 +2553,43 @@
 
         // 更新按零件类型的专用件占比图表 v2.3.22: 完全复用updateIdealExclusiveChart的成功逻辑
         function updateExclusiveByTypeChart(data) {
+            window.console.log('===== updateExclusiveByTypeChart 被调用，数据条数:', data.length, '=====');
+
+            // 测试：显示测试数据先确认UI是否工作
+            const testOption = {
+                tooltip: { trigger: 'item' },
+                series: [{
+                    type: 'pie',
+                    radius: '70%',
+                    data: [
+                        { name: '测试A', value: 100 },
+                        { name: '测试B', value: 200 },
+                        { name: '测试C', value: 150 }
+                    ],
+                    label: { show: true, formatter: '{b}\n{d}%' }
+                }]
+            };
+
+            const chartDom = safeGetElement('exclusivityPieChart');
+            if (!chartDom) {
+                window.console.error('【ERROR】exclusivityPieChart 元素不存在');
+                return;
+            }
+
+            if (!charts.exclusiveByTypeChart) {
+                charts.exclusiveByTypeChart = echarts.init(chartDom);
+                window.console.log('图表初始化完成');
+            }
+
+            charts.exclusiveByTypeChart.setOption(testOption);
+            window.console.log('测试图表显示完成，开始处理实际数据...');
+
             const config = getMetricConfig();
-            const typeData = {}; // 维护 {类型: {是/否/未填写: {count,金额}}}
+            const typeData = {};
 
             data.forEach(item => {
-                // 读取状态 - 与updateIdealExclusiveChart完全一致
+                window.console.log('  -> 处理:', item.零件类型, '状态:', item.是否认可为行业内理想专用);
+
                 let status = item.是否认可为行业内理想专用;
                 if (!status || status.trim() === '') {
                     status = '未填写';
@@ -2570,20 +2602,13 @@
                     typeData[type] = { 是: { count: 0, amount: 0 }, 否: { count: 0, amount: 0 }, 未填写: { count: 0, amount: 0 } };
                 }
 
-                // 确保状态只有三种可能值
                 const statusKey = status === '是' ? '是' : (status === '否' ? '否' : '未填写');
                 typeData[type][statusKey].count += 1;
                 typeData[type][statusKey].amount += amount;
             });
 
-            const chartDom = safeGetElement('exclusivityPieChart');
-            if (!chartDom) return;
+            window.console.log('typeData统计结果:', typeData);
 
-            if (!charts.exclusiveByTypeChart) {
-                charts.exclusiveByTypeChart = echarts.init(chartDom);
-            }
-
-            // 按总金额排序，只显示有"是"状态的数据
             const sortedTypes = Object.entries(typeData)
                 .sort((a, b) => b[1].是.amount - a[1].是.amount)
                 .filter(([_, data]) => data.是.count > 0)
@@ -2593,13 +2618,15 @@
                     count: value.是.count
                 }));
 
+            window.console.log('排序后数据(专用件):', sortedTypes);
+
             const option = {
                 tooltip: {
                     trigger: 'item',
                     formatter: function(params) {
-                        const type = params.name;
-                        const data = typeData[type];
-                        return type + '<br/>是: ' + data.是.count + '条<br/>占比: ' + params.percent + '%';
+                        if (!typeData[params.name]) return params.name;
+                        const dataRef = typeData[params.name];
+                        return params.name + '<br/>是: ' + dataRef.是.count + '条<br/>金额: ¥' + (parseFloat(config.formatter(dataRef.是.amount))).toFixed(2) + '万<br/>占比: ' + params.percent + '%';
                     }
                 },
                 legend: { orient: 'vertical', left: 'left' },
@@ -2614,6 +2641,7 @@
             };
 
             charts.exclusiveByTypeChart.setOption(option);
+            window.console.log('===== updateExclusiveByTypeChart 完成 =====');
         }
 
         // 更新按PSM专业组的专用件占比图表 v2.3.22
