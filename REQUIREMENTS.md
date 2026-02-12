@@ -463,3 +463,31 @@ function updateDistributionAnalysis() {
 - [ ] 各品类超标情况中不再有误匹配到线束天线类的问题
 - [ ] 版本号显示为v2.3.19
 
+
+### 2026-02-12 v2.3.20 - 修复专用性分析三个空表的问题
+
+**用户需求：** 专用性分析中，"是否认可为理想专用"表显示正常，但其他三个表是空的
+
+**问题根因：**
+- `isExclusive`函数引用了不存在的字段 `item.是否为理想专用`（该字段在parseWorkbook中没有映射）
+- `updateExclusiveComparisonChart`中的专用件判断逻辑与`isExclusive`函数不一致
+- 只有直接使用`item.是否认可为行业内理想专用`的图表示正常
+
+**受影响的功能：**
+1. 按零件类型的专用件占比图表 (`exclusivityPieChart`) - 使用`isExclusive(item)`
+2. 按PSM专业组的专用件分布图表 (`exclusivityMultiChart`) - 使用`isExclusive(item)`
+3. 专用 vs 非专用金额对比图表 (`exclusiveComparisonChart`) - 使用独立的判断逻辑
+4. 专用零件交互查询表格 (`exclusivePartsTable`) - 使用`isExclusive(item)`
+
+**修复内容：**
+1. `isExclusive`函数: 移除对不存在字段"是否为理想专用"的引用，只使用实际存在的`是否认可为行业内理想专用`
+2. `updateExclusiveComparisonChart`: 统一专用件判断逻辑，与`isExclusive`函数保持一致（匹配"是"、"认可"、"yes"）
+3. 更新版本号到v2.3.20
+
+**测试验证：**
+- [ ] 按零件类型的专用件占比图表显示正常
+- [ ] 按PSM专业组的专用件分布图表显示正常
+- [ ] 专用 vs 非专用金额对比图表显示正常
+- [ ] 专用零件交互查询表格显示正常
+- [ ] 版本号显示为v2.3.20
+
