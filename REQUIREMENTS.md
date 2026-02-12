@@ -112,6 +112,76 @@ v2.3.3的COLUMN_MAPPING中：
 
 **版本更新：** v2.3.3 → v2.3.4
 
+### 2026-02-12 v2.3.5 - 修复JavaScript级联失败导致图表不显示
+
+**用户反馈：** "这4个图片目前都没有任何显示。在最上面的呆滞总金额的计算是正确的，为什么帕累托里有问题"
+
+**用户提供的错误日志：**
+```
+eop_dashboard.html:3349 Uncaught TypeError: Cannot read properties of null (reading 'querySelector')
+    at updateLTCWStats (eop_dashboard.html:3349:68)
+    at updateDashboard (eop_dashboard.html:4764:5)
+    at eop_dashboard.html:4901:13
+```
+
+**根本原因分析（Systematic Debugging Phase 1）：**
+1. 用户确认：列映射工作正常（"列 '呆滞总金额' 精确匹配到索引 55"）✅
+2. 用户确认：顶部汇总计算正确，说明数据解析成功 ✅
+3. **关键发现：JavaScript执行在`updateLTCWStats`第3349行崩溃** ❌
+   - 错误类型：`TypeError: Cannot read properties of null`
+   - 错误原因：`document.getElementById('ltCwStatsTable')` 返回 `null`
+   - 导致后果：**所有后续图表更新函数都未执行**（级联失败）
+
+**问题影响（级联失败模式）：**
+```javascript
+// updateDashboard调用顺序（第4764行附近）
+updateLTCWStats(data);        // ❌ 第3349行崩溃，抛出TypeError
+updateParetoAnalysis(data);   // ⏹️ 未执行
+updateExclusiveAnalysis(data); // ⏹️ 未执行
+// ... 所有后续图表函数都被阻塞
+```
+
+导致4个图表都为空：
+- 帕累托分析（零件+供应商）- `updateParetoAnalysis`未执行
+- 专用性分析 - `updateExclusiveAnalysis`未执行
+- CWLT分析 - `updateLTCWStats`崩溃中断
+
+**修复内容：**
+在`updateLTCWStats`函数（3348-3376行）添加防御性空值检查：
+```javascript
+// 修复前（第3349行）：
+const tbody = document.getElementById('ltCwStatsTable').querySelector('tbody');
+tbody.innerHTML = '';
+
+// 修复后：
+const tableElement = document.getElementById('ltCwStatsTable');
+if (tableElement) {
+    const tbody = tableElement.querySelector('tbody');
+    if (tbody) {
+        tbody.innerHTML = '';
+        // ... 表格填充逻辑
+    }
+}
+// 图表更新无论表格是否存在都执行
+updateLTChart(groupStats);
+updateCWChart(groupStats);
+```
+
+**Defense-in-Depth原则应用：**
+- 不假设HTML元素一定存在
+- 在访问DOM元素前进行空值检查
+- 确保关键功能（图表更新）不依赖可选功能（表格显示）
+- 防止单点故障导致整个仪表板失效
+
+**版本更新：** v2.3.4 → v2.3.5
+
+**测试验证：**
+- [ ] 上传Excel文件后，浏览器Console无TypeError
+- [ ] 帕累托分析（零件+供应商）正常显示
+- [ ] 专用性分析所有图表正常显示
+- [ ] CWLT分析图表正常显示
+- [ ] 版本号显示为v2.3.5
+
 
 **用户需求：** 帕累托分析，专用性分析，CWLT分析里的功能不可用。L987和L6的列号可能不匹配，需要根据列名做匹配。要求系统性检查所有功能。
 

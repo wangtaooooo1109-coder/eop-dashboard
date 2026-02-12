@@ -264,7 +264,7 @@
         <div class="container-fluid">
             <span class="navbar-brand mb-0 h1">
                 <i class="fas fa-chart-line"></i> EOP呆滞管控数据看板系统
-                <span class="badge bg-light text-dark ms-2" id="versionBadge">v2.3.4</span>
+                <span class="badge bg-light text-dark ms-2" id="versionBadge">v2.3.5</span>
                 <span class="badge bg-info text-dark ms-2" id="filenameBadge" style="display: none;"></span>
             </span>
             <span class="text-white">
@@ -1003,7 +1003,7 @@
 
     <script>
         // 版本号
-        const VERSION = 'v2.3.4';
+        const VERSION = 'v2.3.5';
 
         // CW中品类参考标准数据（天数）
         const CW_STANDARDS = [
@@ -3345,30 +3345,35 @@
                 return { avg, max, min, median };
             };
 
-            // 更新表格
-            const tbody = document.getElementById('ltCwStatsTable').querySelector('tbody');
-            tbody.innerHTML = '';
+            // 更新表格（如果存在）
+            const tableElement = document.getElementById('ltCwStatsTable');
+            if (tableElement) {
+                const tbody = tableElement.querySelector('tbody');
+                if (tbody) {
+                    tbody.innerHTML = '';
 
-            // 按分类名称排序
-            const sortedGroups = Object.entries(groupStats).sort((a, b) => a[0].localeCompare(b[0]));
+                    // 按分类名称排序
+                    const sortedGroups = Object.entries(groupStats).sort((a, b) => a[0].localeCompare(b[0]));
 
-            sortedGroups.forEach(([groupName, data]) => {
-                const ltStats = calculateStats(data.ltValues);
-                const cwStats = calculateStats(data.cwValues);
-                const count = Math.max(data.ltValues.length, data.cwValues.length);
+                    sortedGroups.forEach(([groupName, data]) => {
+                        const ltStats = calculateStats(data.ltValues);
+                        const cwStats = calculateStats(data.cwValues);
+                        const count = Math.max(data.ltValues.length, data.cwValues.length);
 
-                const row = tbody.insertRow();
-                row.insertCell(0).textContent = groupName;
-                row.insertCell(1).textContent = count;
-                row.insertCell(2).textContent = ltStats.avg.toFixed(2);
-                row.insertCell(3).textContent = ltStats.max.toFixed(2);
-                row.insertCell(4).textContent = ltStats.min.toFixed(2);
-                row.insertCell(5).textContent = ltStats.median.toFixed(2);
-                row.insertCell(6).textContent = cwStats.avg.toFixed(2);
-                row.insertCell(7).textContent = cwStats.max.toFixed(2);
-                row.insertCell(8).textContent = cwStats.min.toFixed(2);
-                row.insertCell(9).textContent = cwStats.median.toFixed(2);
-            });
+                        const row = tbody.insertRow();
+                        row.insertCell(0).textContent = groupName;
+                        row.insertCell(1).textContent = count;
+                        row.insertCell(2).textContent = ltStats.avg.toFixed(2);
+                        row.insertCell(3).textContent = ltStats.max.toFixed(2);
+                        row.insertCell(4).textContent = ltStats.min.toFixed(2);
+                        row.insertCell(5).textContent = ltStats.median.toFixed(2);
+                        row.insertCell(6).textContent = cwStats.avg.toFixed(2);
+                        row.insertCell(7).textContent = cwStats.max.toFixed(2);
+                        row.insertCell(8).textContent = cwStats.min.toFixed(2);
+                        row.insertCell(9).textContent = cwStats.median.toFixed(2);
+                    });
+                }
+            }
 
             // 更新LT图表
             updateLTChart(groupStats);
