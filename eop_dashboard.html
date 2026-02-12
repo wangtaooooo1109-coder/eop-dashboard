@@ -452,120 +452,18 @@
                 </div>
             </div>
 
-            <!-- 图表区域 -->
-            <div class="row">
-                <div class="col-md-6">
-                    <div class="card">
-                        <div class="card-header">
-                            <i class="fas fa-layer-group"></i> 呆滞金额阶梯分布
-                        </div>
-                        <div class="card-body">
-                            <div id="tierChart" class="chart-container"></div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-6">
-                    <div class="card">
-                        <div class="card-header">
-                            <i class="fas fa-project-diagram"></i> PSM专业组分析
-                        </div>
-                        <div class="card-body">
-                            <div id="groupChart" class="chart-container"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="row">
-                <div class="col-md-6">
-                    <div class="card">
-                        <div class="card-header">
-                            <i class="fas fa-cubes"></i> 零部件品类Top 10
-                        </div>
-                        <div class="card-body">
-                            <div id="categoryChart" class="chart-container"></div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-6">
-                    <div class="card">
-                        <div class="card-header">
-                            <i class="fas fa-box"></i> 零件类型分布
-                        </div>
-                        <div class="card-body">
-                            <div id="typeChart" class="chart-container"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="row">
-                <div class="col-md-12">
-                    <div class="card">
-                        <div class="card-header">
-                            <i class="fas fa-balance-scale"></i> T1端 vs 理想端对比
-                        </div>
-                        <div class="card-body">
-                            <div id="comparisonChart" class="chart-container"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 新增功能：供应商排名、Review状态、下一步措施 -->
-            <div class="row">
-                <div class="col-md-6">
-                    <div class="card">
-                        <div class="card-header">
-                            <i class="fas fa-trophy"></i> 供应商呆滞金额排名
-                        </div>
-                        <div class="card-body">
-                            <div id="supplierChart" class="chart-container"></div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-6">
-                    <div class="card">
-                        <div class="card-header">
-                            <i class="fas fa-tasks"></i> Review状态分析
-                        </div>
-                        <div class="card-body">
-                            <div id="reviewChart" class="chart-container"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="row">
-                <div class="col-md-12">
-                    <div class="card">
-                        <div class="card-header">
-                            <i class="fas fa-clipboard-list"></i> 下一步措施分类统计
-                        </div>
-                        <div class="card-body">
-                            <div id="nextStepChart" class="chart-container"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
             <!-- Tab 导航 -->
             <div class="row mt-4">
                 <div class="col-12">
                     <ul class="nav nav-tabs" id="dashboardTabs" role="tablist">
                         <li class="nav-item" role="presentation">
-                            <button class="nav-link active" id="overview-tab" data-bs-toggle="tab" data-bs-target="#overview" type="button" role="tab">
-                                <i class="fas fa-tachometer-alt"></i> 数据概览
+                            <button class="nav-link active" id="comprehensive-tab" data-bs-toggle="tab" data-bs-target="#comprehensive" type="button" role="tab">
+                                <i class="fas fa-chart-pie"></i> 综合分析
                             </button>
                         </li>
                         <li class="nav-item" role="presentation">
-                            <button class="nav-link" id="pareto-tab" data-bs-toggle="tab" data-bs-target="#pareto" type="button" role="tab">
-                                <i class="fas fa-chart-line"></i> 帕累托分析
-                            </button>
-                        </li>
-                        <li class="nav-item" role="presentation">
-                            <button class="nav-link" id="status-tab" data-bs-toggle="tab" data-bs-target="#status" type="button" role="tab">
-                                <i class="fas fa-clipboard-check"></i> 状态分析
+                            <button class="nav-link" id="supplier-tab" data-bs-toggle="tab" data-bs-target="#supplier" type="button" role="tab">
+                                <i class="fas fa-truck"></i> 供应商分析
                             </button>
                         </li>
                         <li class="nav-item" role="presentation">
@@ -574,719 +472,509 @@
                             </button>
                         </li>
                         <li class="nav-item" role="presentation">
-                            <button class="nav-link" id="cwstandard-tab" data-bs-toggle="tab" data-bs-target="#cwstandard" type="button" role="tab">
-                                <i class="fas fa-ruler"></i> CW标准对比
+                            <button class="nav-link" id="exclusive-tab" data-bs-toggle="tab" data-bs-target="#exclusive" type="button" role="tab">
+                                <i class="fas fa-lock"></i> 专用性分析
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="progress-tab" data-bs-toggle="tab" data-bs-target="#progress" type="button" role="tab">
+                                <i class="fas fa-tasks"></i> 进度跟进
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="verification-tab" data-bs-toggle="tab" data-bs-target="#verification" type="button" role="tab">
+                                <i class="fas fa-check-circle"></i> 数据正确性确认
                             </button>
                         </li>
                     </ul>
-                    <div class="tab-content" id="dashboardTabsContent" style="margin-top: 20px;">
-                        <!-- Tab 1: 数据概览 -->
-                        <div class="tab-pane fade show active" id="overview" role="tabpanel">
-
-            <!-- 供应商集中度分析 -->
-            <div class="row">
-                <div class="col-md-6">
-                    <div class="card">
-                        <div class="card-header">
-                            <i class="fas fa-chart-pie"></i> 供应商集中度分析（Top10占比）
-                        </div>
-                        <div class="card-body">
-                            <div id="supplierConcentrationChart" class="chart-container"></div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-6">
-                    <div class="card">
-                        <div class="card-header">
-                            <i class="fas fa-exclamation-triangle"></i> 供应商风险评估（金额vs数量）
-                        </div>
-                        <div class="card-body">
-                            <div id="supplierRiskScatterChart" class="chart-container"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="row">
-                <div class="col-md-12">
-                    <div class="card">
-                        <div class="card-header">
-                            <i class="fas fa-star"></i> 供应商绩效评分（综合LT/CW/单价合理性）
-                        </div>
-                        <div class="card-body">
-                            <div id="supplierPerformanceChart" class="chart-container"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 新增：理想专用和合理性确认统计 -->
-            <div class="row">
-                <div class="col-md-4">
-                    <div class="card">
-                        <div class="card-header">
-                            <i class="fas fa-check-circle"></i> 是否认可为理想专用
-                        </div>
-                        <div class="card-body">
-                            <div id="idealExclusiveChart" class="chart-container" style="height: 300px;"></div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="card">
-                        <div class="card-header">
-                            <i class="fas fa-dollar-sign"></i> 单价合理性确认进度
-                        </div>
-                        <div class="card-body">
-                            <div id="priceReasonableChart" class="chart-container" style="height: 300px;"></div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="card">
-                        <div class="card-header">
-                            <i class="fas fa-clock"></i> CW/LT合理性确认进度
-                        </div>
-                        <div class="card-body">
-                            <div id="cwReasonableChart" class="chart-container" style="height: 300px;"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-                        </div>
-                        <!-- End Tab 1: 数据概览 -->
-
-                        <!-- Tab 2: 帕累托分析 -->
-                        <div class="tab-pane fade" id="pareto" role="tabpanel">
-
-            <!-- 帕累托分析（80/20法则） -->
-            <div class="row">
-                <div class="col-md-12">
-                    <div class="card">
-                        <div class="card-header">
-                            <i class="fas fa-chart-line"></i> 帕累托分析 - 零件
-                        </div>
-                        <div class="card-body">
-                            <div id="paretoPartChart" class="chart-container"></div>
-                            <div class="alert alert-info mt-3">
-                                <i class="fas fa-info-circle"></i>
-                                <span id="paretoPartInfo">前20%零件占总金额的__%</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="row mt-3">
-                <div class="col-md-12">
-                    <div class="card">
-                        <div class="card-header">
-                            <i class="fas fa-chart-line"></i> 帕累托分析 - 供应商
-                        </div>
-                        <div class="card-body">
-                            <div id="paretoSupplierChart" class="chart-container"></div>
-                            <div class="alert alert-info mt-3">
-                                <i class="fas fa-info-circle"></i>
-                                <span id="paretoSupplierInfo">前20%供应商占总金额的__%</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 数据对比分析（L987 vs L6） -->
-            <div class="row mt-3">
-                <div class="col-md-12">
-                    <div class="card">
-                        <div class="card-header">
-                            <i class="fas fa-exchange-alt"></i> 项目对比分析（L987 vs L6）
-                            <small class="text-light ms-2">仅在"全部合并"模式下显示</small>
-                        </div>
-                        <div class="card-body" id="comparisonSection">
-                            <div class="row">
-                                <div class="col-md-4">
-                                    <div id="comparisonMetricsChart" class="chart-container" style="height: 300px;"></div>
-                                </div>
-                                <div class="col-md-8">
-                                    <div id="comparisonBarChart" class="chart-container" style="height: 300px;"></div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 智能预警与风险提示 -->
-            <div class="row">
-                <div class="col-md-12">
-                    <div class="card border-warning">
-                        <div class="card-header bg-warning text-dark">
-                            <i class="fas fa-exclamation-triangle"></i> 智能预警与风险提示
-                        </div>
-                        <div class="card-body">
-                            <div class="row">
-                                <div class="col-md-4">
-                                    <h6 class="text-danger"><i class="fas fa-fire"></i> 高风险零件</h6>
-                                    <div id="highRiskList" class="alert-list"></div>
-                                </div>
-                                <div class="col-md-4">
-                                    <h6 class="text-warning"><i class="fas fa-clock"></i> 长期呆滞预警</h6>
-                                    <div id="longTermList" class="alert-list"></div>
-                                </div>
-                                <div class="col-md-4">
-                                    <h6 class="text-info"><i class="fas fa-percentage"></i> 集中度风险</h6>
-                                    <div id="concentrationRiskList" class="alert-list"></div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-                        </div>
-                        <!-- End Tab 2: 帕累托分析 -->
-
-                        <!-- Tab 3: 状态分析 -->
-                        <div class="tab-pane fade" id="status" role="tabpanel">
-
-            <!-- 单价合理性分析 -->
-            <div class="row">
-                <div class="col-md-6">
-                    <div class="card">
-                        <div class="card-header">
-                            <i class="fas fa-dollar-sign"></i> 单价合理性分析
-                        </div>
-                        <div class="card-body">
-                            <div id="priceReasonableChart" class="chart-container" style="height: 350px;"></div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-6">
-                    <div class="card">
-                        <div class="card-header">
-                            <i class="fas fa-exclamation-circle"></i> 单价不合理项-按PSM专业组
-                        </div>
-                        <div class="card-body">
-                            <div id="priceUnreasonableByPSMChart" class="chart-container" style="height: 350px;"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- CW_LT合理性分析 -->
-            <div class="row">
-                <div class="col-md-6">
-                    <div class="card">
-                        <div class="card-header">
-                            <i class="fas fa-balance-scale"></i> CW_LT合理性分析
-                        </div>
-                        <div class="card-body">
-                            <div id="cwltReasonableChart" class="chart-container" style="height: 350px;"></div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-6">
-                    <div class="card">
-                        <div class="card-header">
-                            <i class="fas fa-chart-pie"></i> CW_LT不合理项金额影响
-                        </div>
-                        <div class="card-body">
-                            <div id="cwltImpactChart" class="chart-container" style="height: 350px;"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 新增：专用性多维度分析 -->
-            <div class="row">
-                <div class="col-md-12">
-                    <div class="card">
-                        <div class="card-header">
-                            <i class="fas fa-chart-bar"></i> 专用件占比分析 - 按零件类型
-                        </div>
-                        <div class="card-body">
-                            <div id="exclusiveByTypeChart" class="chart-container"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="row">
-                <div class="col-md-12">
-                    <div class="card">
-                        <div class="card-header">
-                            <i class="fas fa-layer-group"></i> 专用件占比分析 - 按PSM专业组
-                        </div>
-                        <div class="card-body">
-                            <div id="exclusiveByGroupChart" class="chart-container"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="row">
-                <div class="col-md-6">
-                    <div class="card">
-                        <div class="card-header">
-                            <i class="fas fa-percentage"></i> 专用件金额占比总览
-                        </div>
-                        <div class="card-body">
-                            <div id="exclusiveAmountChart" class="chart-container" style="height: 350px;"></div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-6">
-                    <div class="card">
-                        <div class="card-header">
-                            <i class="fas fa-balance-scale"></i> 专用 vs 非专用金额对比
-                        </div>
-                        <div class="card-body">
-                            <div id="exclusiveComparisonChart" class="chart-container" style="height: 350px;"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 专用零件交互查询 -->
-            <div class="row">
-                <div class="col-12">
-                    <div class="card">
-                        <div class="card-header">
-                            <i class="fas fa-search"></i> 专用零件交互查询
-                        </div>
-                        <div class="card-body">
+                                            <div class="tab-content" id="dashboardTabsContent" style="margin-top: 20px;">
+                        <!-- Tab 1: 综合分析 -->
+                        <div class="tab-pane fade show active" id="comprehensive" role="tabpanel">
+                            <!-- 帕累托分析 -->
                             <div class="row mb-3">
-                                <div class="col-md-3">
-                                    <label>选择PSM专业组</label>
-                                    <select class="form-select" id="exclusiveQueryPSM" onchange="updateExclusiveQueryParts()">
-                                        <option value="">--请选择--</option>
-                                    </select>
-                                </div>
-                                <div class="col-md-3">
-                                    <label>选择零件</label>
-                                    <select class="form-select" id="exclusiveQueryPart" onchange="updateExclusivePartDetail()">
-                                        <option value="">--全部零件--</option>
-                                    </select>
-                                </div>
-                                <div class="col-md-6">
-                                    <label>专用件统计</label>
-                                    <div class="alert alert-info mb-0" id="exclusiveQueryStats">
-                                        请选择PSM专业组
+                                <div class="col-md-12">
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <i class="fas fa-chart-line"></i> 帕累托分析 - 零件
+                                        </div>
+                                        <div class="card-body">
+                                            <div id="paretoPartChart" class="chart-container"></div>
+                                            <div class="alert alert-info mt-3">
+                                                <i class="fas fa-info-circle"></i>
+                                                <span id="paretoPartInfo">前20%零件占总金额的__%</span>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
+
+                            <div class="row mb-3">
+                                <div class="col-md-12">
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <i class="fas fa-chart-line"></i> 帕累托分析 - 供应商
+                                        </div>
+                                        <div class="card-body">
+                                            <div id="paretoSupplierChart" class="chart-container"></div>
+                                            <div class="alert alert-info mt-3">
+                                                <i class="fas fa-info-circle"></i>
+                                                <span id="paretoSupplierInfo">前20%供应商占总金额的__%</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 呆滞金额阶梯分布、PSM专业组、零件类型 -->
                             <div class="row">
-                                <div class="col-md-6">
-                                    <div id="exclusiveQueryChart" class="chart-container" style="height: 300px;"></div>
+                                <div class="col-md-4">
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <i class="fas fa-layer-group"></i> 呆滞金额阶梯分布
+                                        </div>
+                                        <div class="card-body">
+                                            <div id="tierChart" class="chart-container"></div>
+                                        </div>
+                                    </div>
                                 </div>
-                                <div class="col-md-6">
-                                    <div style="max-height: 300px; overflow-y: auto;">
-                                        <table class="table table-sm table-striped" id="exclusivePartsTable">
-                                            <thead>
-                                                <tr>
-                                                    <th>零部件名称</th>
-                                                    <th>物料编码</th>
-                                                    <th>供应商</th>
-                                                    <th>呆滞金额</th>
-                                                    <th>是否专用</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody></tbody>
-                                        </table>
+                                <div class="col-md-4">
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <i class="fas fa-project-diagram"></i> PSM专业组分析
+                                        </div>
+                                        <div class="card-body">
+                                            <div id="groupChart" class="chart-container"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <i class="fas fa-box"></i> 零件类型分布
+                                        </div>
+                                        <div class="card-body">
+                                            <div id="typeChart" class="chart-container"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 零部件品类（带筛选） -->
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <i class="fas fa-cubes"></i> 零部件品类分布
+                                            <div class="float-end">
+                                                <select class="form-select form-select-sm d-inline-block" style="width: auto;" id="categoryTopSelect" onchange="updateCategoryChartFromSelect()">
+                                                    <option value="10">Top 10</option>
+                                                    <option value="15">Top 15</option>
+                                                    <option value="20">Top 20</option>
+                                                    <option value="50">Top 50</option>
+                                                    <option value="all">全部</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="card-body">
+                                            <div id="categoryChart" class="chart-container"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- T1&理想端对比（改为饼图） -->
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <i class="fas fa-balance-scale"></i> T1端 vs 理想端对比
+                                        </div>
+                                        <div class="card-body">
+                                            <div id="comparisonChart" class="chart-container"></div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                </div>
-            </div>
+                        <!-- End Tab 1: 综合分析 -->
 
+                        <!-- Tab 2: 供应商分析 -->
+                        <div class="tab-pane fade" id="supplier" role="tabpanel">
+                            <!-- 供应商呆滞金额排名（带筛选和占比） -->
+                            <div class="row mb-3">
+                                <div class="col-md-12">
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <i class="fas fa-trophy"></i> 供应商呆滞金额排名
+                                            <div class="float-end">
+                                                <select class="form-select form-select-sm d-inline-block" style="width: auto;" id="supplierTopSelect" onchange="updateSupplierRankingChart()">
+                                                    <option value="10">Top 10</option>
+                                                    <option value="15">Top 15</option>
+                                                    <option value="20">Top 20</option>
+                                                    <option value="30">Top 30</option>
+                                                    <option value="50">Top 50</option>
+                                                    <option value="all">全部</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="card-body">
+                                            <div id="supplierChart" class="chart-container"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 供应商集中度分析 -->
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <i class="fas fa-chart-pie"></i> 供应商集中度分析（Top10占比）
+                                        </div>
+                                        <div class="card-body">
+                                            <div id="supplierConcentrationChart" class="chart-container"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                        <!-- End Tab 3: 状态分析 -->
+                        <!-- End Tab 2: 供应商分析 -->
 
-                        <!-- Tab 4: LT&CW分析 -->
+                        <!-- Tab 3: LT&CW分析 -->
                         <div class="tab-pane fade" id="ltcw" role="tabpanel">
-
-            <!-- LT和CW交互查询 -->
-            <div class="row">
-                <div class="col-12">
-                    <div class="card">
-                        <div class="card-header">
-                            <i class="fas fa-search"></i> LT & CW 交互查询
-                        </div>
-                        <div class="card-body">
+                            <!-- LT和CW交互查询 -->
                             <div class="row mb-3">
-                                <div class="col-md-3">
-                                    <label>选择PSM专业组</label>
-                                    <select class="form-select" id="ltcwQueryPSM" onchange="updateLTCWQueryParts()">
-                                        <option value="">--请选择--</option>
-                                    </select>
-                                </div>
-                                <div class="col-md-3">
-                                    <label>选择零件</label>
-                                    <select class="form-select" id="ltcwQueryPart" onchange="updateLTCWPartDetail()">
-                                        <option value="">--全部零件--</option>
-                                    </select>
-                                </div>
-                                <div class="col-md-6">
-                                    <label>LT & CW 统计</label>
-                                    <div class="alert alert-info mb-0" id="ltcwQueryStats">
-                                        请选择PSM专业组
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="row">
-                                <div class="col-md-12">
-                                    <h6 class="text-center">LT分布</h6>
-                                    <div id="ltcwQueryChartLT" class="chart-container" style="height: 400px;"></div>
-                                </div>
-                            </div>
-                            <div class="row mt-3">
-                                <div class="col-md-12">
-                                    <h6 class="text-center">CW分布</h6>
-                                    <div id="ltcwQueryChartCW" class="chart-container" style="height: 400px;"></div>
-                                </div>
-                            </div>
-                            <div class="row mt-3">
                                 <div class="col-12">
-                                    <div style="max-height: 300px; overflow-y: auto;">
-                                        <table class="table table-sm table-striped" id="ltcwPartsTable">
-                                            <thead>
-                                                <tr>
-                                                    <th>零部件名称</th>
-                                                    <th>物料编码</th>
-                                                    <th>供应商</th>
-                                                    <th>LT</th>
-                                                    <th>CW</th>
-                                                    <th>呆滞金额</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody></tbody>
-                                        </table>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- LT和CW统计分析 -->
-            <div class="row">
-                <div class="col-12">
-                    <div class="card">
-                        <div class="card-header">
-                            <i class="fas fa-chart-bar"></i> LT & CW 统计分析
-                        </div>
-                        <div class="card-body">
-                            <div class="row mb-3">
-                                <div class="col-md-3">
-                                    <label>统计维度</label>
-                                    <select class="form-select" id="ltcwStatsDimension" onchange="updateDashboard()">
-                                        <option value="category">按零件品类</option>
-                                        <option value="psm">按PSM专业组</option>
-                                        <option value="type">按零件类型</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <h6 class="text-center">LT (Lead Time) 统计</h6>
-                                    <div id="ltStatsChart" class="chart-container" style="height: 350px;"></div>
-                                </div>
-                                <div class="col-md-6">
-                                    <h6 class="text-center">CW (Component Weight) 统计</h6>
-                                    <div id="cwStatsChart" class="chart-container" style="height: 350px;"></div>
-                                </div>
-                            </div>
-                            <div class="row mt-3">
-                                <div class="col-12">
-                                    <table class="table table-striped table-sm" id="ltCwStatsTable">
-                                        <thead>
-                                            <tr>
-                                                <th>分类</th>
-                                                <th>样本数</th>
-                                                <th colspan="4" class="text-center bg-light">LT统计</th>
-                                                <th colspan="4" class="text-center bg-light">CW统计</th>
-                                            </tr>
-                                            <tr>
-                                                <th></th>
-                                                <th></th>
-                                                <th>平均值</th>
-                                                <th>最大值</th>
-                                                <th>最小值</th>
-                                                <th>中位数</th>
-                                                <th>平均值</th>
-                                                <th>最大值</th>
-                                                <th>最小值</th>
-                                                <th>中位数</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody></tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- CW/LT 分布图分析 -->
-            <div class="row">
-                <div class="col-12">
-                    <div class="card">
-                        <div class="card-header">
-                            <i class="fas fa-chart-area"></i> CW / LT 分布图分析 (按2周区间)
-                        </div>
-                        <div class="card-body">
-                            <!-- 筛选条件 -->
-                            <div class="row mb-3">
-                                <div class="col-md-3">
-                                    <label>PSM专业组</label>
-                                    <select class="form-select form-select-sm" id="distPSM" onchange="updateDistParts(); updateDistribution();">
-                                        <option value="">--全部--</option>
-                                    </select>
-                                </div>
-                                <div class="col-md-3">
-                                    <label>零件（总成）</label>
-                                    <select class="form-select form-select-sm" id="distPart" onchange="updateDistribution();">
-                                        <option value="">--全部--</option>
-                                    </select>
-                                </div>
-                                <div class="col-md-3">
-                                    <label>Tn零部件品类</label>
-                                    <select class="form-select form-select-sm" id="distCategory" onchange="updateDistribution();">
-                                        <option value="">--全部--</option>
-                                    </select>
-                                </div>
-                                <div class="col-md-3">
-                                    <label>数据来源</label>
-                                    <select class="form-select form-select-sm" id="distSheet" onchange="updateDistribution();">
-                                        <option value="ALL">全部数据</option>
-                                        <option value="L987">仅L987</option>
-                                        <option value="L6">仅L6</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="row mb-3">
-                                <div class="col-md-6">
-                                    <label>LT 区间筛选（月）</label>
-                                    <div class="input-group input-group-sm">
-                                        <span class="input-group-text">最小</span>
-                                        <input type="number" class="form-control" id="distLTMin" value="0" step="0.5" onchange="updateDistribution();">
-                                        <span class="input-group-text">最大</span>
-                                        <input type="number" class="form-control" id="distLTMax" value="100" step="0.5" onchange="updateDistribution();">
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <label>CW 区间筛选（月）</label>
-                                    <div class="input-group input-group-sm">
-                                        <span class="input-group-text">最小</span>
-                                        <input type="number" class="form-control" id="distCWMin" value="0" step="0.5" onchange="updateDistribution();">
-                                        <span class="input-group-text">最大</span>
-                                        <input type="number" class="form-control" id="distCWMax" value="100" step="0.5" onchange="updateDistribution();">
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- 统计摘要 -->
-                            <div class="alert alert-info mb-3" id="distSummary">
-                                请上传数据后查看分布图
-                            </div>
-
-                            <!-- 分布图 -->
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <h6 class="text-center">LT 分布图（按2周区间）</h6>
-                                    <div id="distChartLT" class="chart-container" style="height: 350px;"></div>
-                                </div>
-                                <div class="col-md-6">
-                                    <h6 class="text-center">CW 分布图（按2周区间）</h6>
-                                    <div id="distChartCW" class="chart-container" style="height: 350px;"></div>
-                                </div>
-                            </div>
-
-                            <!-- 明细列表 -->
-                            <div class="row mt-3">
-                                <div class="col-12">
-                                    <h6>筛选结果明细列表</h6>
-                                    <div class="mb-2">
-                                        <label class="me-2">排序依据：</label>
-                                        <div class="btn-group btn-group-sm" role="group">
-                                            <input type="radio" class="btn-check" name="distSort" id="distSortLT" value="LT" checked onchange="updateDistribution();">
-                                            <label class="btn btn-outline-primary" for="distSortLT">LT</label>
-
-                                            <input type="radio" class="btn-check" name="distSort" id="distSortCW" value="CW" onchange="updateDistribution();">
-                                            <label class="btn btn-outline-primary" for="distSortCW">CW</label>
-
-                                            <input type="radio" class="btn-check" name="distSort" id="distSortAmount" value="amount" onchange="updateDistribution();">
-                                            <label class="btn btn-outline-primary" for="distSortAmount">呆滞金额</label>
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <i class="fas fa-search"></i> LT & CW 交互查询
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="row mb-3">
+                                                <div class="col-md-3">
+                                                    <label>选择PSM专业组</label>
+                                                    <select class="form-select" id="ltcwQueryPSM" onchange="updateLTCWQueryParts()">
+                                                        <option value="">--请选择--</option>
+                                                    </select>
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <label>选择零件</label>
+                                                    <select class="form-select" id="ltcwQueryPart" onchange="updateLTCWPartDetail()">
+                                                        <option value="">--全部零件--</option>
+                                                    </select>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <label>LT & CW 统计</label>
+                                                    <div class="alert alert-info mb-0" id="ltcwQueryStats">
+                                                        请选择PSM专业组
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-md-12">
+                                                    <h6 class="text-center">LT分布</h6>
+                                                    <div id="ltcwQueryChartLT" class="chart-container" style="height: 400px;"></div>
+                                                </div>
+                                            </div>
+                                            <div class="row mt-3">
+                                                <div class="col-md-12">
+                                                    <h6 class="text-center">CW分布</h6>
+                                                    <div id="ltcwQueryChartCW" class="chart-container" style="height: 400px;"></div>
+                                                </div>
+                                            </div>
+                                            <div class="row mt-3">
+                                                <div class="col-12">
+                                                    <div style="max-height: 300px; overflow-y: auto;">
+                                                        <table class="table table-sm table-striped" id="ltcwPartsTable">
+                                                            <thead>
+                                                                <tr>
+                                                                    <th>零部件名称</th>
+                                                                    <th>物料编码</th>
+                                                                    <th>供应商</th>
+                                                                    <th>LT</th>
+                                                                    <th>CW</th>
+                                                                    <th>呆滞金额</th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody></tbody>
+                                                        </table>
+                                                    </div>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
-                                    <div style="max-height: 400px; overflow-y: auto;">
-                                        <table class="table table-sm table-striped table-hover" id="distTable">
-                                            <thead class="sticky-top bg-white">
-                                                <tr>
-                                                    <th>序号</th>
-                                                    <th>PSM专业组</th>
-                                                    <th>零部件名称</th>
-                                                    <th>物料编码</th>
-                                                    <th>供应商</th>
-                                                    <th>Tn品类</th>
-                                                    <th>LT(月)</th>
-                                                    <th>CW(月)</th>
-                                                    <th>呆滞金额</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody></tbody>
-                                        </table>
-                                    </div>
                                 </div>
                             </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
 
-                        </div>
-                        <!-- End Tab 4: LT&CW分析 -->
-
-                        <!-- Tab 5: CW标准对比 -->
-                        <div class="tab-pane fade" id="cwstandard" role="tabpanel">
-
-            <!-- CW标准对比分析 -->
-            <div class="row">
-                <div class="col-12">
-                    <div class="card">
-                        <div class="card-header">
-                            <i class="fas fa-clipboard-check"></i> CW标准对比分析
-                        </div>
-                        <div class="card-body">
-                            <!-- 筛选条件 -->
+                            <!-- LT和CW统计分析 -->
                             <div class="row mb-3">
-                                <div class="col-md-3">
-                                    <label>PSM专业组</label>
-                                    <select class="form-select form-select-sm" id="cwStdPSM" onchange="updateCWStdParts(); updateCWStandardAnalysis();">
-                                        <option value="">--全部--</option>
-                                    </select>
-                                </div>
-                                <div class="col-md-3">
-                                    <label>零件（总成）</label>
-                                    <select class="form-select form-select-sm" id="cwStdPart" onchange="updateCWStandardAnalysis();">
-                                        <option value="">--全部--</option>
-                                    </select>
-                                </div>
-                                <div class="col-md-3">
-                                    <label>数据来源</label>
-                                    <select class="form-select form-select-sm" id="cwStdSheet" onchange="updateCWStandardAnalysis();">
-                                        <option value="ALL">全部数据</option>
-                                        <option value="L987">仅L987</option>
-                                        <option value="L6">仅L6</option>
-                                    </select>
-                                </div>
-                                <div class="col-md-3">
-                                    <label>匹配模式</label>
-                                    <select class="form-select form-select-sm" id="cwStdMatchMode" onchange="updateCWStandardAnalysis();">
-                                        <option value="auto">智能匹配（推荐）</option>
-                                        <option value="exact">精确匹配</option>
-                                        <option value="fuzzy">模糊匹配</option>
-                                    </select>
-                                </div>
-                            </div>
-
-                            <!-- 统计摘要 -->
-                            <div class="row mb-3">
-                                <div class="col-md-3">
-                                    <div class="alert alert-primary mb-0">
-                                        <strong>总记录数</strong><br>
-                                        <h4 id="cwStdTotalCount">-</h4>
-                                    </div>
-                                </div>
-                                <div class="col-md-3">
-                                    <div class="alert alert-success mb-0">
-                                        <strong>已匹配</strong><br>
-                                        <h4 id="cwStdMatchedCount">-</h4>
-                                    </div>
-                                </div>
-                                <div class="col-md-3">
-                                    <div class="alert alert-warning mb-0">
-                                        <strong>超标数量</strong><br>
-                                        <h4 id="cwStdExceededCount">-</h4>
-                                    </div>
-                                </div>
-                                <div class="col-md-3">
-                                    <div class="alert alert-danger mb-0">
-                                        <strong>超标比例</strong><br>
-                                        <h4 id="cwStdExceededRate">-</h4>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- 图表 -->
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <h6 class="text-center">CW超标分布（按中品类）</h6>
-                                    <div id="cwStdCategoryChart" class="chart-container" style="height: 350px;"></div>
-                                </div>
-                                <div class="col-md-6">
-                                    <h6 class="text-center">超标程度分析</h6>
-                                    <div id="cwStdExceedChart" class="chart-container" style="height: 350px;"></div>
-                                </div>
-                            </div>
-
-                            <!-- 明细列表 -->
-                            <div class="row mt-3">
                                 <div class="col-12">
-                                    <h6>CW对比明细列表</h6>
-                                    <div class="mb-2">
-                                        <label class="me-2">筛选：</label>
-                                        <div class="btn-group btn-group-sm" role="group">
-                                            <input type="radio" class="btn-check" name="cwStdFilter" id="cwStdFilterAll" value="all" checked onchange="updateCWStandardAnalysis();">
-                                            <label class="btn btn-outline-primary" for="cwStdFilterAll">全部</label>
-
-                                            <input type="radio" class="btn-check" name="cwStdFilter" id="cwStdFilterMatched" value="matched" onchange="updateCWStandardAnalysis();">
-                                            <label class="btn btn-outline-success" for="cwStdFilterMatched">已匹配</label>
-
-                                            <input type="radio" class="btn-check" name="cwStdFilter" id="cwStdFilterExceeded" value="exceeded" onchange="updateCWStandardAnalysis();">
-                                            <label class="btn btn-outline-danger" for="cwStdFilterExceeded">仅超标</label>
-
-                                            <input type="radio" class="btn-check" name="cwStdFilter" id="cwStdFilterUnmatched" value="unmatched" onchange="updateCWStandardAnalysis();">
-                                            <label class="btn btn-outline-secondary" for="cwStdFilterUnmatched">未匹配</label>
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <i class="fas fa-chart-bar"></i> LT & CW 统计分析
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="row mb-3">
+                                                <div class="col-md-3">
+                                                    <label>统计维度</label>
+                                                    <select class="form-select" id="ltcwStatsDimension" onchange="updateLTCWStats()">
+                                                        <option value="category">按零部件品类</option>
+                                                        <option value="PSM">按PSM专业组</option>
+                                                        <option value="categoryAndPSM">品类-PSM交叉分析</option>
+                                                    </select>
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <label>PSM专业组</label>
+                                                    <select class="form-select" id="ltcwStatsPSM" onchange="updateLTCWRadios()">
+                                                        <option value="">--全部--</option>
+                                                    </select>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <label>显示内容</label>
+                                                    <div class="form-check form-check-inline">
+                                                        <input class="form-check-input" type="checkbox" id="showLtAvg" onchange="updateLTCWStats()" checked>
+                                                        <label class="form-check-label" for="showLtAvg">LT平均值</label>
+                                                    </div>
+                                                    <div class="form-check form-check-inline">
+                                                        <input class="form-check-input" type="checkbox" id="showCwAvg" onchange="updateLTCWStats()" checked>
+                                                        <label class="form-check-label" for="showCwAvg">CW平均值</label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div id="ltcwStatsChart" class="chart-container"></div>
                                         </div>
                                     </div>
-                                    <div style="max-height: 500px; overflow-y: auto;">
-                                        <table class="table table-sm table-striped table-hover" id="cwStdTable">
-                                            <thead class="sticky-top bg-white">
-                                                <tr>
-                                                    <th>序号</th>
-                                                    <th>PSM专业组</th>
-                                                    <th>零部件名称</th>
-                                                    <th>Tn品类</th>
-                                                    <th>实际CW(天)</th>
-                                                    <th>匹配品类</th>
-                                                    <th>标准CW(天)</th>
-                                                    <th>超标(天)</th>
-                                                    <th>状态</th>
-                                                    <th>呆滞金额</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody></tbody>
-                                        </table>
+                                </div>
+                            </div>
+
+                            <!-- CW/LT 分布图分析 -->
+                            <div class="row">
+                                <div class="col-12">
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <i class="fas fa-chart-area"></i> CW/LT 分布图分析
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="row mb-3">
+                                                <div class="col-md-3">
+                                                    <label>PSM专业组</label>
+                                                    <select class="form-select" id="distPSM" onchange="updateDistParts(); updateDistributionAnalysis()">
+                                                        <option value="">--全部--</option>
+                                                    </select>
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <label>零件</label>
+                                                    <select class="form-select" id="distPart" onchange="updateDistributionAnalysis()">
+                                                        <option value="">--全部--</option>
+                                                    </select>
+                                                </div>
+                                                <div class="col-md-2">
+                                                    <label>LT范围(月)</label>
+                                                    <div class="input-group">
+                                                        <input type="number" class="form-control form-control-sm" id="distLTMin" placeholder="0" onchange="updateDistributionAnalysis()">
+                                                        <span class="input-group-text">-</span>
+                                                        <input type="number" class="form-control form-control-sm" id="distLTMax" placeholder="100" onchange="updateDistributionAnalysis()">
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-2">
+                                                    <label>CW范围(月)</label>
+                                                    <div class="input-group">
+                                                        <input type="number" class="form-control form-control-sm" id="distCWMin" placeholder="0" onchange="updateDistributionAnalysis()">
+                                                        <span class="input-group-text">-</span>
+                                                        <input type="number" class="form-control form-control-sm" id="distCWMax" placeholder="100" onchange="updateDistributionAnalysis()">
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-2">
+                                                    <label>操作</label>
+                                                    <div class="form-check form-check-inline">
+                                                        <input class="form-check-input" type="checkbox" id="showDistTable" onchange="updateDistributionAnalysis()">
+                                                        <label class="form-check-label" for="showDistTable">显示明细</label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div id="distSummary" class="alert alert-info mb-3">筛选结果：...</div>
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <h6 class="text-center">LT分布（按2周区间）</h6>
+                                                    <div id="distChartLT" class="chart-container" style="height: 400px;"></div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <h6 class="text-center">CW分布（按2周区间）</h6>
+                                                    <div id="distChartCW" class="chart-container" style="height: 400px;"></div>
+                                                </div>
+                                            </div>
+                                            <div class="row mt-3" id="distTableContainer" style="display: none;">
+                                                <div class="col-12">
+                                                    <h6>明细列表（可点击排序）</h6>
+                                                    <div style="max-height: 400px; overflow-y: auto;">
+                                                        <table class="table table-sm table-striped table-hover" id="distTable">
+                                                            <thead class="sticky-top bg-white">
+                                                                <tr>
+                                                                    <th style="cursor: pointer;" onclick="sortDistTable('part')">零部件名称</th>
+                                                                    <th style="cursor: pointer;" onclick="sortDistTable('lt')">LT(月)</th>
+                                                                    <th style="cursor: pointer;" onclick="sortDistTable('cw')">CW(月)</th>
+                                                                    <th style="cursor: pointer;" onclick="sortDistTable('amount')">呆滞金额</th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody></tbody>
+                                                        </table>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                </div>
-            </div>
+                        <!-- End Tab 3: LT&CW分析 -->
 
+                        <!-- Tab 4: 专用性分析 -->
+                        <div class="tab-pane fade" id="exclusive" role="tabpanel">
+                            <!-- 是否认可理想专用 -->
+                            <div class="row mb-3">
+                                <div class="col-md-12">
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <i class="fas fa-check-circle"></i> 是否认可为理想专用
+                                        </div>
+                                        <div class="card-body">
+                                            <div id="idealExclusiveChart" class="chart-container" style="height: 400px;"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 专用性多维度分析 -->
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <i class="fas fa-project-diagram"></i> 按PSM专业组的专用性分布
+                                        </div>
+                                        <div class="card-body">
+                                            <div id="exclusivityMultiChart" class="chart-container"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <i class="fas fa-chart-pie"></i> 专用性饼图分布
+                                        </div>
+                                        <div class="card-body">
+                                            <div id="exclusivityPieChart" class="chart-container"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 专用零件交互查询 -->
+                            <div class="row">
+                                <div class="col-12">
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <i class="fas fa-search"></i> 专用零件交互查询
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="row mb-3">
+                                                <div class="col-md-3">
+                                                    <label>选择PSM专业组</label>
+                                                    <select class="form-select" id="exclusiveQueryPSM" onchange="updateExclusiveQueryParts()">
+                                                        <option value="">--请选择--</option>
+                                                    </select>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <label>专用零件统计</label>
+                                                    <div class="alert alert-info mb-0" id="exclusiveQueryStats">
+                                                        请选择PSM专业组
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-md-12">
+                                                    <div style="max-height: 300px; overflow-y: auto;">
+                                                        <table class="table table-sm table-striped" id="exclusivePartsTable">
+                                                            <thead>
+                                                                <tr>
+                                                                    <th>零部件名称</th>
+                                                                    <th>物料编码</th>
+                                                                    <th>供应商</th>
+                                                                    <th>呆滞金额</th>
+                                                                    <th>是否认可理想专用</th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody></tbody>
+                                                        </table>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                        <!-- End Tab 5: CW标准对比 -->
+                        <!-- End Tab 4: 专用性分析 -->
 
-                    </div>
-                    <!-- End tab-content -->
-                </div>
+                        <!-- Tab 5: 进度跟进 -->
+                        <div class="tab-pane fade" id="progress" role="tabpanel">
+                            <!-- Review状态分析 -->
+                            <div class="row mb-3">
+                                <div class="col-md-12">
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <i class="fas fa-tasks"></i> Review状态分析
+                                        </div>
+                                        <div class="card-body">
+                                            <div id="reviewStatusChart" class="chart-container" style="height: 400px;"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 下一步措施分析 -->
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <i class="fas fa-clipboard-list"></i> 下一步措施分类统计
+                                        </div>
+                                        <div class="card-body">
+                                            <div id="nextStepChart" class="chart-container" style="height: 400px;"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- End Tab 5: 进度跟进 -->
+
+                        <!-- Tab 6: 数据正确性确认 -->
+                        <div class="tab-pane fade" id="verification" role="tabpanel">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <i class="fas fa-dollar-sign"></i> 单价合理性确认进度
+                                        </div>
+                                        <div class="card-body">
+                                            <div id="priceReasonableChart" class="chart-container" style="height: 400px;"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <i class="fas fa-clock"></i> CW/LT合理性确认进度
+                                        </div>
+                                        <div class="card-body">
+                                            <div id="cwReasonableChart" class="chart-container" style="height: 400px;"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- End Tab 6: 数据正确性确认 -->
+
+                    </div>                </div>
             </div>
             <!-- End Tab 导航 -->
 
@@ -1907,7 +1595,86 @@
                 }
             });
 
-            const topN = parseInt(document.getElementById('topN').value);
+            // Check for the new categoryTopSelect first, fall back to topN if not found
+            const categoryTopSelect = document.getElementById('categoryTopSelect');
+            const topN = categoryTopSelect ?
+                (categoryTopSelect.value === 'all' ? 999999 : parseInt(categoryTopSelect.value)) :
+                parseInt(document.getElementById('topN').value);
+
+            const sortedCategories = Object.entries(categoryData)
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, topN);
+
+            const chartDom = document.getElementById('categoryChart');
+            if (!charts.categoryChart) {
+                charts.categoryChart = echarts.init(chartDom);
+            }
+
+            const option = {
+                tooltip: {
+                    trigger: 'axis',
+                    axisPointer: { type: 'shadow' }
+                },
+                grid: { left: '3%', right: '4%', bottom: '3%', containLabel: true },
+                xAxis: {
+                    type: 'value',
+                    name: '金额(元)',
+                    axisLabel: {
+                        formatter: function(value) {
+                            return (value / 10000).toFixed(0) + '万';
+                        }
+                    }
+                },
+                yAxis: {
+                    type: 'category',
+                    data: sortedCategories.map(item => item[0]),
+                    axisLabel: { interval: 0 }
+                },
+                series: [{
+                    type: 'bar',
+                    data: sortedCategories.map(item => item[1]),
+                    itemStyle: {
+                        color: new echarts.graphic.LinearGradient(0, 0, 1, 0, [
+                            { offset: 0, color: '#667eea' },
+                            { offset: 1, color: '#764ba2' }
+                        ])
+                    },
+                    label: {
+                        show: true,
+                        position: 'right',
+                        formatter: function(params) {
+                            return '¥' + (params.value / 10000).toFixed(1) + '万';
+                        }
+                    }
+                }]
+            };
+
+            charts.categoryChart.setOption(option);
+        }
+
+        // 新增函数：用于品类top select直接调用
+        function updateCategoryChartFromSelect() {
+            const data = currentSheet === 'ALL' ?
+                [...allData.L987, ...allData.L6] :
+                (allData[currentSheet] || []);
+            const config = getMetricConfig();
+            const categoryData = {};
+            data.forEach(item => {
+                const category = item.Tn零部件品类;
+                if (category) {
+                    if (!categoryData[category]) {
+                        categoryData[category] = 0;
+                    }
+                    categoryData[category] += getMetricValue(item, 'total') || 0;
+                }
+            });
+
+            // Check for the new categoryTopSelect first, fall back to topN if not found
+            const categoryTopSelect = document.getElementById('categoryTopSelect');
+            const topN = categoryTopSelect ?
+                (categoryTopSelect.value === 'all' ? 999999 : parseInt(categoryTopSelect.value)) :
+                parseInt(document.getElementById('topN').value);
+
             const sortedCategories = Object.entries(categoryData)
                 .sort((a, b) => b[1] - a[1])
                 .slice(0, topN);
@@ -2023,51 +1790,39 @@
 
             const option = {
                 tooltip: {
-                    trigger: 'axis',
-                    axisPointer: { type: 'shadow' }
+                    trigger: 'item',
+                    formatter: '{a} <br/>{b}: {c} ({d}%)'
                 },
                 legend: {
-                    data: ['T1端', '理想端']
-                },
-                grid: { left: '3%', right: '4%', bottom: '3%', containLabel: true },
-                xAxis: {
-                    type: 'category',
-                    data: ['呆滞金额对比']
-                },
-                yAxis: {
-                    type: 'value',
-                    name: '金额(元)',
-                    axisLabel: {
-                        formatter: function(value) {
-                            return (value / 10000).toFixed(0) + '万';
-                        }
-                    }
+                    orient: 'vertical',
+                    left: 'left'
                 },
                 series: [
                     {
-                        name: 'T1端',
-                        type: 'bar',
-                        data: [t1Total],
-                        itemStyle: { color: '#667eea' },
-                        label: {
-                            show: true,
-                            position: 'top',
-                            formatter: function(params) {
-                                return '¥' + (params.value / 10000).toFixed(1) + '万';
+                        name: '呆滞金额对比',
+                        type: 'pie',
+                        radius: '60%',
+                        data: [
+                            {
+                                value: t1Total,
+                                name: 'T1端',
+                                itemStyle: { color: '#667eea' }
+                            },
+                            {
+                                value: idealTotal,
+                                name: '理想端',
+                                itemStyle: { color: '#764ba2' }
                             }
-                        }
-                    },
-                    {
-                        name: '理想端',
-                        type: 'bar',
-                        data: [idealTotal],
-                        itemStyle: { color: '#764ba2' },
-                        label: {
-                            show: true,
-                            position: 'top',
-                            formatter: function(params) {
-                                return '¥' + (params.value / 10000).toFixed(1) + '万';
+                        ],
+                        emphasis: {
+                            itemStyle: {
+                                shadowBlur: 10,
+                                shadowOffsetX: 0,
+                                shadowColor: 'rgba(0, 0, 0, 0.5)'
                             }
+                        },
+                        label: {
+                            formatter: '{b}: {c}元 ({d}%)'
                         }
                     }
                 ]
@@ -2080,6 +1835,8 @@
         function updateSupplierChart(data) {
             const config = getMetricConfig();
             const supplierData = {};
+            let totalAmount = 0;
+
             data.forEach(item => {
                 const supplier = item.T1供应商名称;
                 if (supplier && supplier !== '-') {
@@ -2088,10 +1845,16 @@
                     }
                     supplierData[supplier].count += 1;
                     supplierData[supplier].amount += getMetricValue(item, 'total') || 0;
+                    totalAmount += getMetricValue(item, 'total') || 0;
                 }
             });
 
-            const topN = parseInt(document.getElementById('topN').value);
+            // Check for the new supplierTopSelect first, fall back to topN if not found
+            const supplierTopSelect = document.getElementById('supplierTopSelect');
+            const topN = supplierTopSelect ?
+                (supplierTopSelect.value === 'all' ? 999999 : parseInt(supplierTopSelect.value)) :
+                parseInt(document.getElementById('topN').value);
+
             const sortedSuppliers = Object.entries(supplierData)
                 .sort((a, b) => b[1].amount - a[1].amount)
                 .slice(0, topN);
@@ -2108,12 +1871,14 @@
                     formatter: function(params) {
                         const supplier = params[0].name;
                         const data = supplierData[supplier];
+                        const percentage = ((data.amount / totalAmount) * 100).toFixed(2);
                         return supplier + '<br/>' +
                                '呆滞金额: ¥' + (parseFloat(config.formatter(data.amount))).toFixed(2) + '万元<br/>' +
+                               '占比: ' + percentage + '%<br/>' +
                                '记录数: ' + data.count + '条';
                     }
                 },
-                grid: { left: '3%', right: '4%', bottom: '3%', containLabel: true },
+                grid: { left: '3%', right: '8%', bottom: '3%', containLabel: true },
                 xAxis: {
                     type: 'value',
                     name: '呆滞金额(元)',
@@ -2146,13 +1911,24 @@
                         show: true,
                         position: 'right',
                         formatter: function(params) {
-                            return '¥' + (params.value / 10000).toFixed(1) + '万';
+                            const supplier = sortedSuppliers[params.dataIndex][0];
+                            const data = supplierData[supplier];
+                            const percentage = ((data.amount / totalAmount) * 100).toFixed(1);
+                            return '¥' + (params.value / 10000).toFixed(1) + '万 (' + percentage + '%)';
                         }
                     }
                 }]
             };
 
             charts.supplierChart.setOption(option);
+        }
+
+        // 新增函数：用于供应商top select直接调用
+        function updateSupplierRankingChart() {
+            const data = currentSheet === 'ALL' ?
+                [...allData.L987, ...allData.L6] :
+                (allData[currentSheet] || []);
+            updateSupplierChart(data);
         }
 
         // 更新Review状态图表
