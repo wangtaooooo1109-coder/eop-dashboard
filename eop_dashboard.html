@@ -264,7 +264,7 @@
         <div class="container-fluid">
             <span class="navbar-brand mb-0 h1">
                 <i class="fas fa-chart-line"></i> EOP呆滞管控数据看板系统
-                <span class="badge bg-light text-dark ms-2" id="versionBadge">v2.3.10</span>
+                <span class="badge bg-light text-dark ms-2" id="versionBadge">v2.3.11</span>
                 <span class="badge bg-info text-dark ms-2" id="filenameBadge" style="display: none;"></span>
             </span>
             <span class="text-white">
@@ -1023,7 +1023,7 @@
 
     <script>
         // 版本号
-        const VERSION = 'v2.3.10';
+        const VERSION = 'v2.3.11';
 
         // CW中品类参考标准数据（天数）
         const CW_STANDARDS = [
@@ -3430,11 +3430,13 @@
                     case 'category':
                         groupKey = item.Tn零部件品类 || '未分类';
                         break;
-                    case 'psm':
+                    case 'PSM': // v2.3.11: 修复大小写匹配
                         groupKey = item.PSM专业组 || '未分类';
                         break;
-                    case 'type':
-                        groupKey = item.零件类型 || '未分类';
+                    case 'categoryAndPSM': // v2.3.11: 修复大小写匹配
+                        const cat = item.Tn零部件品类 || '未分类';
+                        const psm = item.PSM专业组 || '未分类';
+                        groupKey = `${cat} - ${psm}`;
                         break;
                     default:
                         groupKey = '未分类';
@@ -4415,11 +4417,22 @@
             const ltAvg = ltValues.length > 0 ? ltValues.reduce((a, b) => a + b, 0) / ltValues.length : 0;
             const cwAvg = cwValues.length > 0 ? cwValues.reduce((a, b) => a + b, 0) / cwValues.length : 0;
 
+            // v2.3.11: 计算中位值
+            const calculateMedian = (values) => {
+                if (values.length === 0) return 0;
+                const sorted = [...values].sort((a, b) => a - b);
+                return sorted.length % 2 === 0
+                    ? (sorted[sorted.length / 2 - 1] + sorted[sorted.length / 2]) / 2
+                    : sorted[Math.floor(sorted.length / 2)];
+            };
+            const ltMedian = calculateMedian(ltValues);
+            const cwMedian = calculateMedian(cwValues);
+
             document.getElementById('distSummary').innerHTML = `
                 <strong>筛选结果：</strong>共 ${filteredData.length} 条记录 |
                 呆滞金额：${config.displayFormatter(totalAmount)} |
-                LT平均：${ltAvg.toFixed(2)}月 |
-                CW平均：${cwAvg.toFixed(2)}月
+                LT平均：${ltAvg.toFixed(2)}月，中位值：${ltMedian.toFixed(2)}月 |
+                CW平均：${cwAvg.toFixed(2)}月，中位值：${cwMedian.toFixed(2)}月
             `;
 
             // 绘制LT分布图（按2周区间）
@@ -4484,9 +4497,15 @@
                     axisPointer: { type: 'shadow' },
                     formatter: function(params) {
                         let result = params[0].name + '月<br/>' +
-                                   '数量: ' + params[0].value + '条';
+                                   '数量: ' + params[0].value + '条<br/>' +
+                                   '<span style="color:#5470c6">━━</span> 平均值: ' + average.toFixed(2) + '月<br/>' +
+                                   '<span style="color:#ee6666">┄┄</span> 中位值: ' + median.toFixed(2) + '月';
                         return result;
                     }
+                },
+                legend: {
+                    data: ['分布', '平均值', '中位值'],
+                    top: 10
                 },
                 grid: { left: '10%', right: '5%', bottom: '15%', containLabel: true },
                 xAxis: {
@@ -4505,6 +4524,7 @@
                     name: '数量(条)'
                 },
                 series: [{
+                    name: '分布', // v2.3.11: 添加name以便legend显示
                     type: 'bar',
                     data: bins,
                     itemStyle: {
