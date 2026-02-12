@@ -261,7 +261,7 @@
         <div class="container-fluid">
             <span class="navbar-brand mb-0 h1">
                 <i class="fas fa-chart-line"></i> EOP呆滞管控数据看板系统
-                <span class="badge bg-light text-dark ms-2" id="versionBadge">v2.0.0</span>
+                <span class="badge bg-light text-dark ms-2" id="versionBadge">v2.0.3</span>
             </span>
             <span class="text-white">
                 <i class="fas fa-cog"></i> 可自定义分析看板
@@ -4825,6 +4825,13 @@
                 return;
             }
 
+            // 计算统计值
+            const sortedValues = [...values].sort((a, b) => a - b);
+            const median = sortedValues.length % 2 === 0
+                ? (sortedValues[sortedValues.length / 2 - 1] + sortedValues[sortedValues.length / 2]) / 2
+                : sortedValues[Math.floor(sortedValues.length / 2)];
+            const average = values.reduce((a, b) => a + b, 0) / values.length;
+
             // 按2周（0.5月）进行分组
             const binSize = 0.5; // 0.5月 = 2周
             const maxValue = Math.max(...values);
@@ -4851,8 +4858,9 @@
                     trigger: 'axis',
                     axisPointer: { type: 'shadow' },
                     formatter: function(params) {
-                        return params[0].name + '月<br/>' +
-                               '数量: ' + params[0].value + '条';
+                        let result = params[0].name + '月<br/>' +
+                                   '数量: ' + params[0].value + '条';
+                        return result;
                     }
                 },
                 grid: { left: '10%', right: '5%', bottom: '15%', containLabel: true },
@@ -4891,6 +4899,36 @@
                         formatter: function(params) {
                             return params.value > 0 ? params.value : '';
                         }
+                    },
+                    markLine: {
+                        data: [
+                            {
+                                name: '平均值',
+                                xAxis: Math.floor(average / binSize),
+                                lineStyle: {
+                                    color: '#5470c6',
+                                    type: 'solid',
+                                    width: 2
+                                },
+                                label: {
+                                    formatter: '平均: ' + average.toFixed(2) + '月',
+                                    position: 'end'
+                                }
+                            },
+                            {
+                                name: '中位值',
+                                xAxis: Math.floor(median / binSize),
+                                lineStyle: {
+                                    color: '#ee6666',
+                                    type: 'dashed',
+                                    width: 2
+                                },
+                                label: {
+                                    formatter: '中位: ' + median.toFixed(2) + '月',
+                                    position: 'end'
+                                }
+                            }
+                        ]
                     }
                 }]
             };
