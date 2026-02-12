@@ -264,7 +264,7 @@
         <div class="container-fluid">
             <span class="navbar-brand mb-0 h1">
                 <i class="fas fa-chart-line"></i> EOP呆滞管控数据看板系统
-                <span class="badge bg-light text-dark ms-2" id="versionBadge">v2.3.12</span>
+                <span class="badge bg-light text-dark ms-2" id="versionBadge">v2.3.13</span>
                 <span class="badge bg-info text-dark ms-2" id="filenameBadge" style="display: none;"></span>
             </span>
             <span class="text-white">
@@ -745,12 +745,15 @@
                                                     </div>
                                                 </div>
                                             </div>
-                                            <div class="row">
-                                                <div class="col-md-6">
+                                            <!-- v2.3.13: 将LT和CW图表分开到两行 -->
+                                            <div class="row mb-3">
+                                                <div class="col-md-12">
                                                     <h6 class="text-center">LT统计</h6>
                                                     <div id="ltStatsChart" class="chart-container"></div>
                                                 </div>
-                                                <div class="col-md-6">
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-md-12">
                                                     <h6 class="text-center">CW统计</h6>
                                                     <div id="cwStatsChart" class="chart-container"></div>
                                                 </div>
@@ -868,17 +871,12 @@
                                                         <option value="">--全部零件--</option>
                                                     </select>
                                                 </div>
-                                                <div class="col-md-2">
+                                                <div class="col-md-3">
                                                     <label>匹配模式</label>
                                                     <select class="form-select form-select-sm" id="cwStdMatchMode" onchange="updateCWStandardAnalysis()">
                                                         <option value="strict">严格匹配</option>
                                                         <option value="fuzzy" selected>模糊匹配</option>
                                                     </select>
-                                                </div>
-                                                <div class="col-md-2 d-flex align-items-end">
-                                                    <button class="btn btn-primary btn-sm w-100" onclick="updateCWStandardAnalysis()">
-                                                        <i class="fas fa-sync-alt"></i> 分析
-                                                    </button>
                                                 </div>
                                             </div>
 
@@ -1155,7 +1153,7 @@
 
     <script>
         // 版本号
-        const VERSION = 'v2.3.12';
+        const VERSION = 'v2.3.13';
 
         // CW中品类参考标准数据（天数）
         const CW_STANDARDS = [
@@ -5002,7 +5000,7 @@
                 }
             });
 
-            // 图表1: 按中品类的超标分布（雷达图）
+            // 图表1: 按中品类的超标分布（柱状图）v2.3.13
             const categoryChartDom = safeGetElement('cwStdCategoryChart'); // v2.3.7
             if (categoryChartDom && !charts.cwStdCategoryChart) {
                 charts.cwStdCategoryChart = echarts.init(categoryChartDom);
@@ -5012,56 +5010,85 @@
 
             const sortedCategories = Object.entries(categoryStats)
                 .sort((a, b) => b[1].exceeded - a[1].exceeded)
-                .slice(0, 8); // 雷达图取前8个品类
-
-            // 计算最大值用于雷达图刻度
-            const maxTotal = Math.max(...sortedCategories.map(item => item[1].total));
-            const maxExceeded = Math.max(...sortedCategories.map(item => item[1].exceeded));
+                .slice(0, 15); // 柱状图取前15个品类
 
             const categoryOption = {
                 tooltip: {
-                    trigger: 'item',
+                    trigger: 'axis',
+                    axisPointer: { type: 'shadow' },
                     formatter: function(params) {
-                        const category = sortedCategories[params.dataIndex];
-                        return `${category[0]}<br/>` +
-                               `总数: ${category[1].total}条<br/>` +
-                               `超标: ${category[1].exceeded}条<br/>` +
-                               `超标率: ${(category[1].exceeded / category[1].total * 100).toFixed(1)}%`;
+                        const category = params[0].axisValue;
+                        const data = categoryStats[category];
+                        return `${category}<br/>` +
+                               `总数: ${data.total}条<br/>` +
+                               `超标: ${data.exceeded}条<br/>` +
+                               `超标率: ${(data.exceeded / data.total * 100).toFixed(1)}%`;
                     }
                 },
                 legend: {
-                    data: ['总数', '超标数', '超标率'],
-                    bottom: 0
+                    data: ['总零件数', '超标数', '超标率'],
+                    top: 10
                 },
-                radar: {
-                    indicator: sortedCategories.map(item => ({
-                        name: item[0],
-                        max: maxTotal
-                    })),
-                    radius: '60%',
-                    splitNumber: 4
+                grid: { left: '3%', right: '10%', bottom: '3%', containLabel: true },
+                xAxis: {
+                    type: 'category',
+                    data: sortedCategories.map(item => item[0]),
+                    axisLabel: {
+                        rotate: 45,
+                        interval: 0
+                    }
                 },
-                series: [{
-                    type: 'radar',
-                    data: [
-                        {
-                            value: sortedCategories.map(item => item[1].total),
-                            name: '总数',
-                            areaStyle: {
-                                color: 'rgba(145, 204, 117, 0.3)'
-                            },
-                            lineStyle: { color: '#91cc75', width: 2 }
-                        },
-                        {
-                            value: sortedCategories.map(item => item[1].exceeded),
-                            name: '超标数',
-                            areaStyle: {
-                                color: 'rgba(238, 102, 102, 0.3)'
-                            },
-                            lineStyle: { color: '#ee6666', width: 2 }
+                yAxis: [
+                    {
+                        type: 'value',
+                        name: '数量(条)',
+                        position: 'left'
+                    },
+                    {
+                        type: 'value',
+                        name: '超标率(%)',
+                        position: 'right',
+                        max: 100
+                    }
+                ],
+                series: [
+                    {
+                        name: '总零件数',
+                        type: 'bar',
+                        data: sortedCategories.map(item => item[1].total),
+                        itemStyle: { color: '#91cc75' },
+                        label: {
+                            show: true,
+                            position: 'top',
+                            formatter: '{c}'
                         }
-                    ]
-                }]
+                    },
+                    {
+                        name: '超标数',
+                        type: 'bar',
+                        data: sortedCategories.map(item => item[1].exceeded),
+                        itemStyle: { color: '#ee6666' },
+                        label: {
+                            show: true,
+                            position: 'top',
+                            formatter: '{c}'
+                        }
+                    },
+                    {
+                        name: '超标率',
+                        type: 'line',
+                        yAxisIndex: 1,
+                        data: sortedCategories.map(item =>
+                            ((item[1].exceeded / item[1].total) * 100).toFixed(1)
+                        ),
+                        itemStyle: { color: '#5470c6' },
+                        lineStyle: { width: 2 },
+                        label: {
+                            show: true,
+                            formatter: '{c}%'
+                        }
+                    }
+                ]
             };
 
             charts.cwStdCategoryChart.setOption(categoryOption);
@@ -5131,76 +5158,47 @@
 
             tbody.innerHTML = '';
 
-            const filter = document.querySelector('input[name="cwStdFilter"]:checked').value;
-
-            let filteredData = data;
-            if (filter === 'matched') {
-                filteredData = data.filter(item => item.matchedStandard);
-            } else if (filter === 'exceeded') {
-                filteredData = data.filter(item => item.exceeded);
-            } else if (filter === 'unmatched') {
-                filteredData = data.filter(item => !item.matchedStandard);
-            }
+            // v2.3.13: 只显示超标的零件
+            const filteredData = data.filter(item => item.exceeded);
 
             const config = getMetricConfig();
 
-            filteredData.slice(0, 500).forEach((item, index) => {
+            filteredData.slice(0, 100).forEach((item, index) => {
                 const row = tbody.insertRow();
-                row.insertCell(0).textContent = index + 1;
-                row.insertCell(1).textContent = item.PSM专业组 || '-';
-                row.insertCell(2).textContent = item.T1零部件名称 || '-';
-                row.insertCell(3).textContent = item.Tn零部件品类 || '-';
-                row.insertCell(4).textContent = item.actualCWDays ? item.actualCWDays.toFixed(1) : '-';
+                row.insertCell(0).textContent = item.T1零部件名称 || '-';
+                row.insertCell(1).textContent = item.Tn零部件品类 || '-';
+                row.insertCell(2).textContent = item.PSM专业组 || '-';
+                row.insertCell(3).textContent = item.actualCWDays ? item.actualCWDays.toFixed(1) : '-';
+                row.insertCell(4).textContent = item.standardCW ? item.standardCW.toFixed(0) : '-';
 
-                const matchedCell = row.insertCell(5);
-                if (item.matchedStandard) {
-                    matchedCell.textContent = item.matchedStandard.中品类;
-                    matchedCell.style.color = '#52c41a';
-                } else {
-                    matchedCell.textContent = '未匹配';
-                    matchedCell.style.color = '#999';
-                }
+                const exceededCell = row.insertCell(5);
+                exceededCell.textContent = item.exceededDays.toFixed(1);
+                exceededCell.style.color = '#ff4d4f';
+                exceededCell.style.fontWeight = 'bold';
 
-                row.insertCell(6).textContent = item.standardCW ? item.standardCW.toFixed(0) : '-';
+                const percentCell = row.insertCell(6);
+                const percent = item.standardCW ? ((item.exceededDays / item.standardCW) * 100).toFixed(1) : '-';
+                percentCell.textContent = percent + '%';
+                percentCell.style.color = '#ff4d4f';
 
-                const exceededCell = row.insertCell(7);
-                if (item.exceeded) {
-                    exceededCell.textContent = '+' + item.exceededDays.toFixed(1);
-                    exceededCell.style.color = '#ff4d4f';
-                    exceededCell.style.fontWeight = 'bold';
-                } else if (item.matchedStandard) {
-                    exceededCell.textContent = '合格';
-                    exceededCell.style.color = '#52c41a';
-                } else {
-                    exceededCell.textContent = '-';
-                }
-
-                const statusCell = row.insertCell(8);
-                if (item.exceeded) {
-                    statusCell.innerHTML = '<span class="badge bg-danger">超标</span>';
-                } else if (item.matchedStandard) {
-                    statusCell.innerHTML = '<span class="badge bg-success">正常</span>';
-                } else {
-                    statusCell.innerHTML = '<span class="badge bg-secondary">未匹配</span>';
-                }
-
-                row.insertCell(9).textContent = config.displayFormatter(getMetricValue(item, 'total'));
+                row.insertCell(7).textContent = item.matchedStandard ? item.matchedStandard.大类 || '-' : '-';
+                row.insertCell(8).textContent = item.matchedStandard ? item.matchedStandard.中品类 || '-' : '-';
             });
 
-            if (filteredData.length > 500) {
+            if (filteredData.length > 100) {
                 const row = tbody.insertRow();
                 const cell = row.insertCell(0);
-                cell.colSpan = 10;
+                cell.colSpan = 9;
                 cell.className = 'text-center text-muted';
-                cell.textContent = `显示前500条，共${filteredData.length}条记录`;
+                cell.textContent = `显示前100条，共${filteredData.length}条超标记录`;
             }
 
             if (filteredData.length === 0) {
                 const row = tbody.insertRow();
                 const cell = row.insertCell(0);
-                cell.colSpan = 10;
+                cell.colSpan = 9;
                 cell.className = 'text-center text-muted';
-                cell.textContent = '没有符合条件的数据';
+                cell.textContent = '没有超标的零件';
             }
         }
     </script>
