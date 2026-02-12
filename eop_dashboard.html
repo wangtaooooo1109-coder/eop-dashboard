@@ -264,7 +264,7 @@
         <div class="container-fluid">
             <span class="navbar-brand mb-0 h1">
                 <i class="fas fa-chart-line"></i> EOP呆滞管控数据看板系统
-                <span class="badge bg-light text-dark ms-2" id="versionBadge">v2.3.18</span>
+                <span class="badge bg-light text-dark ms-2" id="versionBadge">v2.3.19</span>
                 <span class="badge bg-info text-dark ms-2" id="filenameBadge" style="display: none;"></span>
             </span>
             <span class="text-white">
@@ -1154,7 +1154,7 @@
 
     <script>
         // 版本号
-        const VERSION = 'v2.3.18';
+        const VERSION = 'v2.3.19';
 
         // CW中品类参考标准数据（天数）
         const CW_STANDARDS = [
@@ -4873,10 +4873,11 @@
                     }
                 }
 
-                // 关键词匹配
+                // 关键词匹配 - v2.3.19: 排除"线束"关键词，防止其他物品误匹配到线束天线类
                 const keywords = ['电池', '摄像头', '屏幕', '电机', '芯片', '传感器', '处理器',
                                 '电容', '电感', '电阻', '晶振', '二极管', '三极管', 'IGBT', 'MOSFET',
-                                '塑料', '橡胶', '金属', '铝', '钢', '铜', '玻璃', '陶瓷', '线束'];
+                                '塑料', '橡胶', '金属', '铝', '钢', '铜', '玻璃', '陶瓷'];
+                // "线束"关键词已移除，因为线束相关品类有多个，应该通过前面的模糊匹配来区分
 
                 for (const keyword of keywords) {
                     if (category.includes(keyword)) {
