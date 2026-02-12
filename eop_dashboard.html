@@ -264,7 +264,7 @@
         <div class="container-fluid">
             <span class="navbar-brand mb-0 h1">
                 <i class="fas fa-chart-line"></i> EOP呆滞管控数据看板系统
-                <span class="badge bg-light text-dark ms-2" id="versionBadge">v2.2.2</span>
+                <span class="badge bg-light text-dark ms-2" id="versionBadge">v2.3.0</span>
                 <span class="badge bg-info text-dark ms-2" id="filenameBadge" style="display: none;"></span>
             </span>
             <span class="text-white">
@@ -994,7 +994,7 @@
 
     <script>
         // 版本号
-        const VERSION = 'v2.2.2';
+        const VERSION = 'v2.3.0';
 
         // CW中品类参考标准数据（天数）
         const CW_STANDARDS = [
@@ -3745,158 +3745,9 @@
             charts.supplierConcentrationChart.setOption(option);
         }
 
-        // 3. 供应商风险散点图
-        function updateSupplierRiskScatter(data) {
-            const supplierStats = {};
+        // Removed: 供应商风险散点图 (obsolete)
 
-            data.forEach(item => {
-                const supplier = item.T1供应商名称 || '未知';
-                const amount = parseFloat(item.呆滞总金额) || 0;
-                const quantity = parseFloat(item.呆滞总数量) || 0;
-
-                if (!supplierStats[supplier]) {
-                    supplierStats[supplier] = { amount: 0, quantity: 0 };
-                }
-                supplierStats[supplier].amount += amount;
-                supplierStats[supplier].quantity += quantity;
-            });
-
-            const scatterData = Object.entries(supplierStats).map(([name, stats]) => [
-                stats.amount / 10000,  // 金额(万元)
-                stats.quantity,         // 数量
-                name                    // 供应商名称
-            ]);
-
-            const chartDom = document.getElementById('supplierRiskScatterChart');
-            if (!charts.supplierRiskScatterChart) {
-                charts.supplierRiskScatterChart = echarts.init(chartDom);
-            }
-
-            const option = {
-                tooltip: {
-                    formatter: params => {
-                        return `${params.data[2]}<br/>金额: ¥${params.data[0].toFixed(2)}万<br/>数量: ${params.data[1]}件`;
-                    }
-                },
-                xAxis: {
-                    name: '呆滞金额(万元)',
-                    type: 'value',
-                    splitLine: { show: true }
-                },
-                yAxis: {
-                    name: '呆滞数量(件)',
-                    type: 'value',
-                    splitLine: { show: true }
-                },
-                series: [
-                    {
-                        type: 'scatter',
-                        symbolSize: 10,
-                        data: scatterData,
-                        itemStyle: {
-                            color: params => {
-                                // 高风险: 金额>100万 或 数量>1000
-                                if (params.data[0] > 100 || params.data[1] > 1000) {
-                                    return '#ee6666';
-                                }
-                                return '#5470c6';
-                            }
-                        }
-                    }
-                ]
-            };
-
-            charts.supplierRiskScatterChart.setOption(option);
-        }
-
-        // 4. 供应商绩效评分
-        function updateSupplierPerformance(data) {
-            const supplierPerf = {};
-
-            data.forEach(item => {
-                const supplier = item.T1供应商名称 || '未知';
-                if (!supplierPerf[supplier]) {
-                    supplierPerf[supplier] = {
-                        totalItems: 0,
-                        ltSum: 0,
-                        cwSum: 0,
-                        priceReasonable: 0,
-                        cwltReasonable: 0
-                    };
-                }
-
-                supplierPerf[supplier].totalItems++;
-                supplierPerf[supplier].ltSum += parseFloat(item.LT) || 0;
-                supplierPerf[supplier].cwSum += parseFloat(item.CW) || 0;
-
-                if ((item.单价是否合理 || '').includes('合理') && !(item.单价是否合理 || '').includes('不合理')) {
-                    supplierPerf[supplier].priceReasonable++;
-                }
-                if ((item.CW_LT是否合理 || '').includes('合理') && !(item.CW_LT是否合理 || '').includes('不合理')) {
-                    supplierPerf[supplier].cwltReasonable++;
-                }
-            });
-
-            // 计算综合评分（0-100分）
-            const supplierScores = Object.entries(supplierPerf).map(([name, perf]) => {
-                const avgLT = perf.ltSum / perf.totalItems;
-                const avgCW = perf.cwSum / perf.totalItems;
-                const priceRatio = perf.priceReasonable / perf.totalItems;
-                const cwltRatio = perf.cwltReasonable / perf.totalItems;
-
-                // 评分逻辑: LT越小越好(max=30分), CW越小越好(max=30分), 合理性各20分
-                const ltScore = Math.max(0, 30 - avgLT * 2);  // LT每增加0.5扣1分
-                const cwScore = Math.max(0, 30 - avgCW * 2);
-                const priceScore = priceRatio * 20;
-                const cwltScore = cwltRatio * 20;
-
-                const totalScore = ltScore + cwScore + priceScore + cwltScore;
-
-                return {
-                    name,
-                    score: Math.round(totalScore)
-                };
-            }).sort((a, b) => b.score - a.score).slice(0, 20);
-
-            const chartDom = document.getElementById('supplierPerformanceChart');
-            if (!charts.supplierPerformanceChart) {
-                charts.supplierPerformanceChart = echarts.init(chartDom);
-            }
-
-            const option = {
-                tooltip: {
-                    trigger: 'axis',
-                    axisPointer: { type: 'shadow' }
-                },
-                xAxis: {
-                    type: 'value',
-                    max: 100
-                },
-                yAxis: {
-                    type: 'category',
-                    data: supplierScores.map(s => s.name),
-                    axisLabel: { fontSize: 10 }
-                },
-                series: [
-                    {
-                        type: 'bar',
-                        data: supplierScores.map(s => ({
-                            value: s.score,
-                            itemStyle: {
-                                color: s.score >= 80 ? '#67c23a' : s.score >= 60 ? '#e6a23c' : '#f56c6c'
-                            }
-                        })),
-                        label: {
-                            show: true,
-                            position: 'right',
-                            formatter: '{c}分'
-                        }
-                    }
-                ]
-            };
-
-            charts.supplierPerformanceChart.setOption(option);
-        }
+        // Removed: 供应商绩效评分 (obsolete)
 
         // 5. 单价合理性详细分析
         function updatePriceReasonabilityAnalysis(data) {
@@ -4158,107 +4009,7 @@
             document.getElementById('concentrationRiskList').innerHTML = concentrationHtml;
         }
 
-        // 8. 项目对比分析
-        function updateProjectComparison() {
-            // 只在"全部合并"模式下显示
-            const currentSheet = document.getElementById('sheetSelector').value;
-
-            if (currentSheet !== 'ALL') {
-                document.getElementById('comparisonSection').style.display = 'none';
-                return;
-            }
-
-            document.getElementById('comparisonSection').style.display = 'block';
-
-            const l987Data = allData.L987 || [];
-            const l6Data = allData.L6 || [];
-
-            const l987Amount = l987Data.reduce((sum, item) => sum + (parseFloat(item.呆滞总金额) || 0), 0);
-            const l6Amount = l6Data.reduce((sum, item) => sum + (parseFloat(item.呆滞总金额) || 0), 0);
-
-            const l987Quantity = l987Data.reduce((sum, item) => sum + (parseFloat(item.呆滞总数量) || 0), 0);
-            const l6Quantity = l6Data.reduce((sum, item) => sum + (parseFloat(item.呆滞总数量) || 0), 0);
-
-            // 对比雷达图
-            const chartDom = document.getElementById('comparisonMetricsChart');
-            if (!charts.comparisonMetricsChart) {
-                charts.comparisonMetricsChart = echarts.init(chartDom);
-            }
-
-            const option = {
-                tooltip: {},
-                legend: {
-                    data: ['L987', 'L6']
-                },
-                radar: {
-                    indicator: [
-                        { name: '记录数', max: Math.max(l987Data.length, l6Data.length) * 1.2 },
-                        { name: '金额', max: Math.max(l987Amount, l6Amount) * 1.2 },
-                        { name: '数量', max: Math.max(l987Quantity, l6Quantity) * 1.2 }
-                    ]
-                },
-                series: [
-                    {
-                        type: 'radar',
-                        data: [
-                            { value: [l987Data.length, l987Amount, l987Quantity], name: 'L987' },
-                            { value: [l6Data.length, l6Amount, l6Quantity], name: 'L6' }
-                        ]
-                    }
-                ]
-            };
-
-            charts.comparisonMetricsChart.setOption(option);
-
-            // 对比柱状图
-            const chartDom2 = document.getElementById('comparisonBarChart');
-            if (!charts.comparisonBarChart) {
-                charts.comparisonBarChart = echarts.init(chartDom2);
-            }
-
-            const option2 = {
-                tooltip: {
-                    trigger: 'axis',
-                    axisPointer: { type: 'shadow' }
-                },
-                legend: {
-                    data: ['L987', 'L6']
-                },
-                xAxis: {
-                    type: 'category',
-                    data: ['记录数', '金额(万元)', '数量(件)', '供应商数']
-                },
-                yAxis: {
-                    type: 'value'
-                },
-                series: [
-                    {
-                        name: 'L987',
-                        type: 'bar',
-                        data: [
-                            l987Data.length,
-                            l987Amount / 10000,
-                            l987Quantity,
-                            new Set(l987Data.map(item => item.T1供应商名称)).size
-                        ],
-                        itemStyle: { color: '#5470c6' }
-                    },
-                    {
-                        name: 'L6',
-                        type: 'bar',
-                        data: [
-                            l6Data.length,
-                            l6Amount / 10000,
-                            l6Quantity,
-                            new Set(l6Data.map(item => item.T1供应商名称)).size
-                        ],
-                        itemStyle: { color: '#91cc75' }
-                    }
-                ]
-            };
-
-            charts.comparisonBarChart.setOption(option2);
-        }
+        // Removed: 项目对比分析 (obsolete)
 
         // 9. Excel导出功能
         function exportToExcel() {
