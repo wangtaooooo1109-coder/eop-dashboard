@@ -264,7 +264,7 @@
         <div class="container-fluid">
             <span class="navbar-brand mb-0 h1">
                 <i class="fas fa-chart-line"></i> EOP呆滞管控数据看板系统
-                <span class="badge bg-light text-dark ms-2" id="versionBadge">v2.3.7.2</span>
+                <span class="badge bg-light text-dark ms-2" id="versionBadge">v2.3.7.3</span>
                 <span class="badge bg-info text-dark ms-2" id="filenameBadge" style="display: none;"></span>
             </span>
             <span class="text-white">
@@ -1003,7 +1003,7 @@
 
     <script>
         // 版本号
-        const VERSION = 'v2.3.7.2';
+        const VERSION = 'v2.3.7.3';
 
         // CW中品类参考标准数据（天数）
         const CW_STANDARDS = [
@@ -3656,7 +3656,11 @@
                 `前20%零件(${top20Percent}个)占总金额的${top20Ratio}%`;
 
             // 绘制图表
-            const chartDom = document.getElementById('paretoPartChart');
+            const chartDom = safeGetElement('paretoPartChart'); // v2.3.7.3
+            if (!chartDom) {
+                console.warn('[Pareto] Chart container not found: paretoPartChart');
+                return;
+            }
             if (!charts.paretoPartChart) {
                 charts.paretoPartChart = echarts.init(chartDom);
             }
@@ -3736,7 +3740,11 @@
             document.getElementById('paretoSupplierInfo').textContent =
                 `前20%供应商(${top20SupplierCount}家)占总金额的${top20SupplierRatio}%`;
 
-            const chartDom2 = document.getElementById('paretoSupplierChart');
+            const chartDom2 = safeGetElement('paretoSupplierChart'); // v2.3.7.3
+            if (!chartDom2) {
+                console.warn('[Pareto] Chart container not found: paretoSupplierChart');
+                return;
+            }
             if (!charts.paretoSupplierChart) {
                 charts.paretoSupplierChart = echarts.init(chartDom2);
             }
@@ -4553,7 +4561,9 @@
         // 初始化CW标准分析选项
         function updateCWStandardOptions(data) {
             // 更新PSM专业组选项
-            const psmSelect = document.getElementById('cwStdPSM');
+            const psmSelect = safeGetElement('cwStdPSM'); // v2.3.7.3
+            if (!psmSelect) return; // v2.3.7.3: 防御性检查
+
             const psmSet = new Set();
             data.forEach(item => {
                 if (item.PSM专业组) psmSet.add(item.PSM专业组);
