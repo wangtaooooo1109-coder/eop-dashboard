@@ -264,7 +264,7 @@
         <div class="container-fluid">
             <span class="navbar-brand mb-0 h1">
                 <i class="fas fa-chart-line"></i> EOP呆滞管控数据看板系统
-                <span class="badge bg-light text-dark ms-2" id="versionBadge">v2.3.19</span>
+                <span class="badge bg-light text-dark ms-2" id="versionBadge">v2.3.20</span>
                 <span class="badge bg-info text-dark ms-2" id="filenameBadge" style="display: none;"></span>
             </span>
             <span class="text-white">
@@ -1154,7 +1154,7 @@
 
     <script>
         // 版本号
-        const VERSION = 'v2.3.19';
+        const VERSION = 'v2.3.20';
 
         // CW中品类参考标准数据（天数）
         const CW_STANDARDS = [
@@ -2545,9 +2545,9 @@
             charts.cwReasonableChart.setOption(option);
         }
 
-        // 判断是否为专用件
+        // 判断是否为专用件 v2.3.20: 修复字段引用，使用实际存在的字段
         function isExclusive(item) {
-            const status = item.是否为理想专用 || item.是否认可为行业内理想专用 || '';
+            const status = item.是否认可为行业内理想专用 || '';
             return status.includes('是') || status.includes('认可') || status.toLowerCase().includes('yes');
         }
 
@@ -2751,8 +2751,15 @@
         // 更新专用件对比分析
         function updateExclusiveComparisonChart(data) {
             console.log('[DEBUG v2.3.10] updateExclusiveComparisonChart 收到数据:', data.length, '条');
-            const exclusiveData = data.filter(item => (item.是否认可为行业内理想专用 || '').includes('是'));
-            const nonExclusiveData = data.filter(item => !(item.是否认可为行业内理想专用 || '').includes('是'));
+            // v2.3.20: 修复专用件判断逻辑，与isExclusive函数保持一致
+            const exclusiveData = data.filter(item => {
+                const status = item.是否认可为行业内理想专用 || '';
+                return status.includes('是') || status.includes('认可') || status.toLowerCase().includes('yes');
+            });
+            const nonExclusiveData = data.filter(item => {
+                const status = item.是否认可为行业内理想专用 || '';
+                return !(status.includes('是') || status.includes('认可') || status.toLowerCase().includes('yes'));
+            });
 
             console.log('[DEBUG v2.3.10] 专用件:', exclusiveData.length, '条, 非专用件:', nonExclusiveData.length, '条');
 
