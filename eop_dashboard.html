@@ -264,7 +264,7 @@
         <div class="container-fluid">
             <span class="navbar-brand mb-0 h1">
                 <i class="fas fa-chart-line"></i> EOP呆滞管控数据看板系统
-                <span class="badge bg-light text-dark ms-2" id="versionBadge">v2.3.7.3</span>
+                <span class="badge bg-light text-dark ms-2" id="versionBadge">v2.3.7.4</span>
                 <span class="badge bg-info text-dark ms-2" id="filenameBadge" style="display: none;"></span>
             </span>
             <span class="text-white">
@@ -1003,7 +1003,7 @@
 
     <script>
         // 版本号
-        const VERSION = 'v2.3.7.3';
+        const VERSION = 'v2.3.7.4';
 
         // CW中品类参考标准数据（天数）
         const CW_STANDARDS = [
@@ -2192,7 +2192,8 @@
             const sortedData = Object.entries(exclusiveData)
                 .sort((a, b) => b[1].amount - a[1].amount);
 
-            const chartDom = document.getElementById('idealExclusiveChart');
+            const chartDom = safeGetElement('idealExclusiveChart'); // v2.3.7.4
+            if (!chartDom) return;
             if (!charts.idealExclusiveChart) {
                 charts.idealExclusiveChart = echarts.init(chartDom);
             }
@@ -2407,7 +2408,11 @@
                 }
             });
 
-            const chartDom = document.getElementById('exclusivityPieChart');
+            const chartDom = safeGetElement('exclusivityPieChart'); // v2.3.7.4
+            if (!chartDom) {
+                console.warn('[Exclusive] Chart container not found: exclusivityPieChart');
+                return;
+            }
             if (!charts.exclusiveByTypeChart) {
                 charts.exclusiveByTypeChart = echarts.init(chartDom);
             }
@@ -2481,7 +2486,11 @@
                 return total > 0 ? ((groupData[group].exclusive.count / total) * 100).toFixed(1) : 0;
             });
 
-            const chartDom = document.getElementById('exclusivityMultiChart');
+            const chartDom = safeGetElement('exclusivityMultiChart'); // v2.3.7.4
+            if (!chartDom) {
+                console.warn('[Exclusive] Chart container not found: exclusivityMultiChart');
+                return;
+            }
             if (!charts.exclusiveByGroupChart) {
                 charts.exclusiveByGroupChart = echarts.init(chartDom);
             }
