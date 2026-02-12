@@ -264,7 +264,7 @@
         <div class="container-fluid">
             <span class="navbar-brand mb-0 h1">
                 <i class="fas fa-chart-line"></i> EOP呆滞管控数据看板系统
-                <span class="badge bg-light text-dark ms-2" id="versionBadge">v2.3.14</span>
+                <span class="badge bg-light text-dark ms-2" id="versionBadge">v2.3.15</span>
                 <span class="badge bg-info text-dark ms-2" id="filenameBadge" style="display: none;"></span>
             </span>
             <span class="text-white">
@@ -951,6 +951,7 @@
                                                                     <th>零部件名称</th>
                                                                     <th>零部件品类</th>
                                                                     <th>PSM专业组</th>
+                                                                    <th>国产/进口</th>
                                                                     <th>实际CW(天)</th>
                                                                     <th>标准CW(天)</th>
                                                                     <th>超标(天)</th>
@@ -1153,7 +1154,7 @@
 
     <script>
         // 版本号
-        const VERSION = 'v2.3.14';
+        const VERSION = 'v2.3.15';
 
         // CW中品类参考标准数据（天数）
         const CW_STANDARDS = [
@@ -1272,7 +1273,8 @@
             '呆滞总金额': ['呆滞总金额（元）-公式', '呆滞总金额', '总金额', '呆滞金额合计'],  // 优先匹配BC列带公式的
             '呆滞总数量': ['呆滞总数量', '总数量', '呆滞数量合计', '数量'],
             '下一步措施': ['下一步措施', '措施', '处理措施'],
-            '内部review': ['内部review', 'review', '审核状态', 'Review']
+            '内部review': ['内部review', 'review', '审核状态', 'Review'],
+            '补充说明': ['补充说明', '说明', '备注']  // v2.3.15: T列，用于判断国产/进口
         };
 
         // 根据列名查找列索引
@@ -1434,7 +1436,8 @@
                         呆滞总金额: findColumnIndex(headers, '呆滞总金额'),
                         呆滞总数量: findColumnIndex(headers, '呆滞总数量'),
                         下一步措施: findColumnIndex(headers, '下一步措施'),
-                        内部review: findColumnIndex(headers, '内部review')
+                        内部review: findColumnIndex(headers, '内部review'),
+                        补充说明: findColumnIndex(headers, '补充说明')  // v2.3.15
                     };
 
                     console.log(`${sheetName} 列映射:`, colMap);
@@ -1483,7 +1486,8 @@
                             呆滞总金额: parseFloat(getColumnValue(row, colMap.呆滞总金额, 0)) || 0,
                             呆滞总数量: 理想端数量 + T1端数量,
                             下一步措施: getColumnValue(row, colMap.下一步措施),
-                            内部review: getColumnValue(row, colMap.内部review)
+                            内部review: getColumnValue(row, colMap.内部review),
+                            补充说明: getColumnValue(row, colMap.补充说明, '')  // v2.3.15: 用于判断国产/进口
                         };
 
                         // 调试：输出组合灯数据
@@ -4901,14 +4905,18 @@
 
         // CW标准对比分析主函数
         function updateCWStandardAnalysis() {
-            let data = [];
+            // v2.3.15: 获取所有原始数据用于计算总零件数
+            let allRawData = [];
             const sheetFilter = safeGetValue('cwStdSheet');
 
             if (sheetFilter === 'ALL') {
-                data = [...allData.L987, ...allData.L6];
+                allRawData = [...allData.L987, ...allData.L6];
             } else {
-                data = allData[sheetFilter] || [];
+                allRawData = allData[sheetFilter] || [];
             }
+
+            // 应用筛选条件获取用于图表和分析的数据
+            let data = [...allRawData];
 
             const selectedTiers = Array.from(document.querySelectorAll('.tier-checkbox:checked')).map(cb => cb.value);
             if (selectedTiers.length > 0) {
@@ -4941,13 +4949,25 @@
                 const matched = matchCWStandard(item.Tn零部件品类, matchMode);
                 const actualCWDays = item.CW * 30; // 转换为天数
 
+                // v2.3.15: 判断国产还是进口
+                const 补充说明 = (item.补充说明 || '').toString();
+                const isImport = 补充说明.includes('进口');
+                const isDomestic = 补充说明.includes('国产');
+                const sourceType = isImport ? '进口' : (isDomestic ? '国产' : '未知');
+
                 let standardCW = null;
                 let exceeded = false;
                 let exceededDays = 0;
 
                 if (matched) {
-                    // 优先使用国产标准，如果没有则使用进口标准
-                    standardCW = matched.国产CW || matched.进口CW;
+                    // v2.3.15: 根据补充说明中的国产/进口信息选择标准
+                    if (isImport) {
+                        // 包含"进口"：优先使用进口CW，如果没有则使用国产CW
+                        standardCW = matched.进口CW || matched.国产CW;
+                    } else {
+                        // 包含"国产"或没有明确标记：优先使用国产CW，如果没有则使用进口CW
+                        standardCW = matched.国产CW || matched.进口CW;
+                    }
 
                     if (standardCW && actualCWDays > standardCW) {
                         exceeded = true;
@@ -4961,12 +4981,14 @@
                     standardCW: standardCW,
                     actualCWDays: actualCWDays,
                     exceeded: exceeded,
-                    exceededDays: exceededDays
+                    exceededDays: exceededDays,
+                    sourceType: sourceType  // v2.3.15: 添加国产/进口标记
                 };
             });
 
             // 统计数据
-            const totalCount = enrichedData.length;
+            // v2.3.15: 总零件数使用未筛选的原始数据总数
+            const totalCount = allRawData.length;
             const matchedCount = enrichedData.filter(item => item.matchedStandard).length;
             const exceededCount = enrichedData.filter(item => item.exceeded).length;
             const exceededRate = matchedCount > 0 ? (exceededCount / matchedCount * 100).toFixed(1) : 0;
@@ -5169,21 +5191,32 @@
                 row.insertCell(0).textContent = item.T1零部件名称 || '-';
                 row.insertCell(1).textContent = item.Tn零部件品类 || '-';
                 row.insertCell(2).textContent = item.PSM专业组 || '-';
-                row.insertCell(3).textContent = item.actualCWDays ? item.actualCWDays.toFixed(1) : '-';
-                row.insertCell(4).textContent = item.standardCW ? item.standardCW.toFixed(0) : '-';
 
-                const exceededCell = row.insertCell(5);
+                // v2.3.15: 添加国产/进口列
+                const sourceCell = row.insertCell(3);
+                sourceCell.textContent = item.sourceType || '未知';
+                if (item.sourceType === '进口') {
+                    sourceCell.style.color = '#1890ff';
+                    sourceCell.style.fontWeight = 'bold';
+                } else if (item.sourceType === '国产') {
+                    sourceCell.style.color = '#52c41a';
+                }
+
+                row.insertCell(4).textContent = item.actualCWDays ? item.actualCWDays.toFixed(1) : '-';
+                row.insertCell(5).textContent = item.standardCW ? item.standardCW.toFixed(0) : '-';
+
+                const exceededCell = row.insertCell(6);
                 exceededCell.textContent = item.exceededDays.toFixed(1);
                 exceededCell.style.color = '#ff4d4f';
                 exceededCell.style.fontWeight = 'bold';
 
-                const percentCell = row.insertCell(6);
+                const percentCell = row.insertCell(7);
                 const percent = item.standardCW ? ((item.exceededDays / item.standardCW) * 100).toFixed(1) : '-';
                 percentCell.textContent = percent + '%';
                 percentCell.style.color = '#ff4d4f';
 
-                row.insertCell(7).textContent = item.matchedStandard ? item.matchedStandard.大类 || '-' : '-';
-                row.insertCell(8).textContent = item.matchedStandard ? item.matchedStandard.中品类 || '-' : '-';
+                row.insertCell(8).textContent = item.matchedStandard ? item.matchedStandard.大类 || '-' : '-';
+                row.insertCell(9).textContent = item.matchedStandard ? item.matchedStandard.中品类 || '-' : '-';
             });
 
             if (filteredData.length > 100) {
