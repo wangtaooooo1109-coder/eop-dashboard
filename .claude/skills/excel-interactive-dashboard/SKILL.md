@@ -459,19 +459,21 @@ See the complete implementation at `/Users/wangtao1/eop_dashboard.html`:
 - Supports L987 and L6 sheet templates
 - 10 KPI cards, multiple chart types, Pareto analysis
 - Dynamic column mapping with 23 field mappings
-- **Version v2.0.3 features**:
+- **Version v2.0.4 features**:
   - Bug fixes for supplier display and review chart proportions (v2.0.1)
   - CW/LT distribution charts by 2-week intervals (v2.0.2)
   - Multi-dimensional cascading filters (PSM group → parts, category, range)
   - Real-time chart updates on filter changes
   - Sortable detail tables (by LT/CW/amount)
-  - Median and average reference lines on distribution charts
+  - Median and average reference lines on distribution charts (v2.0.3)
   - **CW标准对比分析** (v2.0.3):
     - Embedded 51 CW reference standards (6 major categories)
     - Smart matching algorithm (exact/fuzzy/keyword-based)
     - Exceeds standard analysis with percentage breakdown
-    - Category-wise comparison charts
+    - **Radar chart for CW exceeded distribution by category** (v2.0.4)
     - Filter by PSM/part/data source
+  - **LT&CW交互查询** (v2.0.4):
+    - Added median and average reference lines to both LT and CW bar charts
 
 ## Testing Checklist
 
