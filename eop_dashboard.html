@@ -264,7 +264,7 @@
         <div class="container-fluid">
             <span class="navbar-brand mb-0 h1">
                 <i class="fas fa-chart-line"></i> EOP呆滞管控数据看板系统
-                <span class="badge bg-light text-dark ms-2" id="versionBadge">v2.3.5</span>
+                <span class="badge bg-light text-dark ms-2" id="versionBadge">v2.3.6</span>
                 <span class="badge bg-info text-dark ms-2" id="filenameBadge" style="display: none;"></span>
             </span>
             <span class="text-white">
@@ -1003,7 +1003,7 @@
 
     <script>
         // 版本号
-        const VERSION = 'v2.3.5';
+        const VERSION = 'v2.3.6';
 
         // CW中品类参考标准数据（天数）
         const CW_STANDARDS = [
@@ -3300,6 +3300,33 @@
         // ========== LT和CW统计分析功能 ==========
 
         function updateLTCWStats(data) {
+            // 如果没有传入data，则从当前视图获取
+            if (!data) {
+                data = [];
+                if (currentSheet === 'ALL') {
+                    data = [...allData.L987, ...allData.L6];
+                } else {
+                    data = allData[currentSheet] || [];
+                }
+
+                // 应用阶梯筛选
+                const selectedTiers = Array.from(document.querySelectorAll('.tier-checkbox:checked')).map(cb => cb.value);
+                if (selectedTiers.length > 0) {
+                    data = data.filter(item => selectedTiers.includes(item.分类));
+                }
+
+                // 应用类型筛选
+                const selectedTypes = Array.from(document.querySelectorAll('.type-checkbox:checked')).map(cb => cb.value);
+                if (selectedTypes.length > 0) {
+                    data = data.filter(item => {
+                        const partType = item.零件类型 || '';
+                        if (selectedTypes.includes('总成') && partType.includes('总成')) return true;
+                        if (selectedTypes.includes('物料') && !partType.includes('总成')) return true;
+                        return false;
+                    });
+                }
+            }
+
             // 获取统计维度
             const dimension = document.getElementById('ltcwStatsDimension').value;
 
@@ -4173,7 +4200,8 @@
         // 更新零件选项（关联PSM专业组）
         function updateDistParts() {
             let data = [];
-            const sheetFilter = document.getElementById('distSheet').value;
+            const sheetFilterElement = document.getElementById('distSheet');
+            const sheetFilter = sheetFilterElement ? sheetFilterElement.value : currentSheet;
 
             if (sheetFilter === 'ALL') {
                 data = [...allData.L987, ...allData.L6];

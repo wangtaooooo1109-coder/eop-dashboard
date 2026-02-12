@@ -175,6 +175,84 @@ updateCWChart(groupStats);
 
 **版本更新：** v2.3.4 → v2.3.5
 
+### 2026-02-12 v2.3.6 - 修复用户交互触发的函数调用错误
+
+**用户反馈错误日志：**
+```
+eop_dashboard.html:3309 Uncaught TypeError: Cannot read properties of undefined (reading 'forEach')
+    at updateLTCWStats (eop_dashboard.html:3309:18)
+    at HTMLSelectElement.onchange (eop_dashboard.html:724:134)
+
+eop_dashboard.html:4176 Uncaught TypeError: Cannot read properties of null (reading 'value')
+    at updateDistParts (eop_dashboard.html:4176:69)
+    at HTMLSelectElement.onchange (eop_dashboard.html:774:153)
+```
+
+**根本原因分析（Systematic Debugging Phase 1）：**
+
+1. **错误1 - updateLTCWStats(3309行)：**
+   - HTML onchange事件调用`updateLTCWStats()`时没有传入`data`参数
+   - 函数内部尝试对`undefined`调用`.forEach()`导致TypeError
+   - 触发场景：用户在LT&CW统计分析中更改"统计维度"下拉框
+
+2. **错误2 - updateDistParts(4176行)：**
+   - 函数尝试访问`document.getElementById('distSheet')`但该元素不存在
+   - 对`null`调用`.value`导致TypeError
+   - 触发场景：用户在CW/LT分布图分析中更改"PSM专业组"下拉框
+
+**问题模式：**
+- 这两个函数原本设计为被`updateDashboard()`调用并传入`data`参数
+- 但HTML中的onchange事件直接调用这些函数，没有传参
+- 导致交互式筛选功能无法工作
+
+**修复内容：**
+
+1. **修复updateLTCWStats（3302-3328行）：**
+   - 添加参数防御：如果`data`未传入，自动从`allData`获取当前视图数据
+   - 自动应用阶梯筛选和类型筛选，保持与主仪表板一致
+   ```javascript
+   function updateLTCWStats(data) {
+       // 如果没有传入data，则从当前视图获取
+       if (!data) {
+           data = [];
+           if (currentSheet === 'ALL') {
+               data = [...allData.L987, ...allData.L6];
+           } else {
+               data = allData[currentSheet] || [];
+           }
+           // 应用筛选器...
+       }
+       // ... 原有逻辑
+   }
+   ```
+
+2. **修复updateDistParts（4201-4210行）：**
+   - 添加元素存在性检查
+   - 如果`distSheet`元素不存在，使用`currentSheet`作为fallback
+   ```javascript
+   function updateDistParts() {
+       const sheetFilterElement = document.getElementById('distSheet');
+       const sheetFilter = sheetFilterElement ? sheetFilterElement.value : currentSheet;
+       // ... 原有逻辑
+   }
+   ```
+
+**Defense-in-Depth原则应用：**
+- 函数在被不同方式调用时都能正常工作（传参 vs 无参）
+- 对DOM元素访问进行空值检查
+- 提供合理的fallback值
+- 确保用户交互不会导致JavaScript崩溃
+
+**版本更新：** v2.3.5 → v2.3.6
+
+**测试验证：**
+- [ ] 上传Excel文件后，浏览器Console无TypeError
+- [ ] LT&CW统计分析中更改"统计维度"下拉框能正常工作
+- [ ] CW/LT分布图分析中更改"PSM专业组"下拉框能正常工作
+- [ ] 所有图表交互式筛选功能正常
+- [ ] 版本号显示为v2.3.6
+
+
 **测试验证：**
 - [ ] 上传Excel文件后，浏览器Console无TypeError
 - [ ] 帕累托分析（零件+供应商）正常显示
