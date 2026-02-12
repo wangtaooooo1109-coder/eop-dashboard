@@ -103,6 +103,9 @@
             padding: 10px 30px;
             font-weight: bold;
             transition: all 0.3s;
+            cursor: pointer;
+            z-index: 10;
+            position: relative;
         }
 
         .btn-primary:hover {
@@ -261,7 +264,7 @@
         <div class="container-fluid">
             <span class="navbar-brand mb-0 h1">
                 <i class="fas fa-chart-line"></i> EOP呆滞管控数据看板系统
-                <span class="badge bg-light text-dark ms-2" id="versionBadge">v2.2.1</span>
+                <span class="badge bg-light text-dark ms-2" id="versionBadge">v2.2.2</span>
                 <span class="badge bg-info text-dark ms-2" id="filenameBadge" style="display: none;"></span>
             </span>
             <span class="text-white">
@@ -280,7 +283,7 @@
                     <p class="text-muted">拖拽文件到此处，或点击选择文件</p>
                     <p class="text-muted small">支持格式: .xlsx, .xls</p>
                     <input type="file" id="fileInput" accept=".xlsx,.xls" style="display: none;">
-                    <button class="btn btn-primary mt-3" id="selectFileButton">
+                    <button class="btn btn-primary mt-3" id="selectFileButton" type="button" onclick="triggerFileSelect()">
                         <i class="fas fa-folder-open"></i> 选择文件
                     </button>
                 </div>
@@ -991,7 +994,7 @@
 
     <script>
         // 版本号
-        const VERSION = 'v2.2.1';
+        const VERSION = 'v2.2.2';
 
         // CW中品类参考标准数据（天数）
         const CW_STANDARDS = [
@@ -1138,23 +1141,9 @@
             const fileInput = document.getElementById('fileInput');
             const selectFileButton = document.getElementById('selectFileButton');
 
-            // 直接在按钮上触发文件选择（最简单可靠的方式）
-            if (selectFileButton) {
-                selectFileButton.onclick = function() {
-                    fileInput.click();
-                };
-            }
+            console.log('initUploadArea called', { uploadArea, fileInput, selectFileButton });
 
-            // 点击上传区域的其他地方触发文件选择
-            uploadArea.addEventListener('click', function(e) {
-                // 不处理按钮点击（已由按钮自身的onclick处理）
-                if (e.target === selectFileButton || selectFileButton && selectFileButton.contains(e.target)) {
-                    return;
-                }
-                fileInput.click();
-            });
-
-            // 文件选择
+            // 处理文件选择
             fileInput.addEventListener('change', handleFileSelect);
 
             // 拖拽功能
@@ -1175,6 +1164,12 @@
                     handleFile(files[0]);
                 }
             });
+
+            // 全局函数用于打开文件选择
+            window.triggerFileSelect = function() {
+                console.log('triggerFileSelect called');
+                fileInput.click();
+            };
         }
 
         // 处理文件选择
