@@ -264,7 +264,7 @@
         <div class="container-fluid">
             <span class="navbar-brand mb-0 h1">
                 <i class="fas fa-chart-line"></i> EOP呆滞管控数据看板系统
-                <span class="badge bg-light text-dark ms-2" id="versionBadge">v2.3.15</span>
+                <span class="badge bg-light text-dark ms-2" id="versionBadge">v2.3.16</span>
                 <span class="badge bg-info text-dark ms-2" id="filenameBadge" style="display: none;"></span>
             </span>
             <span class="text-white">
@@ -323,16 +323,16 @@
                                 <label>阶梯筛选（可多选）</label>
                                 <div class="tier-filter-group">
                                     <label class="tier-checkbox-label">
-                                        <input type="checkbox" class="tier-checkbox" value="50万以内" onchange="updateDashboard()"> 50万以内
+                                        <input type="checkbox" class="tier-checkbox" value="50万以内" onchange="updateDashboard(); updateCWStandardAnalysis();"> 50万以内
                                     </label>
                                     <label class="tier-checkbox-label">
-                                        <input type="checkbox" class="tier-checkbox" value="50-100万" onchange="updateDashboard()"> 50-100万
+                                        <input type="checkbox" class="tier-checkbox" value="50-100万" onchange="updateDashboard(); updateCWStandardAnalysis();"> 50-100万
                                     </label>
                                     <label class="tier-checkbox-label">
-                                        <input type="checkbox" class="tier-checkbox" value="100-500万" onchange="updateDashboard()"> 100-500万
+                                        <input type="checkbox" class="tier-checkbox" value="100-500万" onchange="updateDashboard(); updateCWStandardAnalysis();"> 100-500万
                                     </label>
                                     <label class="tier-checkbox-label">
-                                        <input type="checkbox" class="tier-checkbox" value="500万以上" onchange="updateDashboard()"> 500万以上
+                                        <input type="checkbox" class="tier-checkbox" value="500万以上" onchange="updateDashboard(); updateCWStandardAnalysis();"> 500万以上
                                     </label>
                                 </div>
                             </div>
@@ -340,10 +340,10 @@
                                 <label>类型筛选（可多选）</label>
                                 <div class="tier-filter-group">
                                     <label class="tier-checkbox-label">
-                                        <input type="checkbox" class="type-checkbox" value="总成" onchange="updateDashboard()"> 总成
+                                        <input type="checkbox" class="type-checkbox" value="总成" onchange="updateDashboard(); updateCWStandardAnalysis();"> 总成
                                     </label>
                                     <label class="tier-checkbox-label">
-                                        <input type="checkbox" class="type-checkbox" value="物料" onchange="updateDashboard()"> 物料
+                                        <input type="checkbox" class="type-checkbox" value="物料" onchange="updateDashboard(); updateCWStandardAnalysis();"> 物料
                                     </label>
                                 </div>
                             </div>
@@ -885,7 +885,7 @@
                                                 <div class="col-md-3">
                                                     <div class="card bg-light">
                                                         <div class="card-body text-center">
-                                                            <h6 class="card-title">总零件数</h6>
+                                                            <h6 class="card-title">总物料数</h6>
                                                             <h4 id="cwStdTotalCount">0</h4>
                                                         </div>
                                                     </div>
@@ -893,7 +893,7 @@
                                                 <div class="col-md-3">
                                                     <div class="card bg-info text-white">
                                                         <div class="card-body text-center">
-                                                            <h6 class="card-title">已匹配标准</h6>
+                                                            <h6 class="card-title">已匹配标准物料数</h6>
                                                             <h4 id="cwStdMatchedCount">0</h4>
                                                         </div>
                                                     </div>
@@ -901,7 +901,7 @@
                                                 <div class="col-md-3">
                                                     <div class="card bg-warning text-white">
                                                         <div class="card-body text-center">
-                                                            <h6 class="card-title">超标零件数</h6>
+                                                            <h6 class="card-title">超标物料数</h6>
                                                             <h4 id="cwStdExceededCount">0</h4>
                                                         </div>
                                                     </div>
@@ -1154,7 +1154,7 @@
 
     <script>
         // 版本号
-        const VERSION = 'v2.3.15';
+        const VERSION = 'v2.3.16';
 
         // CW中品类参考标准数据（天数）
         const CW_STANDARDS = [
@@ -4905,24 +4905,23 @@
 
         // CW标准对比分析主函数
         function updateCWStandardAnalysis() {
-            // v2.3.15: 获取所有原始数据用于计算总零件数
-            let allRawData = [];
+            // v2.3.16: 获取数据并应用筛选条件
+            let data = [];
             const sheetFilter = safeGetValue('cwStdSheet');
 
             if (sheetFilter === 'ALL') {
-                allRawData = [...allData.L987, ...allData.L6];
+                data = [...allData.L987, ...allData.L6];
             } else {
-                allRawData = allData[sheetFilter] || [];
+                data = allData[sheetFilter] || [];
             }
 
-            // 应用筛选条件获取用于图表和分析的数据
-            let data = [...allRawData];
-
+            // 应用阶梯筛选
             const selectedTiers = Array.from(document.querySelectorAll('.tier-checkbox:checked')).map(cb => cb.value);
             if (selectedTiers.length > 0) {
                 data = data.filter(item => selectedTiers.includes(item.分类));
             }
 
+            // 应用类型筛选
             const selectedTypes = Array.from(document.querySelectorAll('.type-checkbox:checked')).map(cb => cb.value);
             if (selectedTypes.length > 0) {
                 data = data.filter(item => {
@@ -4933,6 +4932,7 @@
                 });
             }
 
+            // 应用PSM和零件筛选
             const selectedPSM = safeGetValue('cwStdPSM');
             const selectedPart = safeGetValue('cwStdPart');
             const matchMode = safeGetValue('cwStdMatchMode');
@@ -4987,8 +4987,8 @@
             });
 
             // 统计数据
-            // v2.3.15: 总零件数使用未筛选的原始数据总数
-            const totalCount = allRawData.length;
+            // v2.3.16: 总物料数使用筛选后的数据总数，不是未筛选的
+            const totalCount = enrichedData.length;
             const matchedCount = enrichedData.filter(item => item.matchedStandard).length;
             const exceededCount = enrichedData.filter(item => item.exceeded).length;
             const exceededRate = matchedCount > 0 ? (exceededCount / matchedCount * 100).toFixed(1) : 0;
