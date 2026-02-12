@@ -264,7 +264,7 @@
         <div class="container-fluid">
             <span class="navbar-brand mb-0 h1">
                 <i class="fas fa-chart-line"></i> EOP呆滞管控数据看板系统
-                <span class="badge bg-light text-dark ms-2" id="versionBadge">v2.3.7.4</span>
+                <span class="badge bg-light text-dark ms-2" id="versionBadge">v2.3.8</span>
                 <span class="badge bg-info text-dark ms-2" id="filenameBadge" style="display: none;"></span>
             </span>
             <span class="text-white">
@@ -1003,7 +1003,7 @@
 
     <script>
         // 版本号
-        const VERSION = 'v2.3.7.4';
+        const VERSION = 'v2.3.8';
 
         // CW中品类参考标准数据（天数）
         const CW_STANDARDS = [
@@ -1524,7 +1524,8 @@
                 }
             });
 
-            const chartDom = document.getElementById('tierChart');
+            const chartDom = safeGetElement('tierChart'); // v2.3.8
+            if (!chartDom) return;
             if (!charts.tierChart) {
                 charts.tierChart = echarts.init(chartDom);
             }
@@ -1592,7 +1593,8 @@
             const sortedGroups = Object.entries(groupData)
                 .sort((a, b) => b[1] - a[1]);
 
-            const chartDom = document.getElementById('groupChart');
+            const chartDom = safeGetElement('groupChart'); // v2.3.8
+            if (!chartDom) return;
             if (!charts.groupChart) {
                 charts.groupChart = echarts.init(chartDom);
             }
@@ -1658,7 +1660,8 @@
                 .sort((a, b) => b[1] - a[1])
                 .slice(0, topN);
 
-            const chartDom = document.getElementById('categoryChart');
+            const chartDom = safeGetElement('categoryChart'); // v2.3.8
+            if (!chartDom) return;
             if (!charts.categoryChart) {
                 charts.categoryChart = echarts.init(chartDom);
             }
@@ -1732,7 +1735,8 @@
                 .sort((a, b) => b[1] - a[1])
                 .slice(0, topN);
 
-            const chartDom = document.getElementById('categoryChart');
+            const chartDom = safeGetElement('categoryChart'); // v2.3.8
+            if (!chartDom) return;
             if (!charts.categoryChart) {
                 charts.categoryChart = echarts.init(chartDom);
             }
@@ -1793,7 +1797,8 @@
                 }
             });
 
-            const chartDom = document.getElementById('typeChart');
+            const chartDom = safeGetElement('typeChart'); // v2.3.8
+            if (!chartDom) return;
             if (!charts.typeChart) {
                 charts.typeChart = echarts.init(chartDom);
             }
@@ -1836,7 +1841,8 @@
             const t1Total = data.reduce((sum, item) => sum + (getMetricValue(item, 't1') || 0), 0);
             const idealTotal = data.reduce((sum, item) => sum + (getMetricValue(item, 'ideal') || 0), 0);
 
-            const chartDom = document.getElementById('comparisonChart');
+            const chartDom = safeGetElement('comparisonChart'); // v2.3.8
+            if (!chartDom) return;
             if (!charts.comparisonChart) {
                 charts.comparisonChart = echarts.init(chartDom);
             }
@@ -1912,7 +1918,8 @@
                 .sort((a, b) => b[1].amount - a[1].amount)
                 .slice(0, topN);
 
-            const chartDom = document.getElementById('supplierChart');
+            const chartDom = safeGetElement('supplierChart'); // v2.3.8
+            if (!chartDom) return;
             if (!charts.supplierChart) {
                 charts.supplierChart = echarts.init(chartDom);
             }
@@ -2003,7 +2010,8 @@
             const sortedReview = Object.entries(reviewData)
                 .sort((a, b) => b[1].amount - a[1].amount);
 
-            const chartDom = document.getElementById('reviewChart');
+            const chartDom = safeGetElement('reviewChart'); // v2.3.8
+            if (!chartDom) return;
             if (!charts.reviewChart) {
                 charts.reviewChart = echarts.init(chartDom);
             }
@@ -2115,7 +2123,8 @@
             const sortedSteps = Object.entries(nextStepData)
                 .sort((a, b) => b[1].amount - a[1].amount);
 
-            const chartDom = document.getElementById('nextStepChart');
+            const chartDom = safeGetElement('nextStepChart'); // v2.3.8
+            if (!chartDom) return;
             if (!charts.nextStepChart) {
                 charts.nextStepChart = echarts.init(chartDom);
             }
@@ -2251,7 +2260,8 @@
             const sortedData = Object.entries(priceData)
                 .sort((a, b) => b[1].amount - a[1].amount);
 
-            const chartDom = document.getElementById('priceReasonableChart');
+            const chartDom = safeGetElement('priceReasonableChart'); // v2.3.8
+            if (!chartDom) return;
             if (!charts.priceReasonableChart) {
                 charts.priceReasonableChart = echarts.init(chartDom);
             }
@@ -2324,7 +2334,8 @@
             const sortedData = Object.entries(cwData)
                 .sort((a, b) => b[1].amount - a[1].amount);
 
-            const chartDom = document.getElementById('cwReasonableChart');
+            const chartDom = safeGetElement('cwReasonableChart'); // v2.3.8
+            if (!chartDom) return;
             if (!charts.cwReasonableChart) {
                 charts.cwReasonableChart = echarts.init(chartDom);
             }
@@ -3191,7 +3202,8 @@
             `;
 
             // 更新LT图表
-            const ltChartDom = document.getElementById('ltcwQueryChartLT');
+            const ltChartDom = safeGetElement('ltcwQueryChartLT'); // v2.3.8
+            if (!ltChartDom) return;
             if (!charts.ltcwQueryChartLT) {
                 charts.ltcwQueryChartLT = echarts.init(ltChartDom);
             }
@@ -3254,7 +3266,8 @@
             charts.ltcwQueryChartLT.setOption(ltOption);
 
             // 更新CW图表
-            const cwChartDom = document.getElementById('ltcwQueryChartCW');
+            const cwChartDom = safeGetElement('ltcwQueryChartCW'); // v2.3.8
+            if (!cwChartDom) return;
             if (!charts.ltcwQueryChartCW) {
                 charts.ltcwQueryChartCW = echarts.init(cwChartDom);
             }
@@ -3452,7 +3465,8 @@
         }
 
         function updateLTChart(groupStats) {
-            const chartDom = document.getElementById('ltStatsChart');
+            const chartDom = safeGetElement('ltStatsChart'); // v2.3.8
+            if (!chartDom) return;
             if (!charts.ltStatsChart) {
                 charts.ltStatsChart = echarts.init(chartDom);
             }
@@ -3541,7 +3555,8 @@
         }
 
         function updateCWChart(groupStats) {
-            const chartDom = document.getElementById('cwStatsChart');
+            const chartDom = safeGetElement('cwStatsChart'); // v2.3.8
+            if (!chartDom) return;
             if (!charts.cwStatsChart) {
                 charts.cwStatsChart = echarts.init(chartDom);
             }
@@ -3831,7 +3846,8 @@
                 chartData.push({ name: '其他供应商', value: othersAmount });
             }
 
-            const chartDom = document.getElementById('supplierConcentrationChart');
+            const chartDom = safeGetElement('supplierConcentrationChart'); // v2.3.8
+            if (!chartDom) return;
             if (!charts.supplierConcentrationChart) {
                 charts.supplierConcentrationChart = echarts.init(chartDom);
             }
@@ -3897,7 +3913,8 @@
                 }
             });
 
-            const chartDom = document.getElementById('priceReasonableChart');
+            const chartDom = safeGetElement('priceReasonableChart'); // v2.3.8
+            if (!chartDom) return;
             if (!charts.priceReasonableChart) {
                 charts.priceReasonableChart = echarts.init(chartDom);
             }
@@ -4386,7 +4403,8 @@
 
         // 绘制分布图（按2周区间）
         function updateDistributionChart(type, values, chartId) {
-            const chartDom = document.getElementById(chartId);
+            const chartDom = safeGetElement(chartId); // v2.3.8
+            if (!chartDom) return; // v2.3.8
             if (!charts[chartId]) {
                 charts[chartId] = echarts.init(chartDom);
             }
