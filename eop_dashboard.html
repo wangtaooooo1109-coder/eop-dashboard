@@ -264,7 +264,7 @@
         <div class="container-fluid">
             <span class="navbar-brand mb-0 h1">
                 <i class="fas fa-chart-line"></i> EOP呆滞管控数据看板系统
-                <span class="badge bg-light text-dark ms-2" id="versionBadge">v2.3.21</span>
+                <span class="badge bg-light text-dark ms-2" id="versionBadge">v2.3.22</span>
                 <span class="badge bg-info text-dark ms-2" id="filenameBadge" style="display: none;"></span>
             </span>
             <span class="text-white">
@@ -1154,7 +1154,7 @@
 
     <script>
         // 版本号
-        const VERSION = 'v2.3.21';
+        const VERSION = 'v2.3.22';
 
         // CW中品类参考标准数据（天数）
         const CW_STANDARDS = [
@@ -2551,275 +2551,161 @@
             return status.includes('是') || status.includes('认可') || status.toLowerCase().includes('yes');
         }
 
-        // 更新按零件类型的专用件占比图表 v2.3.21: 与updateIdealExclusiveChart逻辑一致
+        // 更新按零件类型的专用件占比图表 v2.3.22: 完全复用updateIdealExclusiveChart的成功逻辑
         function updateExclusiveByTypeChart(data) {
-            console.log('[DEBUG v2.3.21] updateExclusiveByTypeChart 收到数据:', data.length, '条');
             const config = getMetricConfig();
-            const typeData = {};
+            const typeData = {}; // 维护 {类型: {是/否/未填写: {count,金额}}}
 
             data.forEach(item => {
-                const type = item.零件类型 || '未分类';
+                // 读取状态 - 与updateIdealExclusiveChart完全一致
                 let status = item.是否认可为行业内理想专用;
                 if (!status || status.trim() === '') {
                     status = '未填写';
                 }
 
+                const type = item.零件类型 || '未分类';
+                const amount = getMetricValue(item, 'total') || 0;
+
                 if (!typeData[type]) {
-                    typeData[type] = {
-                        是: { count: 0, amount: 0 },
-                        否: { count: 0, amount: 0 },
-                        未填写: { count: 0, amount: 0 }
-                    };
+                    typeData[type] = { 是: { count: 0, amount: 0 }, 否: { count: 0, amount: 0 }, 未填写: { count: 0, amount: 0 } };
                 }
 
-                const amount = getMetricValue(item, 'total') || 0;
-                const mappedStatus = typeData[type].hasOwnProperty(status) ? status : '未填写';
-                typeData[type][mappedStatus].count += 1;
-                typeData[type][mappedStatus].amount += amount;
+                // 确保状态只有三种可能值
+                const statusKey = status === '是' ? '是' : (status === '否' ? '否' : '未填写');
+                typeData[type][statusKey].count += 1;
+                typeData[type][statusKey].amount += amount;
             });
 
-            console.log('[DEBUG v2.3.21] typeData统计结果:', Object.keys(typeData).length, '种类型', typeData);
+            const chartDom = safeGetElement('exclusivityPieChart');
+            if (!chartDom) return;
 
-            const chartDom = safeGetElement('exclusivityPieChart'); // v2.3.7.4
-            if (!chartDom) {
-                console.warn('[Exclusive] Chart container not found: exclusivityPieChart');
-                return;
-            }
             if (!charts.exclusiveByTypeChart) {
                 charts.exclusiveByTypeChart = echarts.init(chartDom);
             }
 
-            // 聚合所有类型的"是"状态数据
-            const typeChartData = [];
-            Object.entries(typeData).forEach(([type, statusData]) => {
-                if (statusData.是.count > 0) {
-                    typeChartData.push({
-                        name: type,
-                        value: statusData.是.count
-                    });
-                }
-            });
+            // 按总金额排序，只显示有"是"状态的数据
+            const sortedTypes = Object.entries(typeData)
+                .sort((a, b) => b[1].是.amount - a[1].是.amount)
+                .filter(([_, data]) => data.是.count > 0)
+                .map(([name, value]) => ({
+                    name: name,
+                    value: value.是.amount,
+                    count: value.是.count
+                }));
 
             const option = {
                 tooltip: {
                     trigger: 'item',
-                    formatter: '{a} <br/>{b}: {c} ({d}%)'
-                },
-                legend: {
-                    orient: 'vertical',
-                    left: 'left'
-                },
-                series: [
-                    {
-                        name: '专用件',
-                        type: 'pie',
-                        radius: ['40%', '70%'],
-                        center: ['50%', '50%'],
-                        data: typeChartData,
-                        itemStyle: {
-                            borderRadius: 5,
-                            borderColor: '#fff',
-                            borderWidth: 2
-                        },
-                        label: {
-                            show: true
-                        }
+                    formatter: function(params) {
+                        const type = params.name;
+                        const data = typeData[type];
+                        return type + '<br/>是: ' + data.是.count + '条<br/>占比: ' + params.percent + '%';
                     }
-                ]
+                },
+                legend: { orient: 'vertical', left: 'left' },
+                series: [{
+                    name: '专用件',
+                    type: 'pie',
+                    radius: '70%',
+                    data: sortedTypes,
+                    itemStyle: { borderRadius: 5, borderColor: '#fff', borderWidth: 2 },
+                    label: { show: true, formatter: '{b}\n{d}%' }
+                }]
             };
 
             charts.exclusiveByTypeChart.setOption(option);
         }
 
-// 更新按PSM专业组的专用件占比图表 v2.3.21: 与updateIdealExclusiveChart逻辑一致
+        // 更新按PSM专业组的专用件占比图表 v2.3.22
         function updateExclusiveByGroupChart(data) {
-            console.log('[DEBUG v2.3.21] updateExclusiveByGroupChart 收到数据:', data.length, '条');
             const config = getMetricConfig();
             const groupData = {};
 
             data.forEach(item => {
-                const group = item.PSM专业组 || '未分类';
                 let status = item.是否认可为行业内理想专用;
                 if (!status || status.trim() === '') {
                     status = '未填写';
                 }
 
+                const group = item.PSM专业组 || '未分类';
+                const amount = getMetricValue(item, 'total') || 0;
+
                 if (!groupData[group]) {
-                    groupData[group] = {
-                        是: { count: 0, amount: 0 },
-                        否: { count: 0, amount: 0 },
-                        未填写: { count: 0, amount: 0 }
-                    };
+                    groupData[group] = { 是: { count: 0, amount: 0 }, 否: { count: 0, amount: 0 }, 未填写: { count: 0, amount: 0 } };
                 }
 
-                const amount = getMetricValue(item, 'total') || 0;
-                const mappedStatus = groupData[group].hasOwnProperty(status) ? status : '未填写';
-                groupData[group][mappedStatus].count += 1;
-                groupData[group][mappedStatus].amount += amount;
+                const statusKey = status === '是' ? '是' : (status === '否' ? '否' : '未填写');
+                groupData[group][statusKey].count += 1;
+                groupData[group][statusKey].amount += amount;
             });
 
-            console.log('[DEBUG v2.3.21] groupData统计结果:', Object.keys(groupData).length, '个专业组', groupData);
+            const chartDom = safeGetElement('exclusivityMultiChart');
+            if (!chartDom) return;
 
-            const sortedGroups = Object.entries(groupData)
-                .sort((a, b) => {
-                    const totalA = Object.values(a[1]).reduce((sum, v) => sum + v.amount, 0);
-                    const totalB = Object.values(b[1]).reduce((sum, v) => sum + v.amount, 0);
-                    return totalB - totalA;
-                })
-                .map(item => item[0]);
-
-            const exclusiveCounts = sortedGroups.map(group => groupData[group].是.count);
-            const nonExclusiveCounts = sortedGroups.map(group => groupData[group].否.count + groupData[group].未填写.count);
-            const exclusivePercentages = sortedGroups.map(group => {
-                const total = exclusiveCounts[sortedGroups.indexOf(group)] + nonExclusiveCounts[sortedGroups.indexOf(group)];
-                return total > 0 ? ((exclusiveCounts[sortedGroups.indexOf(group)] / total) * 100).toFixed(1) : 0;
-            });
-
-            const chartDom = safeGetElement('exclusivityMultiChart'); // v2.3.7.4
-            if (!chartDom) {
-                console.warn('[Exclusive] Chart container not found: exclusivityMultiChart');
-                return;
-            }
             if (!charts.exclusiveByGroupChart) {
                 charts.exclusiveByGroupChart = echarts.init(chartDom);
             }
 
+            const sortedGroups = Object.entries(groupData)
+                .sort((a, b) => b[1].是.amount - a[1].是.amount)
+                .filter(([_, data]) => data.是.count > 0)
+                .map(([name, value]) => ({
+                    name: name,
+                    value: value.是.amount
+                }));
+
             const option = {
-                tooltip: {
-                    trigger: 'axis',
-                    axisPointer: { type: 'shadow' },
-                    formatter: function(params) {
-                        const group = params[0].axisValue;
-                        const data = groupData[group];
-                        const total = data.是.count + data.否.count + data.未填写.count;
-                        const percentage = total > 0 ? ((data.是.count / total) * 100).toFixed(1) : 0;
-                        return group + '<br/>' +
-                               '是: ' + data.是.count + '条 (¥' + (parseFloat(config.formatter(data.是.amount))).toFixed(2) + '万)<br/>' +
-                               '否/未填写: ' + (data.否.count + data.未填写.count) + '条 (¥' + (parseFloat(config.formatter(data.否.amount + data.未填写.amount))).toFixed(2) + '万)<br/>' +
-                               '专用件占比: ' + percentage + '%';
-                    }
-                },
-                legend: {
-                    data: ['是', '否+未填写', '专用件占比'],
-                    top: 10
-                },
-                grid: { left: '3%', right: '10%', bottom: '3%', containLabel: true },
-                xAxis: {
-                    type: 'category',
-                    data: sortedGroups
-                },
-                yAxis: [
-                    {
-                        type: 'value',
-                        name: '数量(条)',
-                        position: 'left'
-                    },
-                    {
-                        type: 'value',
-                        name: '占比(%)',
-                        position: 'right',
-                        max: 100
-                    }
-                ],
-                series: [
-                    {
-                        name: '是',
-                        type: 'bar',
-                        stack: 'total',
-                        data: exclusiveCounts,
-                        itemStyle: { color: '#5470c6' },
-                        label: {
-                            show: true,
-                            position: 'inside',
-                            formatter: '{c}'
-                        }
-                    },
-                    {
-                        name: '否+未填写',
-                        type: 'bar',
-                        stack: 'total',
-                        data: nonExclusiveCounts,
-                        itemStyle: { color: '#91cc75' },
-                        label: {
-                            show: true,
-                            position: 'inside',
-                            formatter: '{c}'
-                        }
-                    },
-                    {
-                        name: '专用件占比',
-                        type: 'line',
-                        yAxisIndex: 1,
-                        data: exclusivePercentages,
-                        itemStyle: { color: '#f5576c' },
-                        lineStyle: { width: 2 },
-                        label: {
-                            show: true,
-                            position: 'top',
-                            formatter: '{c}%'
-                        }
-                    }
-                ]
+                tooltip: { trigger: 'item', formatter: '{b}: ¥{c}万' },
+                legend: { orient: 'vertical', left: 'left' },
+                series: [{
+                    name: '专用件',
+                    type: 'pie',
+                    radius: '70%',
+                    data: sortedGroups,
+                    itemStyle: { borderRadius: 5, borderColor: '#fff', borderWidth: 2 },
+                    label: { show: true, formatter: '{b}\n{d}%' }
+                }]
             };
 
             charts.exclusiveByGroupChart.setOption(option);
         }
 
-        // 更新专用件对比分析 v2.3.21: 与updateIdealExclusiveChart逻辑一致
+        // 更新专用件对比分析 v2.3.22
         function updateExclusiveComparisonChart(data) {
-            console.log('[DEBUG v2.3.21] updateExclusiveComparisonChart 收到数据:', data.length, '条');
             const config = getMetricConfig();
-            const exclusiveData = { 是: { count: 0, amount: 0 }, 否: { count: 0, amount: 0 }, 未填写: { count: 0, amount: 0 } };
+            const exclusiveData = {};
 
             data.forEach(item => {
                 let status = item.是否认可为行业内理想专用;
                 if (!status || status.trim() === '') {
                     status = '未填写';
                 }
-
-                const amount = getMetricValue(item, 'total') || 0;
-                const mappedStatus = exclusiveData.hasOwnProperty(status) ? status : '未填写';
-                exclusiveData[mappedStatus].count += 1;
-                exclusiveData[mappedStatus].amount += amount;
+                if (!exclusiveData[status]) {
+                    exclusiveData[status] = { count: 0, amount: 0 };
+                }
+                exclusiveData[status].count += 1;
+                exclusiveData[status].amount += getMetricValue(item, 'total') || 0;
             });
 
-            const exclusiveAmount = exclusiveData.是.amount;
-            const nonExclusiveAmount = exclusiveData.否.amount + exclusiveData.未填写.amount;
+            const chartDom = safeGetElement('exclusiveComparisonChart');
+            if (!chartDom) return;
 
-            console.log('[DEBUG v2.3.21] 专用件:', exclusiveData.是.count, '条, 非专用件:', exclusiveData.否.count + exclusiveData.未填写.count, '条');
-
-            const chartDom = safeGetElement('exclusiveComparisonChart'); // v2.3.9
-            if (!chartDom) {
-                console.warn('[Exclusive] Chart container not found: exclusiveComparisonChart');
-                return;
-            }
             if (!charts.exclusiveComparisonChart) {
                 charts.exclusiveComparisonChart = echarts.init(chartDom);
             }
 
+            const sortedData = Object.entries(exclusiveData)
+                .sort((a, b) => b[1].amount - a[1].amount);
+
             const option = {
-                tooltip: {
-                    trigger: 'item',
-                    formatter: '{b}: {c}万元 ({d}%)'
-                },
-                legend: {
-                    orient: 'vertical',
-                    left: 'left'
-                },
+                tooltip: { trigger: 'item', formatter: '{b}: {c}万元 ({d}%)' },
+                legend: { orient: 'vertical', left: 'left' },
                 series: [{
                     type: 'pie',
-                    radius: '60%',
-                    data: [
-                        { value: (exclusiveAmount / 10000).toFixed(2), name: '专用件' },
-                        { value: (nonExclusiveAmount / 10000).toFixed(2), name: '非专用件' }
-                    ],
-                    emphasis: {
-                        itemStyle: {
-                            shadowBlur: 10,
-                            shadowOffsetX: 0,
-                            shadowColor: 'rgba(0, 0, 0, 0.5)'
-                        }
-                    }
+                    radius: '70%',
+                    data: sortedData.map(([name, value]) => ({ name: name, value: value.amount })),
+                    itemStyle: { borderRadius: 5, borderColor: '#fff', borderWidth: 2 },
+                    label: { show: true, formatter: '{b}\n{d}%' }
                 }]
             };
 
