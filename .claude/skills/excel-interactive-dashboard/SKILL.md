@@ -465,6 +465,7 @@ See the complete implementation at `/Users/wangtao1/eop_dashboard.html`:
   - Multi-dimensional cascading filters (PSM group → parts, category, range)
   - Real-time chart updates on filter changes
   - Sortable detail tables (by LT/CW/amount)
+  - Median and average reference lines on distribution charts
   - **CW标准对比分析** (v2.0.3):
     - Embedded 51 CW reference standards (6 major categories)
     - Smart matching algorithm (exact/fuzzy/keyword-based)
