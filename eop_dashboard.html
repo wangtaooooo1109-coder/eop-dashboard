@@ -977,6 +977,123 @@
                 </div>
             </div>
 
+            <!-- CW/LT 分布图分析 -->
+            <div class="row">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <i class="fas fa-chart-area"></i> CW / LT 分布图分析 (按2周区间)
+                        </div>
+                        <div class="card-body">
+                            <!-- 筛选条件 -->
+                            <div class="row mb-3">
+                                <div class="col-md-3">
+                                    <label>PSM专业组</label>
+                                    <select class="form-select form-select-sm" id="distPSM" onchange="updateDistParts(); updateDistribution();">
+                                        <option value="">--全部--</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-3">
+                                    <label>零件（总成）</label>
+                                    <select class="form-select form-select-sm" id="distPart" onchange="updateDistribution();">
+                                        <option value="">--全部--</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-3">
+                                    <label>Tn零部件品类</label>
+                                    <select class="form-select form-select-sm" id="distCategory" onchange="updateDistribution();">
+                                        <option value="">--全部--</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-3">
+                                    <label>数据来源</label>
+                                    <select class="form-select form-select-sm" id="distSheet" onchange="updateDistribution();">
+                                        <option value="ALL">全部数据</option>
+                                        <option value="L987">仅L987</option>
+                                        <option value="L6">仅L6</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label>LT 区间筛选（月）</label>
+                                    <div class="input-group input-group-sm">
+                                        <span class="input-group-text">最小</span>
+                                        <input type="number" class="form-control" id="distLTMin" value="0" step="0.5" onchange="updateDistribution();">
+                                        <span class="input-group-text">最大</span>
+                                        <input type="number" class="form-control" id="distLTMax" value="100" step="0.5" onchange="updateDistribution();">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label>CW 区间筛选（月）</label>
+                                    <div class="input-group input-group-sm">
+                                        <span class="input-group-text">最小</span>
+                                        <input type="number" class="form-control" id="distCWMin" value="0" step="0.5" onchange="updateDistribution();">
+                                        <span class="input-group-text">最大</span>
+                                        <input type="number" class="form-control" id="distCWMax" value="100" step="0.5" onchange="updateDistribution();">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 统计摘要 -->
+                            <div class="alert alert-info mb-3" id="distSummary">
+                                请上传数据后查看分布图
+                            </div>
+
+                            <!-- 分布图 -->
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <h6 class="text-center">LT 分布图（按2周区间）</h6>
+                                    <div id="distChartLT" class="chart-container" style="height: 350px;"></div>
+                                </div>
+                                <div class="col-md-6">
+                                    <h6 class="text-center">CW 分布图（按2周区间）</h6>
+                                    <div id="distChartCW" class="chart-container" style="height: 350px;"></div>
+                                </div>
+                            </div>
+
+                            <!-- 明细列表 -->
+                            <div class="row mt-3">
+                                <div class="col-12">
+                                    <h6>筛选结果明细列表</h6>
+                                    <div class="mb-2">
+                                        <label class="me-2">排序依据：</label>
+                                        <div class="btn-group btn-group-sm" role="group">
+                                            <input type="radio" class="btn-check" name="distSort" id="distSortLT" value="LT" checked onchange="updateDistribution();">
+                                            <label class="btn btn-outline-primary" for="distSortLT">LT</label>
+
+                                            <input type="radio" class="btn-check" name="distSort" id="distSortCW" value="CW" onchange="updateDistribution();">
+                                            <label class="btn btn-outline-primary" for="distSortCW">CW</label>
+
+                                            <input type="radio" class="btn-check" name="distSort" id="distSortAmount" value="amount" onchange="updateDistribution();">
+                                            <label class="btn btn-outline-primary" for="distSortAmount">呆滞金额</label>
+                                        </div>
+                                    </div>
+                                    <div style="max-height: 400px; overflow-y: auto;">
+                                        <table class="table table-sm table-striped table-hover" id="distTable">
+                                            <thead class="sticky-top bg-white">
+                                                <tr>
+                                                    <th>序号</th>
+                                                    <th>PSM专业组</th>
+                                                    <th>零部件名称</th>
+                                                    <th>物料编码</th>
+                                                    <th>供应商</th>
+                                                    <th>Tn品类</th>
+                                                    <th>LT(月)</th>
+                                                    <th>CW(月)</th>
+                                                    <th>呆滞金额</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody></tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- 数据表格 -->
             <div class="row">
                 <div class="col-12">
@@ -1024,7 +1141,7 @@
 
     <script>
         // 版本号
-        const VERSION = 'v2.0.1';
+        const VERSION = 'v2.0.2';
 
         // 全局数据存储
         let allData = {
@@ -1370,6 +1487,7 @@
             updateExclusiveQueryPSMOptions(data);
             updateLTCWQueryPSMOptions(data);
             updateLTCWStats(data);
+            updateDistributionOptions(data);
             updateDataTable(data);
 
             // 新增图表更新
@@ -4340,6 +4458,314 @@
             XLSX.writeFile(wb, fileName);
 
             alert(`Excel文件已导出: ${fileName}`);
+        }
+
+        // ========== CW/LT 分布图分析功能 ==========
+
+        // 初始化分布图选项
+        function updateDistributionOptions(data) {
+            // 更新PSM专业组选项
+            const psmSelect = document.getElementById('distPSM');
+            const psmSet = new Set();
+            data.forEach(item => {
+                if (item.PSM专业组) psmSet.add(item.PSM专业组);
+            });
+
+            const currentPSM = psmSelect.value;
+            psmSelect.innerHTML = '<option value="">--全部--</option>';
+            Array.from(psmSet).sort().forEach(psm => {
+                const option = document.createElement('option');
+                option.value = psm;
+                option.textContent = psm;
+                if (psm === currentPSM) option.selected = true;
+                psmSelect.appendChild(option);
+            });
+
+            // 更新Tn零部件品类选项
+            const categorySelect = document.getElementById('distCategory');
+            const categorySet = new Set();
+            data.forEach(item => {
+                if (item.Tn零部件品类) categorySet.add(item.Tn零部件品类);
+            });
+
+            const currentCategory = categorySelect.value;
+            categorySelect.innerHTML = '<option value="">--全部--</option>';
+            Array.from(categorySet).sort().forEach(category => {
+                const option = document.createElement('option');
+                option.value = category;
+                option.textContent = category;
+                if (category === currentCategory) option.selected = true;
+                categorySelect.appendChild(option);
+            });
+
+            // 初始更新零件选项
+            updateDistParts();
+        }
+
+        // 更新零件选项（关联PSM专业组）
+        function updateDistParts() {
+            let data = [];
+            const sheetFilter = document.getElementById('distSheet').value;
+
+            if (sheetFilter === 'ALL') {
+                data = [...allData.L987, ...allData.L6];
+            } else {
+                data = allData[sheetFilter] || [];
+            }
+
+            // 应用阶梯和类型筛选
+            const selectedTiers = Array.from(document.querySelectorAll('.tier-checkbox:checked')).map(cb => cb.value);
+            if (selectedTiers.length > 0) {
+                data = data.filter(item => selectedTiers.includes(item.分类));
+            }
+
+            const selectedTypes = Array.from(document.querySelectorAll('.type-checkbox:checked')).map(cb => cb.value);
+            if (selectedTypes.length > 0) {
+                data = data.filter(item => {
+                    const partType = item.零件类型 || '';
+                    if (selectedTypes.includes('总成') && partType.includes('总成')) return true;
+                    if (selectedTypes.includes('物料') && !partType.includes('总成')) return true;
+                    return false;
+                });
+            }
+
+            const selectedPSM = document.getElementById('distPSM').value;
+            const partSelect = document.getElementById('distPart');
+            const partSet = new Set();
+
+            // 如果选择了PSM专业组，只显示该组的零件
+            if (selectedPSM) {
+                data.filter(item => item.PSM专业组 === selectedPSM).forEach(item => {
+                    if (item.T1零部件名称 && item.T1零部件名称.trim() !== '') {
+                        partSet.add(item.T1零部件名称);
+                    }
+                });
+            } else {
+                // 显示所有零件
+                data.forEach(item => {
+                    if (item.T1零部件名称 && item.T1零部件名称.trim() !== '') {
+                        partSet.add(item.T1零部件名称);
+                    }
+                });
+            }
+
+            const currentPart = partSelect.value;
+            partSelect.innerHTML = '<option value="">--全部--</option>';
+            Array.from(partSet).sort().forEach(part => {
+                const option = document.createElement('option');
+                option.value = part;
+                option.textContent = part;
+                if (part === currentPart) option.selected = true;
+                partSelect.appendChild(option);
+            });
+        }
+
+        // 更新分布图
+        function updateDistribution() {
+            let data = [];
+            const sheetFilter = document.getElementById('distSheet').value;
+
+            if (sheetFilter === 'ALL') {
+                data = [...allData.L987, ...allData.L6];
+            } else {
+                data = allData[sheetFilter] || [];
+            }
+
+            // 应用所有筛选条件
+            const selectedTiers = Array.from(document.querySelectorAll('.tier-checkbox:checked')).map(cb => cb.value);
+            if (selectedTiers.length > 0) {
+                data = data.filter(item => selectedTiers.includes(item.分类));
+            }
+
+            const selectedTypes = Array.from(document.querySelectorAll('.type-checkbox:checked')).map(cb => cb.value);
+            if (selectedTypes.length > 0) {
+                data = data.filter(item => {
+                    const partType = item.零件类型 || '';
+                    if (selectedTypes.includes('总成') && partType.includes('总成')) return true;
+                    if (selectedTypes.includes('物料') && !partType.includes('总成')) return true;
+                    return false;
+                });
+            }
+
+            const selectedPSM = document.getElementById('distPSM').value;
+            const selectedPart = document.getElementById('distPart').value;
+            const selectedCategory = document.getElementById('distCategory').value;
+            const ltMin = parseFloat(document.getElementById('distLTMin').value) || 0;
+            const ltMax = parseFloat(document.getElementById('distLTMax').value) || 100;
+            const cwMin = parseFloat(document.getElementById('distCWMin').value) || 0;
+            const cwMax = parseFloat(document.getElementById('distCWMax').value) || 100;
+
+            // 应用筛选
+            let filteredData = data.filter(item => {
+                if (selectedPSM && item.PSM专业组 !== selectedPSM) return false;
+                if (selectedPart && item.T1零部件名称 !== selectedPart) return false;
+                if (selectedCategory && item.Tn零部件品类 !== selectedCategory) return false;
+                if (item.LT < ltMin || item.LT > ltMax) return false;
+                if (item.CW < cwMin || item.CW > cwMax) return false;
+                return true;
+            });
+
+            // 更新统计摘要
+            const config = getMetricConfig();
+            const totalAmount = filteredData.reduce((sum, item) => sum + getMetricValue(item, 'total'), 0);
+            const ltValues = filteredData.map(item => item.LT).filter(v => v > 0);
+            const cwValues = filteredData.map(item => item.CW).filter(v => v > 0);
+
+            const ltAvg = ltValues.length > 0 ? ltValues.reduce((a, b) => a + b, 0) / ltValues.length : 0;
+            const cwAvg = cwValues.length > 0 ? cwValues.reduce((a, b) => a + b, 0) / cwValues.length : 0;
+
+            document.getElementById('distSummary').innerHTML = `
+                <strong>筛选结果：</strong>共 ${filteredData.length} 条记录 |
+                呆滞金额：${config.displayFormatter(totalAmount)} |
+                LT平均：${ltAvg.toFixed(2)}月 |
+                CW平均：${cwAvg.toFixed(2)}月
+            `;
+
+            // 绘制LT分布图（按2周区间）
+            updateDistributionChart('LT', ltValues, 'distChartLT');
+
+            // 绘制CW分布图（按2周区间）
+            updateDistributionChart('CW', cwValues, 'distChartCW');
+
+            // 更新明细列表
+            updateDistributionTable(filteredData);
+        }
+
+        // 绘制分布图（按2周区间）
+        function updateDistributionChart(type, values, chartId) {
+            const chartDom = document.getElementById(chartId);
+            if (!charts[chartId]) {
+                charts[chartId] = echarts.init(chartDom);
+            }
+
+            if (values.length === 0) {
+                charts[chartId].clear();
+                return;
+            }
+
+            // 按2周（0.5月）进行分组
+            const binSize = 0.5; // 0.5月 = 2周
+            const maxValue = Math.max(...values);
+            const binCount = Math.ceil(maxValue / binSize);
+
+            const bins = new Array(binCount).fill(0);
+            const binLabels = [];
+
+            // 统计每个区间的数量
+            values.forEach(value => {
+                const binIndex = Math.min(Math.floor(value / binSize), binCount - 1);
+                bins[binIndex]++;
+            });
+
+            // 生成区间标签
+            for (let i = 0; i < binCount; i++) {
+                const start = (i * binSize).toFixed(1);
+                const end = ((i + 1) * binSize).toFixed(1);
+                binLabels.push(`${start}-${end}`);
+            }
+
+            const option = {
+                tooltip: {
+                    trigger: 'axis',
+                    axisPointer: { type: 'shadow' },
+                    formatter: function(params) {
+                        return params[0].name + '月<br/>' +
+                               '数量: ' + params[0].value + '条';
+                    }
+                },
+                grid: { left: '10%', right: '5%', bottom: '15%', containLabel: true },
+                xAxis: {
+                    type: 'category',
+                    data: binLabels,
+                    name: type + '(月)',
+                    nameLocation: 'center',
+                    nameGap: 30,
+                    axisLabel: {
+                        rotate: 45,
+                        interval: Math.floor(binCount / 10) // 防止标签过密
+                    }
+                },
+                yAxis: {
+                    type: 'value',
+                    name: '数量(条)'
+                },
+                series: [{
+                    type: 'bar',
+                    data: bins,
+                    itemStyle: {
+                        color: type === 'LT' ?
+                            new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                                { offset: 0, color: '#83bff6' },
+                                { offset: 1, color: '#188df0' }
+                            ]) :
+                            new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                                { offset: 0, color: '#fccb05' },
+                                { offset: 1, color: '#f77062' }
+                            ])
+                    },
+                    label: {
+                        show: true,
+                        position: 'top',
+                        formatter: function(params) {
+                            return params.value > 0 ? params.value : '';
+                        }
+                    }
+                }]
+            };
+
+            charts[chartId].setOption(option);
+        }
+
+        // 更新明细列表
+        function updateDistributionTable(data) {
+            const tbody = document.getElementById('distTable').querySelector('tbody');
+            tbody.innerHTML = '';
+
+            // 获取排序方式
+            const sortBy = document.querySelector('input[name="distSort"]:checked').value;
+
+            // 排序
+            let sortedData = [...data];
+            if (sortBy === 'LT') {
+                sortedData.sort((a, b) => b.LT - a.LT);
+            } else if (sortBy === 'CW') {
+                sortedData.sort((a, b) => b.CW - a.CW);
+            } else if (sortBy === 'amount') {
+                sortedData.sort((a, b) => getMetricValue(b, 'total') - getMetricValue(a, 'total'));
+            }
+
+            const config = getMetricConfig();
+
+            // 显示所有结果（如果太多可以限制）
+            const displayLimit = 500;
+            sortedData.slice(0, displayLimit).forEach((item, index) => {
+                const row = tbody.insertRow();
+                row.insertCell(0).textContent = index + 1;
+                row.insertCell(1).textContent = item.PSM专业组 || '-';
+                row.insertCell(2).textContent = item.T1零部件名称 || '-';
+                row.insertCell(3).textContent = item.T1物料编码 || '-';
+                row.insertCell(4).textContent = item.T1供应商名称 || '-';
+                row.insertCell(5).textContent = item.Tn零部件品类 || '-';
+                row.insertCell(6).textContent = item.LT ? item.LT.toFixed(2) : '-';
+                row.insertCell(7).textContent = item.CW ? item.CW.toFixed(2) : '-';
+                row.insertCell(8).textContent = config.displayFormatter(getMetricValue(item, 'total'));
+            });
+
+            if (sortedData.length > displayLimit) {
+                const row = tbody.insertRow();
+                const cell = row.insertCell(0);
+                cell.colSpan = 9;
+                cell.className = 'text-center text-muted';
+                cell.textContent = `显示前${displayLimit}条，共${sortedData.length}条记录`;
+            }
+
+            if (sortedData.length === 0) {
+                const row = tbody.insertRow();
+                const cell = row.insertCell(0);
+                cell.colSpan = 9;
+                cell.className = 'text-center text-muted';
+                cell.textContent = '没有符合条件的数据';
+            }
         }
     </script>
 </body>
